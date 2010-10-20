@@ -119,9 +119,11 @@ typedef struct {
 	hid_t count_identifier;
 	char* path;
 	char* description;
+	int stored;
+	int allocated;
 } PIODataset;
 
-#define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL})
+#define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL, -1, -1})
 
 
 #endif
