@@ -15,7 +15,10 @@
 #define PIOFileIsInvalid PIOObjectIsInvalid 
 
 #define PIOFile_Structure_Group_Timelines "timeline"
-#define PIOFile_Structure_Group_Datasets  "data"
+#define PIOFile_Structure_Group_Datasets  "dataset"
+
+#define PIOFile_Structure_Datasets_Data  "data"
+#define PIOFile_Structure_Datasets_Count "count"
 
 /// Creates new pinocchIO file. 
 ///
