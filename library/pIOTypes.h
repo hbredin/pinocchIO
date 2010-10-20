@@ -115,12 +115,13 @@ typedef struct {
 
 /// pinocchIO dataset
 typedef struct {
-	hid_t identifier;
+	hid_t identifier; // data_identifier
+	hid_t count_identifier;
 	char* path;
 	char* description;
 } PIODataset;
 
-#define PIODatasetInvalid ((PIODataset) {-1, NULL, NULL})
+#define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL})
 
 
 #endif
