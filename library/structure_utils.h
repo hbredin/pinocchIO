@@ -12,6 +12,12 @@
 #define _STRUCTURE_UTILS_H
 
 #include <hdf5.h>
+#include "pIOTypes.h"
+
+
+int getTimesUsed(PIOTimeline pioTimeline);
+int incrementTimesUsed(PIOTimeline pioTimeline);
+int decrementTimesUsed(PIOTimeline pioTimeline);
 
 /// \returns int
 ///		- number of datasets when successfull

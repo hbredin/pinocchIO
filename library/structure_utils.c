@@ -11,8 +11,60 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "pIOTypes.h"
+#include <hdf5_hl.h>
 
+#include "pIOTypes.h"
+#include "pIOAttributes.h"
+
+int getTimesUsed(PIOTimeline pioTimeline)
+{
+	ERROR_SWITCH_INIT
+	int times_used = -1;
+	herr_t get_err;
+	
+	ERROR_SWITCH_OFF
+	get_err = H5LTget_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used);
+	ERROR_SWITCH_ON
+	
+	if (get_err < 0) return -1;
+	return times_used;
+}
+
+int incrementTimesUsed(PIOTimeline pioTimeline)
+{
+	ERROR_SWITCH_INIT
+	herr_t set_err;
+	
+	int times_used = getTimesUsed(pioTimeline);
+	if (times_used < 0) return -1;
+	
+	times_used++;
+	
+	ERROR_SWITCH_OFF
+	set_err = H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1);
+	ERROR_SWITCH_ON
+	
+	if (set_err < 0) return -1;
+	return times_used;
+}
+
+int decrementTimesUsed(PIOTimeline pioTimeline)
+{
+	ERROR_SWITCH_INIT
+	herr_t set_err;
+	
+	int times_used = getTimesUsed(pioTimeline);
+	if (times_used < 0) return -1;
+	
+	times_used--;
+	
+	ERROR_SWITCH_OFF
+	set_err = H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1);
+	ERROR_SWITCH_ON
+	
+	if (set_err < 0) return -1;
+	return times_used;
+}
 
 int listOfObjectsInGroup( hid_t group, H5G_obj_t filter, char*** objects_names)
 {

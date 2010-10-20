@@ -41,7 +41,7 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 ///		- negative value otherwise.
 ///
 /// Depending on flag value, file handle is granted read-only (PINOCCHIO_READONLY) or read/write (PINOCCHIO_READNWRITE) access rights.
-PIOTimeline pioOpenTimeline(PIOFile pioFile, const char* path);
+PIOTimeline pioOpenTimeline(PIOObject pioObjectInFile, const char* path);
 
 /// Closes timeline. 
 ///
@@ -58,5 +58,7 @@ int pioCloseTimeline( PIOTimeline pioTimeline );
 ///		- number of timelines in file when successfull
 ///		- negative value otherwise
 int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines);
+
+PIOTimeline pioGetTimeline(PIODataset pioDataset);
 
 #endif

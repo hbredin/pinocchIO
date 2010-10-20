@@ -12,6 +12,7 @@
 #include "pIOFile.h"
 #include "pIOTimeComparison.h"
 #include "pIOVersion.h"
+#include "structure_utils.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -42,56 +43,6 @@ hid_t timelineDatatype()
 	return timetype;
 }
 
-int getTimesUsed(PIOTimeline pioTimeline)
-{
-	ERROR_SWITCH_INIT
-	int times_used = -1;
-	herr_t get_err;
-	
-	ERROR_SWITCH_OFF
-	get_err = H5LTget_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used);
-	ERROR_SWITCH_ON
-	
-	if (get_err < 0) return -1;
-	return times_used;
-}
-
-int incrementTimesUsed(PIOTimeline pioTimeline)
-{
-	ERROR_SWITCH_INIT
-	herr_t set_err;
-	
-	int times_used = getTimesUsed(pioTimeline);
-	if (times_used < 0) return -1;
-	
-	times_used++;
-
-	ERROR_SWITCH_OFF
-	set_err = H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1);
-	ERROR_SWITCH_ON
-	
-	if (set_err < 0) return -1;
-	return times_used;
-}
-
-int decrementTimesUsed(PIOTimeline pioTimeline)
-{
-	ERROR_SWITCH_INIT
-	herr_t set_err;
-	
-	int times_used = getTimesUsed(pioTimeline);
-	if (times_used < 0) return -1;
-	
-	times_used--;
-	
-	ERROR_SWITCH_OFF
-	set_err = H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1);
-	ERROR_SWITCH_ON
-	
-	if (set_err < 0) return -1;
-	return times_used;
-}
-
 PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* description,
 						   int numberOfTimeRanges, PIOTimeRange* timeranges)
 {
@@ -110,7 +61,7 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 	ERROR_SWITCH_INIT
 	
 	// make sure a timeline doesn't already exist at path
-	pioTimeline = pioOpenTimeline(pioFile, path);
+	pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), path);
 	if (PIOTimelineIsValid(pioTimeline))
 	{
 		pioCloseTimeline(pioTimeline);
@@ -214,7 +165,7 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 	return pioTimeline;
 }
 
-PIOTimeline pioOpenTimeline(PIOFile pioFile, const char* path)
+PIOTimeline pioOpenTimeline(PIOObject pioObjectInFile, const char* path)
 {
 	PIOTimeline pioTimeline = PIOTimelineInvalid;
 	
@@ -235,7 +186,7 @@ PIOTimeline pioOpenTimeline(PIOFile pioFile, const char* path)
 	
 	// open dataset
 	ERROR_SWITCH_OFF	
-	pioTimeline.identifier = H5Dopen2(pioFile.identifier, internalPath, H5P_DEFAULT);
+	pioTimeline.identifier = H5Dopen2(pioObjectInFile.identifier, internalPath, H5P_DEFAULT);
 	ERROR_SWITCH_ON
 	free(internalPath);
 	
@@ -319,3 +270,26 @@ int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines)
 							  PIOFile_Structure_Group_Timelines, 
 							  pathsToTimelines);
 }
+
+PIOTimeline pioGetTimeline(PIODataset pioDataset)
+{
+	hid_t attr;
+	hsize_t storage;
+	char* path2timeline;
+	
+	PIOTimeline pioTimeline = PIOTimelineInvalid;
+	
+	// read stored path to timeline
+	attr = H5Aopen_name(pioDataset.identifier, PIOAttribute_Timeline);
+	storage = H5Aget_storage_size(attr); H5Aclose(attr);
+	path2timeline = (char*)malloc( storage + sizeof(char));
+	H5LTget_attribute_string(pioDataset.identifier, ".", PIOAttribute_Timeline, path2timeline);
+	
+	// open timeline
+	pioTimeline = pioOpenTimeline(PIOMakeObject(pioDataset), path2timeline);
+	
+	free(path2timeline);
+	
+	return pioTimeline;
+}
+
