@@ -15,8 +15,9 @@
 #define PIOAttribute_Version      "version"
 #define PIOAttribute_File_Medium  "medium"
 #define PIOAttribute_Description  "description"
+#define PIOAttribute_TimesUsed    "times_used"
 
-#define PIOAttribute_NumberProtected 3
+#define PIOAttribute_NumberProtected 4
 
 /// Checks attribute protection
 ///
