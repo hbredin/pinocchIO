@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		282DD878126DDF7B007BA6F9 /* pIODataset.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD876126DDF7B007BA6F9 /* pIODataset.h */; settings = {ATTRIBUTES = (); }; };
+		282DD8B4126EC999007BA6F9 /* pIODatatype.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD8B2126EC999007BA6F9 /* pIODatatype.h */; settings = {ATTRIBUTES = (); }; };
+		282DD8FC126ED789007BA6F9 /* structure_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD8FA126ED789007BA6F9 /* structure_utils.h */; };
+		282DD8FD126ED789007BA6F9 /* structure_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 282DD8FB126ED789007BA6F9 /* structure_utils.c */; };
 		28304ED112675811003292A5 /* pinocchIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 28304ED012675811003292A5 /* pinocchIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28304ED41267584A003292A5 /* pIOFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 28304ED21267584A003292A5 /* pIOFile.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28304ED51267584A003292A5 /* pIOFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304ED31267584A003292A5 /* pIOFile.c */; };
@@ -19,7 +23,7 @@
 		28304F2D12685D43003292A5 /* pIOAttributes.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304F2B12685D43003292A5 /* pIOAttributes.c */; };
 		28304FC612687473003292A5 /* pIOTimeline.h in Headers */ = {isa = PBXBuildFile; fileRef = 28304FC412687473003292A5 /* pIOTimeline.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28304FC712687473003292A5 /* pIOTimeline.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304FC512687473003292A5 /* pIOTimeline.c */; };
-		28304FD612688669003292A5 /* pIOTimeComparison.h in Headers */ = {isa = PBXBuildFile; fileRef = 28304FD412688669003292A5 /* pIOTimeComparison.h */; };
+		28304FD612688669003292A5 /* pIOTimeComparison.h in Headers */ = {isa = PBXBuildFile; fileRef = 28304FD412688669003292A5 /* pIOTimeComparison.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28304FD712688669003292A5 /* pIOTimeComparison.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304FD512688669003292A5 /* pIOTimeComparison.c */; };
 /* End PBXBuildFile section */
 
@@ -28,12 +32,18 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC0620554660B00DB518D /* pinocchIO */;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D;
 			remoteInfo = pinocchIO;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		282DD876126DDF7B007BA6F9 /* pIODataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIODataset.h; sourceTree = "<group>"; };
+		282DD877126DDF7B007BA6F9 /* pIODataset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIODataset.c; sourceTree = "<group>"; };
+		282DD8B2126EC999007BA6F9 /* pIODatatype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIODatatype.h; sourceTree = "<group>"; };
+		282DD8B3126EC999007BA6F9 /* pIODatatype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIODatatype.c; sourceTree = "<group>"; };
+		282DD8FA126ED789007BA6F9 /* structure_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = structure_utils.h; sourceTree = "<group>"; };
+		282DD8FB126ED789007BA6F9 /* structure_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = structure_utils.c; sourceTree = "<group>"; };
 		28304ED012675811003292A5 /* pinocchIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pinocchIO.h; sourceTree = "<group>"; };
 		28304ED21267584A003292A5 /* pIOFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIOFile.h; sourceTree = "<group>"; };
 		28304ED31267584A003292A5 /* pIOFile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIOFile.c; sourceTree = "<group>"; };
@@ -41,7 +51,7 @@
 		28304ED712675928003292A5 /* pIOTypes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIOTypes.c; sourceTree = "<group>"; };
 		28304EDA126763B6003292A5 /* pIOVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIOVersion.h; sourceTree = "<group>"; };
 		28304EED12676DB5003292A5 /* test_PIOFile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_PIOFile.c; sourceTree = "<group>"; };
-		28304EF412676DD6003292A5 /* test_PIOFile */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = test_PIOFile; path = build/Debug/test_PIOFile; sourceTree = "<group>"; };
+		28304EF412676DD6003292A5 /* test_PIOFile */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_PIOFile; sourceTree = BUILT_PRODUCTS_DIR; };
 		28304F2A12685D43003292A5 /* pIOAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIOAttributes.h; sourceTree = "<group>"; };
 		28304F2B12685D43003292A5 /* pIOAttributes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIOAttributes.c; sourceTree = "<group>"; };
 		28304FC412687473003292A5 /* pIOTimeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIOTimeline.h; sourceTree = "<group>"; };
@@ -104,6 +114,12 @@
 				28304FC512687473003292A5 /* pIOTimeline.c */,
 				28304FD412688669003292A5 /* pIOTimeComparison.h */,
 				28304FD512688669003292A5 /* pIOTimeComparison.c */,
+				282DD876126DDF7B007BA6F9 /* pIODataset.h */,
+				282DD877126DDF7B007BA6F9 /* pIODataset.c */,
+				282DD8B2126EC999007BA6F9 /* pIODatatype.h */,
+				282DD8B3126EC999007BA6F9 /* pIODatatype.c */,
+				282DD8FA126ED789007BA6F9 /* structure_utils.h */,
+				282DD8FB126ED789007BA6F9 /* structure_utils.c */,
 			);
 			path = library;
 			sourceTree = "<group>";
@@ -130,6 +146,9 @@
 				28304F2C12685D43003292A5 /* pIOAttributes.h in Headers */,
 				28304FC612687473003292A5 /* pIOTimeline.h in Headers */,
 				28304FD612688669003292A5 /* pIOTimeComparison.h in Headers */,
+				282DD878126DDF7B007BA6F9 /* pIODataset.h in Headers */,
+				282DD8B4126EC999007BA6F9 /* pIODatatype.h in Headers */,
+				282DD8FC126ED789007BA6F9 /* structure_utils.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -206,6 +225,7 @@
 				28304F2D12685D43003292A5 /* pIOAttributes.c in Sources */,
 				28304FC712687473003292A5 /* pIOTimeline.c in Sources */,
 				28304FD712688669003292A5 /* pIOTimeComparison.c in Sources */,
+				282DD8FD126ED789007BA6F9 /* structure_utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
