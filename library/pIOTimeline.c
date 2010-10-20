@@ -42,6 +42,56 @@ hid_t timelineDatatype()
 	return timetype;
 }
 
+int getTimesUsed(PIOTimeline pioTimeline)
+{
+	ERROR_SWITCH_INIT
+	int times_used = -1;
+	herr_t get_err;
+	
+	ERROR_SWITCH_OFF
+	get_err = H5LTget_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used);
+	ERROR_SWITCH_ON
+	
+	if (get_err < 0) return -1;
+	return times_used;
+}
+
+int incrementTimesUsed(PIOTimeline pioTimeline)
+{
+	ERROR_SWITCH_INIT
+	herr_t set_err;
+	
+	int times_used = getTimesUsed(pioTimeline);
+	if (times_used < 0) return -1;
+	
+	times_used++;
+
+	ERROR_SWITCH_OFF
+	set_err = H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1);
+	ERROR_SWITCH_ON
+	
+	if (set_err < 0) return -1;
+	return times_used;
+}
+
+int decrementTimesUsed(PIOTimeline pioTimeline)
+{
+	ERROR_SWITCH_INIT
+	herr_t set_err;
+	
+	int times_used = getTimesUsed(pioTimeline);
+	if (times_used < 0) return -1;
+	
+	times_used--;
+	
+	ERROR_SWITCH_OFF
+	set_err = H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1);
+	ERROR_SWITCH_ON
+	
+	if (set_err < 0) return -1;
+	return times_used;
+}
+
 PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* description,
 						   int numberOfTimeRanges, PIOTimeRange* timeranges)
 {
@@ -140,6 +190,14 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 		return PIOTimelineInvalid;
 	}
 	
+	// add number of datasets referencing this timeline as attribute
+	int times_used = 0;
+	if (H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1))
+	{
+		pioCloseTimeline(pioTimeline);
+		return PIOTimelineInvalid;
+	}
+	
 	// store everything in PIOTimeline structure
 	pioTimeline.ntimeranges = numberOfTimeRanges;
 	pioTimeline.timeranges = malloc(numberOfTimeRanges*sizeof(PIOTimeRange));
@@ -216,7 +274,7 @@ PIOTimeline pioOpenTimeline(PIOFile pioFile, const char* path)
 	pioTimeline.path[strlen(path)] = '\0';
 	
 	// store timeline description
-	attr = H5Aopen_name(pioFile.identifier, PIOAttribute_Description);
+	attr = H5Aopen_name(pioTimeline.identifier, PIOAttribute_Description);
 	storage = H5Aget_storage_size(attr); H5Aclose(attr);
 	pioTimeline.description = (char*)malloc( (storage+1) * sizeof(char));
 	H5LTget_attribute_string(pioTimeline.identifier, ".", PIOAttribute_Description, pioTimeline.description);
@@ -253,4 +311,11 @@ int pioCloseTimeline( PIOTimeline pioTimeline )
 	pioTimeline.identifier = -1;
 	
 	return 1;
+}
+
+int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines)
+{
+	return allDatasetsInGroup(pioFile.identifier,
+							  PIOFile_Structure_Group_Timelines, 
+							  pathsToTimelines);
 }
