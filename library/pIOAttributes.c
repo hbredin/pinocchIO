@@ -18,6 +18,7 @@ char* PIOAttribute_ListProtected[PIOAttribute_NumberProtected] = {
 	PIOAttribute_File_Medium,
 	PIOAttribute_Description,
 	PIOAttribute_TimesUsed,
+	PIOAttribute_Timeline,
 };
 
 int pioAttributeIsProtected( const char* attr_name)
