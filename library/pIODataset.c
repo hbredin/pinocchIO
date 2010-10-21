@@ -71,7 +71,7 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	ERROR_SWITCH_INIT
 	
 	// make sure a dataset doesn't already exist at path
-	pioDataset = pioOpenDataset(pioFile, path);
+	pioDataset = pioOpenDataset(PIOMakeObject(pioFile), path);
 	if (PIODatasetIsValid(pioDataset))
 	{
 		pioCloseDataset(pioDataset);
@@ -138,7 +138,7 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	}
 	
 	// add path to timeline as attribute of dataset
-	if (H5LTset_attribute_string(pioDataset.identifier, ".", PIOAttribute_Timeline, pioTimeline.description) < 0)
+	if (H5LTset_attribute_string(pioDataset.identifier, ".", PIOAttribute_Timeline, pioTimeline.path) < 0)
 	{
 		pioCloseDataset(pioDataset);
 		return PIODatasetInvalid;
@@ -166,7 +166,7 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	return pioDataset;
 }
 
-PIODataset pioOpenDataset(PIOFile pioFile, const char* path)
+PIODataset pioOpenDataset(PIOObject pioObject, const char* path)
 {
 	PIODataset pioDataset = PIODatasetInvalid;	
 	
@@ -185,8 +185,8 @@ PIODataset pioOpenDataset(PIOFile pioFile, const char* path)
 	
 	// open dataset
 	ERROR_SWITCH_OFF	
-	pioDataset.identifier = H5Dopen2(pioFile.identifier, internalPathToData, H5P_DEFAULT);
-	pioDataset.count_identifier = H5Dopen2(pioFile.identifier, internalPathToCount, H5P_DEFAULT);
+	pioDataset.identifier = H5Dopen2(pioObject.identifier, internalPathToData, H5P_DEFAULT);
+	pioDataset.count_identifier = H5Dopen2(pioObject.identifier, internalPathToCount, H5P_DEFAULT);
 	ERROR_SWITCH_ON
 	free(internalPathToData);
 	free(internalPathToCount);
@@ -241,3 +241,27 @@ int pioCloseDataset(PIODataset pioDataset)
 	
 	return 1;
 }
+
+int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets)
+{	
+	int numberOfDatasets = -1;
+	int ds;
+	int rawpath_length = -1;
+	int data_length = -1;
+	numberOfDatasets = allMatchingDatasetsInGroup(pioFile.identifier, PIOFile_Structure_Group_Datasets, 
+												  PIOFile_Structure_Datasets_Data, 
+												  pathsToDatasets);
+	
+	
+	data_length = strlen(PIOFile_Structure_Datasets_Data);
+	for (ds=0; ds<numberOfDatasets; ds++)
+	{
+		rawpath_length = strlen((*pathsToDatasets)[ds]);
+		(*pathsToDatasets)[ds][rawpath_length-data_length-1] = '\0';
+	}
+	
+	return numberOfDatasets;
+}
+
+
+

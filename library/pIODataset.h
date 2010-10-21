@@ -21,8 +21,15 @@ PIODataset pioNewDataset(PIOFile pioFile,
 						 PIODatatype pioDatatype); 
 
 
-PIODataset pioOpenDataset(PIOFile pioFile, const char* path);
+PIODataset pioOpenDataset(PIOObject pioObject, const char* path);
 
 int pioCloseDataset(PIODataset pioDataset);
+
+
+/// \returns int
+///		- number of timelines in file when successfull
+///		- negative value otherwise
+int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets);
+
 
 #endif
