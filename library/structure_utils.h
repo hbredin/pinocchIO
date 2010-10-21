@@ -25,12 +25,13 @@ int decrementTimesUsed(PIOTimeline pioTimeline);
 int allDatasetsInGroup(hid_t file,
 					   const char* path2group,
 					   char*** path);
-//
-///// \returns int
-/////		- number of matching datasets when successfull
-/////		- negative value otherwise
-//int allMatchingDatasetsInGroup(char* path2group,
-//							   char* match,
-//							   char** path);
-//
+
+/// \returns int
+///		- number of matching datasets when successfull
+///		- negative value otherwise
+int allMatchingDatasetsInGroup(hid_t file,
+							   const char* path2group,
+							   const char* filter,
+							   char*** path);
+
 #endif

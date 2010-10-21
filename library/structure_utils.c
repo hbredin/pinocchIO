@@ -267,3 +267,46 @@ int allDatasetsInGroup(hid_t file,
 	
 	return numberOfDatasets;
 }
+
+
+int allMatchingDatasetsInGroup(hid_t file,
+							   const char* path2group,
+							   const char* filter,
+							   char*** path)
+{
+	char** tofilter_path = NULL;
+	int numberOfDatasets = -1;
+	int numberOfMatchingDatasets = 0;
+	int ds;
+	
+	numberOfDatasets = allDatasetsInGroup(file, path2group, &tofilter_path);
+	if (numberOfDatasets < 0) return -1;
+	
+	int filter_length = strlen(filter);
+	int path_length;
+	
+	for (ds = 0; ds < numberOfDatasets; ds++)
+	{
+		path_length = strlen(tofilter_path[ds]);
+		if (strcmp(filter, tofilter_path[ds]+path_length-filter_length) == 0) numberOfMatchingDatasets++;
+	}
+	
+	*path = (char**) malloc(numberOfMatchingDatasets*sizeof(char*));
+	numberOfMatchingDatasets = 0;
+	for (ds = 0; ds < numberOfDatasets; ds++) 
+	{
+		path_length = strlen(tofilter_path[ds]);
+		if (strcmp(filter, tofilter_path[ds]+path_length-filter_length) == 0) 
+		{
+			(*path)[numberOfMatchingDatasets] = (char*) malloc((path_length+1)*sizeof(char));			
+			strncpy((*path)[numberOfMatchingDatasets], tofilter_path[ds], path_length); 
+			(*path)[numberOfMatchingDatasets][path_length] = '\0';
+			numberOfMatchingDatasets++;
+		}
+	}
+	
+	for (ds=0; ds<numberOfDatasets; ds++) free(tofilter_path[ds]);
+	free(tofilter_path);
+	
+	return numberOfMatchingDatasets;
+}
