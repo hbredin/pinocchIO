@@ -27,10 +27,27 @@
 		28304FC712687473003292A5 /* pIOTimeline.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304FC512687473003292A5 /* pIOTimeline.c */; };
 		28304FD612688669003292A5 /* pIOTimeComparison.h in Headers */ = {isa = PBXBuildFile; fileRef = 28304FD412688669003292A5 /* pIOTimeComparison.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28304FD712688669003292A5 /* pIOTimeComparison.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304FD512688669003292A5 /* pIOTimeComparison.c */; };
+		2895EB7712706C4B00CA5A76 /* piols.c in Sources */ = {isa = PBXBuildFile; fileRef = 2895EB3A127061E400CA5A76 /* piols.c */; };
+		2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304EED12676DB5003292A5 /* test_PIOFile.c */; };
+		2895EBB512706D6500CA5A76 /* libpinocchIO.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libpinocchIO.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		28304F2812685D29003292A5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D;
+			remoteInfo = pinocchIO;
+		};
+		2895EB7512706C4500CA5A76 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D /* pinocchIO */;
+			remoteInfo = pinocchIO;
+		};
+		2895EBB112706D6500CA5A76 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
@@ -60,6 +77,9 @@
 		28304FC512687473003292A5 /* pIOTimeline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIOTimeline.c; sourceTree = "<group>"; };
 		28304FD412688669003292A5 /* pIOTimeComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIOTimeComparison.h; sourceTree = "<group>"; };
 		28304FD512688669003292A5 /* pIOTimeComparison.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIOTimeComparison.c; sourceTree = "<group>"; };
+		2895EB3A127061E400CA5A76 /* piols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = piols.c; sourceTree = "<group>"; };
+		2895EB7112706C3E00CA5A76 /* piols */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = piols; sourceTree = BUILT_PRODUCTS_DIR; };
+		2895EBB912706D6500CA5A76 /* test_PIODataset */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_PIODataset; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2AAC0630554660B00DB518D /* libpinocchIO.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpinocchIO.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -69,6 +89,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				28304EFA12676E3B003292A5 /* libpinocchIO.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2895EB6F12706C3E00CA5A76 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2895EBB412706D6500CA5A76 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2895EBB512706D6500CA5A76 /* libpinocchIO.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +120,7 @@
 		08FB7794FE84155DC02AAC07 /* pinocchIO2 */ = {
 			isa = PBXGroup;
 			children = (
+				2895EB6D12706C1A00CA5A76 /* tools */,
 				28304EEC12676D98003292A5 /* test */,
 				28304ECF126757F7003292A5 /* library */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -97,6 +133,8 @@
 			children = (
 				D2AAC0630554660B00DB518D /* libpinocchIO.dylib */,
 				28304EF412676DD6003292A5 /* test_PIOFile */,
+				2895EB7112706C3E00CA5A76 /* piols */,
+				2895EBB912706D6500CA5A76 /* test_PIODataset */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,6 +170,14 @@
 				28304EED12676DB5003292A5 /* test_PIOFile.c */,
 			);
 			path = test;
+			sourceTree = "<group>";
+		};
+		2895EB6D12706C1A00CA5A76 /* tools */ = {
+			isa = PBXGroup;
+			children = (
+				2895EB3A127061E400CA5A76 /* piols.c */,
+			);
+			path = tools;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -174,6 +220,40 @@
 			productReference = 28304EF412676DD6003292A5 /* test_PIOFile */;
 			productType = "com.apple.product-type.tool";
 		};
+		2895EB7012706C3E00CA5A76 /* piols */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2895EB8412706CC500CA5A76 /* Build configuration list for PBXNativeTarget "piols" */;
+			buildPhases = (
+				2895EB6E12706C3E00CA5A76 /* Sources */,
+				2895EB6F12706C3E00CA5A76 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2895EB7612706C4500CA5A76 /* PBXTargetDependency */,
+			);
+			name = piols;
+			productName = piols;
+			productReference = 2895EB7112706C3E00CA5A76 /* piols */;
+			productType = "com.apple.product-type.tool";
+		};
+		2895EBAF12706D6500CA5A76 /* test_PIODataset */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2895EBB612706D6500CA5A76 /* Build configuration list for PBXNativeTarget "test_PIODataset" */;
+			buildPhases = (
+				2895EBB212706D6500CA5A76 /* Sources */,
+				2895EBB412706D6500CA5A76 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2895EBB012706D6500CA5A76 /* PBXTargetDependency */,
+			);
+			name = test_PIODataset;
+			productName = test_PIOFile;
+			productReference = 2895EBB912706D6500CA5A76 /* test_PIODataset */;
+			productType = "com.apple.product-type.tool";
+		};
 		D2AAC0620554660B00DB518D /* pinocchIO */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB914A08733D8E0010E9CD /* Build configuration list for PBXNativeTarget "pinocchIO" */;
@@ -205,6 +285,8 @@
 			targets = (
 				D2AAC0620554660B00DB518D /* pinocchIO */,
 				28304EF312676DD6003292A5 /* test_PIOFile */,
+				2895EB7012706C3E00CA5A76 /* piols */,
+				2895EBAF12706D6500CA5A76 /* test_PIODataset */,
 			);
 		};
 /* End PBXProject section */
@@ -215,6 +297,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				28304EF812676DE1003292A5 /* test_PIOFile.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2895EB6E12706C3E00CA5A76 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2895EB7712706C4B00CA5A76 /* piols.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2895EBB212706D6500CA5A76 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +338,16 @@
 			isa = PBXTargetDependency;
 			target = D2AAC0620554660B00DB518D /* pinocchIO */;
 			targetProxy = 28304F2812685D29003292A5 /* PBXContainerItemProxy */;
+		};
+		2895EB7612706C4500CA5A76 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC0620554660B00DB518D /* pinocchIO */;
+			targetProxy = 2895EB7512706C4500CA5A76 /* PBXContainerItemProxy */;
+		};
+		2895EBB012706D6500CA5A76 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC0620554660B00DB518D /* pinocchIO */;
+			targetProxy = 2895EBB112706D6500CA5A76 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -357,6 +465,68 @@
 			};
 			name = Release;
 		};
+		2895EB7312706C3E00CA5A76 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lpinocchIO";
+				PREBINDING = NO;
+				PRODUCT_NAME = piols;
+			};
+			name = Debug;
+		};
+		2895EB7412706C3E00CA5A76 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lpinocchIO";
+				PREBINDING = NO;
+				PRODUCT_NAME = piols;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		2895EBB712706D6500CA5A76 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = test_PIODataset;
+			};
+			name = Debug;
+		};
+		2895EBB812706D6500CA5A76 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = test_PIODataset;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -383,6 +553,24 @@
 			buildConfigurations = (
 				28304EF612676DD7003292A5 /* Debug */,
 				28304EF712676DD7003292A5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2895EB8412706CC500CA5A76 /* Build configuration list for PBXNativeTarget "piols" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2895EB7312706C3E00CA5A76 /* Debug */,
+				2895EB7412706C3E00CA5A76 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2895EBB612706D6500CA5A76 /* Build configuration list for PBXNativeTarget "test_PIODataset" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2895EBB712706D6500CA5A76 /* Debug */,
+				2895EBB812706D6500CA5A76 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
