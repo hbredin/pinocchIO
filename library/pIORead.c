@@ -1,5 +1,5 @@
 /*
- *  pioRead.c
+ *  pIORead.c
  *  pinocchIO
  *
  *  Created by Hervé BREDIN on 22/10/10.
@@ -7,7 +7,7 @@
  *
  */
 
-#include "pioRead.h"
+#include "pIORead.h"
 
 #include <stdlib.h>
 

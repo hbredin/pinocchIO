@@ -103,6 +103,4 @@ int pioFindTimeRangeInTimeLine( PIOTimeRange tr, PIOTimeRange* tl, int n);
 ///		
 PIOTimelineComparison pioCompareTimeLines (PIOTimeRange* tr1, int n1, PIOTimeRange* tr2, int n2);
 
-
-
 #endif
