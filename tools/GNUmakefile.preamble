@@ -1,0 +1,4 @@
+
+piols_TOOL_LIBS   += -lpinocchIO
+piodump_TOOL_LIBS += -lpinocchIO
+
