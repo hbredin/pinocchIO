@@ -6,6 +6,44 @@
 	objectVersion = 45;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		283EF6D41271D4C8003F82A0 /* library */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 283EF6E01271D4D8003F82A0 /* Build configuration list for PBXAggregateTarget "library" */;
+			buildPhases = (
+			);
+			dependencies = (
+				283EF6D81271D4D3003F82A0 /* PBXTargetDependency */,
+			);
+			name = library;
+			productName = library;
+		};
+		283EF6E11271D4E6003F82A0 /* tools */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 283EF6EB1271D4FB003F82A0 /* Build configuration list for PBXAggregateTarget "tools" */;
+			buildPhases = (
+			);
+			dependencies = (
+				283EF6E71271D4F2003F82A0 /* PBXTargetDependency */,
+				283EF6E51271D4EF003F82A0 /* PBXTargetDependency */,
+			);
+			name = tools;
+			productName = tools;
+		};
+		283EF6EC1271D516003F82A0 /* test */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 283EF6F61271D528003F82A0 /* Build configuration list for PBXAggregateTarget "test" */;
+			buildPhases = (
+			);
+			dependencies = (
+				283EF6F21271D521003F82A0 /* PBXTargetDependency */,
+				283EF6F01271D521003F82A0 /* PBXTargetDependency */,
+			);
+			name = test;
+			productName = test;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		282DD878126DDF7B007BA6F9 /* pIODataset.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD876126DDF7B007BA6F9 /* pIODataset.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		282DD8B4126EC999007BA6F9 /* pIODatatype.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD8B2126EC999007BA6F9 /* pIODatatype.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -51,6 +89,41 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC0620554660B00DB518D;
 			remoteInfo = pinocchIO;
+		};
+		283EF6D71271D4D3003F82A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D /* pinocchIO */;
+			remoteInfo = pinocchIO;
+		};
+		283EF6E41271D4EF003F82A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2895EB7012706C3E00CA5A76 /* piols */;
+			remoteInfo = piols;
+		};
+		283EF6E61271D4F2003F82A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 283EF64C1271C912003F82A0 /* piodump */;
+			remoteInfo = piodump;
+		};
+		283EF6EF1271D521003F82A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2895EBAF12706D6500CA5A76 /* test_PIODataset */;
+			remoteInfo = test_PIODataset;
+		};
+		283EF6F11271D521003F82A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 28304EF312676DD6003292A5 /* test_PIOFile */;
+			remoteInfo = test_PIOFile;
 		};
 		2895EB7512706C4500CA5A76 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -333,11 +406,14 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				283EF6D41271D4C8003F82A0 /* library */,
+				283EF6E11271D4E6003F82A0 /* tools */,
+				283EF6EC1271D516003F82A0 /* test */,
 				D2AAC0620554660B00DB518D /* pinocchIO */,
-				28304EF312676DD6003292A5 /* test_PIOFile */,
 				2895EB7012706C3E00CA5A76 /* piols */,
-				2895EBAF12706D6500CA5A76 /* test_PIODataset */,
 				283EF64C1271C912003F82A0 /* piodump */,
+				28304EF312676DD6003292A5 /* test_PIOFile */,
+				2895EBAF12706D6500CA5A76 /* test_PIODataset */,
 			);
 		};
 /* End PBXProject section */
@@ -404,6 +480,31 @@
 			isa = PBXTargetDependency;
 			target = D2AAC0620554660B00DB518D /* pinocchIO */;
 			targetProxy = 283EF64E1271C912003F82A0 /* PBXContainerItemProxy */;
+		};
+		283EF6D81271D4D3003F82A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC0620554660B00DB518D /* pinocchIO */;
+			targetProxy = 283EF6D71271D4D3003F82A0 /* PBXContainerItemProxy */;
+		};
+		283EF6E51271D4EF003F82A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2895EB7012706C3E00CA5A76 /* piols */;
+			targetProxy = 283EF6E41271D4EF003F82A0 /* PBXContainerItemProxy */;
+		};
+		283EF6E71271D4F2003F82A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 283EF64C1271C912003F82A0 /* piodump */;
+			targetProxy = 283EF6E61271D4F2003F82A0 /* PBXContainerItemProxy */;
+		};
+		283EF6F01271D521003F82A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2895EBAF12706D6500CA5A76 /* test_PIODataset */;
+			targetProxy = 283EF6EF1271D521003F82A0 /* PBXContainerItemProxy */;
+		};
+		283EF6F21271D521003F82A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 28304EF312676DD6003292A5 /* test_PIOFile */;
+			targetProxy = 283EF6F11271D521003F82A0 /* PBXContainerItemProxy */;
 		};
 		2895EB7612706C4500CA5A76 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -563,6 +664,69 @@
 			};
 			name = Release;
 		};
+		283EF6D51271D4C8003F82A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = library;
+			};
+			name = Debug;
+		};
+		283EF6D61271D4C8003F82A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = library;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		283EF6E21271D4E7003F82A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = tools;
+			};
+			name = Debug;
+		};
+		283EF6E31271D4E7003F82A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = tools;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		283EF6ED1271D516003F82A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = test;
+			};
+			name = Debug;
+		};
+		283EF6EE1271D516003F82A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = test;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		2895EB7312706C3E00CA5A76 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -660,6 +824,33 @@
 			buildConfigurations = (
 				283EF6531271C912003F82A0 /* Debug */,
 				283EF6541271C912003F82A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		283EF6E01271D4D8003F82A0 /* Build configuration list for PBXAggregateTarget "library" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				283EF6D51271D4C8003F82A0 /* Debug */,
+				283EF6D61271D4C8003F82A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		283EF6EB1271D4FB003F82A0 /* Build configuration list for PBXAggregateTarget "tools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				283EF6E21271D4E7003F82A0 /* Debug */,
+				283EF6E31271D4E7003F82A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		283EF6F61271D528003F82A0 /* Build configuration list for PBXAggregateTarget "test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				283EF6ED1271D516003F82A0 /* Debug */,
+				283EF6EE1271D516003F82A0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
