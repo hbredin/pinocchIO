@@ -36,7 +36,7 @@ PIODatatype pioNewDatatype( const PIOBaseType type, int dimension );
 ///		- positive value when successful
 ///		- negative value otherwise.
 ///
-int pioCloseDatatype( PIODatatype datatype );
+int pioCloseDatatype( PIODatatype* datatype );
 
 PIODatatype pioGetDatatype(PIODataset pioDataset);
 

@@ -49,13 +49,13 @@ PIODatatype pioNewDatatype( const PIOBaseType type, int dimension )
 	return datatype;
 }
 
-int pioCloseDatatype( PIODatatype pioDatatype )
+int pioCloseDatatype( PIODatatype* pioDatatype )
 {
-	pioDatatype.dimension = -1;
-	pioDatatype.type = -1;
+	pioDatatype->dimension = -1;
+	pioDatatype->type = -1;
 	
-	if (H5Tclose(pioDatatype.identifier) < 0) return 0;
-	pioDatatype.identifier = -1;
+	if (H5Tclose(pioDatatype->identifier) < 0) return 0;
+	pioDatatype->identifier = -1;
 	
 	return 1;
 }
