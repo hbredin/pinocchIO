@@ -32,14 +32,14 @@ PIOFile pioNewFile( const char* path, const char* medium )
 	// add path to media as attribute of root group
 	if (H5LTset_attribute_string(pioFile.identifier, "/", PIOAttribute_File_Medium, medium) < 0)
 	{
-		pioCloseFile(pioFile);
+		pioCloseFile(&pioFile);
 		return PIOFileInvalid;
 	}
 	
 	// add pinocchIO version as attribute of root group
 	if (H5LTset_attribute_string(pioFile.identifier, "/", PIOAttribute_Version, PINOCCHIO_VERSION) < 0)
 	{
-		pioCloseFile(pioFile);
+		pioCloseFile(&pioFile);
 		return PIOFileInvalid;
 	}
 	
@@ -49,7 +49,7 @@ PIOFile pioNewFile( const char* path, const char* medium )
 	ERROR_SWITCH_ON
 	if (group < 0)
 	{
-		pioCloseFile(pioFile);
+		pioCloseFile(&pioFile);
 		return PIOFileInvalid;		
 	}
 	H5Gclose(group);
@@ -60,7 +60,7 @@ PIOFile pioNewFile( const char* path, const char* medium )
 	ERROR_SWITCH_ON
 	if (group < 0)
 	{
-		pioCloseFile(pioFile);
+		pioCloseFile(&pioFile);
 		return PIOFileInvalid;		
 	}
 	H5Gclose(group);
@@ -124,12 +124,14 @@ PIOFile pioOpenFile( const char* path, PIOFileRights rights )
 	return pioFile;
 }
 
-int pioCloseFile( PIOFile pioFile )
+int pioCloseFile( PIOFile* pioFile )
 {
-	if (pioFile.medium) free(pioFile.medium);
-	pioFile.medium = NULL;
+	if (pioFile->medium) free(pioFile->medium);
+	pioFile->medium = NULL;
 	
-	if (H5Fclose(pioFile.identifier) < 0) return 0;
+	if (H5Fclose(pioFile->identifier) < 0) return 0;
+	pioFile->identifier = -1;
+	
 	return 1;	
 }
 

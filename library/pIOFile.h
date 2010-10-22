@@ -18,7 +18,7 @@
 #define PIOFile_Structure_Group_Datasets  "dataset"
 
 #define PIOFile_Structure_Datasets_Data  "data"
-#define PIOFile_Structure_Datasets_Count "count"
+#define PIOFile_Structure_Datasets_Link "link"
 
 /// Creates new pinocchIO file. 
 ///
@@ -56,6 +56,6 @@ PIOFile pioOpenFile( const char* path, PIOFileRights rights );
 /// \returns	int
 ///		- positive value when successful
 ///		- negative value otherwise.
-int pioCloseFile( PIOFile file );
+int pioCloseFile( PIOFile* file );
 
 #endif
