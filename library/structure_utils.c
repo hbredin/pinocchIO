@@ -16,6 +16,25 @@
 #include "pIOTypes.h"
 #include "pIOAttributes.h"
 
+
+hid_t linkDatatype()
+{
+	hid_t tLink;
+	hid_t tPosition;
+	hid_t tNumber;	
+	
+	tLink = H5Tcreate(H5T_COMPOUND, sizeof(link_t));
+	tPosition = H5Tcopy(H5T_NATIVE_INT32);
+	tNumber = H5Tcopy(H5T_NATIVE_INT32);
+	H5Tinsert(tLink, "position", HOFFSET(link_t, position), tPosition);
+	H5Tinsert(tLink, "number", HOFFSET(link_t, number), tNumber);
+	H5Tclose(tPosition);
+	H5Tclose(tNumber);
+	return tLink;
+}
+
+
+
 int getTimesUsed(PIOTimeline pioTimeline)
 {
 	ERROR_SWITCH_INIT

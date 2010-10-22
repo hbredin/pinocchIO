@@ -14,6 +14,13 @@
 #include <hdf5.h>
 #include "pIOTypes.h"
 
+typedef struct {
+	int32_t position;
+	int32_t number;
+} link_t;
+
+hid_t linkDatatype();
+
 
 int getTimesUsed(PIOTimeline pioTimeline);
 int incrementTimesUsed(PIOTimeline pioTimeline);
