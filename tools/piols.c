@@ -107,13 +107,13 @@ int main (int argc, char *const  argv[])
 	char** timelines = NULL;
 	int numberOfTimelines = pioGetListOfTimelines(pioFile, &timelines);
 	int tl;
-	fprintf(stdout, "Timelines\n");
+	fprintf(stdout, "== Timelines ==\n");
 	for (tl = 0; tl<numberOfTimelines; tl++) 
 	{
 		fprintf(stdout, "%s", timelines[tl]);
 		PIOTimeline pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), timelines[tl]);
 		fprintf(stdout, " %s\n", pioTimeline.description);
-		pioCloseTimeline(pioTimeline);
+		pioCloseTimeline(&pioTimeline);
 	}
 	for (tl = 0; tl<numberOfTimelines; tl++) free(timelines[tl]);
 	free(timelines);
@@ -122,19 +122,19 @@ int main (int argc, char *const  argv[])
 	char** datasets = NULL;
 	int numberOfDatasets = pioGetListOfDatasets(pioFile, &datasets);
 	int ds;
-	fprintf(stdout, "Datasets\n");
+	fprintf(stdout, "== Datasets ==\n");
 	for (ds = 0; ds<numberOfDatasets; ds++) 
 	{
 		fprintf(stdout, "%s", datasets[ds]);
 		PIODataset pioDataset = pioOpenDataset(PIOMakeObject(pioFile), datasets[ds]);
 		fprintf(stdout, " %s\n", pioDataset.description);
-		pioCloseDataset(pioDataset);
+		pioCloseDataset(&pioDataset);
 	}
 	for (ds = 0; ds<numberOfDatasets; ds++) free(datasets[ds]);
 	free(datasets);
 	
 	
-	pioCloseFile(pioFile);
+	pioCloseFile(&pioFile);
 	return 1;
 }
 	
