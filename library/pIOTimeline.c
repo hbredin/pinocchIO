@@ -64,7 +64,7 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 	pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), path);
 	if (PIOTimelineIsValid(pioTimeline))
 	{
-		pioCloseTimeline(pioTimeline);
+		pioCloseTimeline(&pioTimeline);
 		return PIOTimelineInvalid;
 	}
 	
@@ -123,21 +123,21 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 	// check if write was successfull
 	if (write_err < 0) 
 	{
-		pioCloseTimeline(pioTimeline);
+		pioCloseTimeline(&pioTimeline);
 		return PIOTimelineInvalid;
 	}
 	
 	// add description as attribute of timeline
 	if (H5LTset_attribute_string(pioTimeline.identifier, ".", PIOAttribute_Description, description) < 0)
 	{
-		pioCloseTimeline(pioTimeline);
+		pioCloseTimeline(&pioTimeline);
 		return PIOTimelineInvalid;
 	}
 	
 	// add pinocchIO version as attribute of timeline
 	if (H5LTset_attribute_string(pioTimeline.identifier, ".", PIOAttribute_Version, PINOCCHIO_VERSION) < 0)
 	{
-		pioCloseTimeline(pioTimeline);
+		pioCloseTimeline(&pioTimeline);
 		return PIOTimelineInvalid;
 	}
 	
@@ -145,7 +145,7 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 	int times_used = 0;
 	if (H5LTset_attribute_int(pioTimeline.identifier, ".", PIOAttribute_TimesUsed, &times_used, 1))
 	{
-		pioCloseTimeline(pioTimeline);
+		pioCloseTimeline(&pioTimeline);
 		return PIOTimelineInvalid;
 	}
 	
@@ -215,7 +215,7 @@ PIOTimeline pioOpenTimeline(PIOObject pioObjectInFile, const char* path)
 	
 	if (read_err < 0)
 	{
-		pioCloseTimeline(pioTimeline);
+		pioCloseTimeline(&pioTimeline);
 		return PIOTimelineInvalid;
 	}
 	
@@ -245,21 +245,21 @@ PIOTimeline pioOpenTimeline(PIOObject pioObjectInFile, const char* path)
 	return pioTimeline;
 }
 
-int pioCloseTimeline( PIOTimeline pioTimeline )
+int pioCloseTimeline( PIOTimeline* pioTimeline )
 {
-	if (pioTimeline.path) free(pioTimeline.path); 
-	pioTimeline.path = NULL;
+	if (pioTimeline->path) free(pioTimeline->path); 
+	pioTimeline->path = NULL;
 	
-	if (pioTimeline.description) free(pioTimeline.description);
-	pioTimeline.description = NULL;
+	if (pioTimeline->description) free(pioTimeline->description);
+	pioTimeline->description = NULL;
 	
-	if (pioTimeline.timeranges) free(pioTimeline.timeranges);
-	pioTimeline.timeranges = NULL;
+	if (pioTimeline->timeranges) free(pioTimeline->timeranges);
+	pioTimeline->timeranges = NULL;
 	
-	pioTimeline.ntimeranges = -1;
+	pioTimeline->ntimeranges = -1;
 
-	if (H5Dclose(pioTimeline.identifier) < 0) return 0;
-	pioTimeline.identifier = -1;
+	if (H5Dclose(pioTimeline->identifier) < 0) return 0;
+	pioTimeline->identifier = -1;
 	
 	return 1;
 }

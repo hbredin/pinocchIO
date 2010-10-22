@@ -52,7 +52,7 @@ PIOTimeline pioOpenTimeline(PIOObject pioObjectInFile, const char* path);
 /// \returns	int
 ///		- positive value when successful
 ///		- negative value otherwise.
-int pioCloseTimeline( PIOTimeline pioTimeline );
+int pioCloseTimeline( PIOTimeline* pioTimeline );
 
 /// \returns int
 ///		- number of timelines in file when successfull
