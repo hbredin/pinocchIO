@@ -116,11 +116,11 @@ typedef struct {
 /// pinocchIO dataset
 typedef struct {
 	hid_t identifier; // data_identifier
-	hid_t count_identifier;
+	hid_t link_identifier;
 	char* path;
 	char* description;
-	int stored;
-	int allocated;
+	int stored; // number of stored elements
+	int ntimeranges; // number of timeranges in dataset timeline ( = extent of link dataset)
 } PIODataset;
 
 #define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL, -1, -1})
