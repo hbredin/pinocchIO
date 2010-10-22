@@ -12,7 +12,7 @@
 
 #include "pIOTypes.h"
 
-#define PIODatasetIsValid(d)   (((d).identifier > 0) && ((d).count_identifier > 0))
+#define PIODatasetIsValid(d)   (((d).identifier > 0) && ((d).link_identifier > 0))
 #define PIODatasetIsInvalid(d) (!PIODatasetIsValid(d))
 
 PIODataset pioNewDataset(PIOFile pioFile, 
@@ -23,13 +23,12 @@ PIODataset pioNewDataset(PIOFile pioFile,
 
 PIODataset pioOpenDataset(PIOObject pioObject, const char* path);
 
-int pioCloseDataset(PIODataset pioDataset);
+int pioCloseDataset(PIODataset* pioDataset);
 
 
 /// \returns int
 ///		- number of timelines in file when successfull
 ///		- negative value otherwise
 int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets);
-
 
 #endif

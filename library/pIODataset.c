@@ -18,6 +18,18 @@
 #include <string.h>
 #include <hdf5_hl.h>
 
+int monoDimensionalDatasetExtent(hid_t monoDimensionalDataset)
+{
+	hid_t dataDataspace;
+	hsize_t extent[1] = {-1};
+		
+	dataDataspace = H5Dget_space(monoDimensionalDataset);
+	H5Sget_simple_extent_dims(dataDataspace, extent, NULL);
+	H5Sclose(dataDataspace);
+	
+	return (int)extent[0];
+}
+
 // Returns /dataset/path/data
 int internalPathToDatasetData( const char* path, char** internalPath )
 {
@@ -31,24 +43,17 @@ int internalPathToDatasetData( const char* path, char** internalPath )
 	return 1;
 }
 
-// Returns /dataset/path/count
-int internalPathToDatasetCount( const char* path, char** internalPath )
+// Returns /dataset/path/link
+int internalPathToDatasetLink( const char* path, char** internalPath )
 {
 	int length = 3*strlen("/")+ \
 	strlen(PIOFile_Structure_Group_Datasets)+ \
-	strlen(PIOFile_Structure_Datasets_Count)+ \
+	strlen(PIOFile_Structure_Datasets_Link)+ \
 	strlen(path);
 	*internalPath = (char*) malloc((length+1)*sizeof(char));
 	sprintf(*internalPath, "/%s/%s/%s", 
-			PIOFile_Structure_Group_Datasets, path, PIOFile_Structure_Datasets_Count);	
+			PIOFile_Structure_Group_Datasets, path, PIOFile_Structure_Datasets_Link);	
 	return 1;
-}
-
-hid_t countDatatype()
-{
-	hid_t tCount;	
-	tCount = H5Tcopy(H5T_NATIVE_INT32);
-	return tCount;
 }
 
 PIODataset pioNewDataset(PIOFile pioFile, 
@@ -62,19 +67,22 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	char* internalPathToCount = NULL; // name says it all
 	
 	hid_t datasetCreationProperty, linkCreationProperty; 
-	hid_t dataspace;
-	hsize_t dataspaceMinSize[1] = { 0 };
-	hsize_t dataspaceMaxSize[1] = { H5S_UNLIMITED };
-	hsize_t dataspaceChunkSize[1] = { 1 };
-	hid_t count_datatype;
-		
+	hid_t dataspaceForData;
+	hsize_t dataspaceForDataMinSize[1] = { 0 };
+	hsize_t dataspaceForDataMaxSize[1] = { H5S_UNLIMITED };
+	hsize_t dataspaceForDataChunkSize[1] = { 1 };
+
+	hid_t link_datatype;
+	hid_t dataspaceForLink;
+	hsize_t dataspaceForLinkFixedSize[1] = { pioTimeline.ntimeranges };
+	
 	ERROR_SWITCH_INIT
 	
 	// make sure a dataset doesn't already exist at path
 	pioDataset = pioOpenDataset(PIOMakeObject(pioFile), path);
 	if (PIODatasetIsValid(pioDataset))
 	{
-		pioCloseDataset(pioDataset);
+		pioCloseDataset(&pioDataset);
 		return PIODatasetInvalid;
 	}
 	
@@ -83,30 +91,31 @@ PIODataset pioNewDataset(PIOFile pioFile,
 		
 	// get internal paths
 	internalPathToDatasetData(path, &internalPathToData);
-	internalPathToDatasetCount(path, &internalPathToCount);
+	internalPathToDatasetLink(path, &internalPathToCount);
 	
 	// create dataset/link creation propery
 	datasetCreationProperty = H5Pcreate(H5P_DATASET_CREATE);
-	H5Pset_chunk(datasetCreationProperty, 1, dataspaceChunkSize);
+	H5Pset_chunk(datasetCreationProperty, 1, dataspaceForDataChunkSize);
 
 	linkCreationProperty    = H5Pcreate(H5P_LINK_CREATE);
 	H5Pset_create_intermediate_group(linkCreationProperty, 1);	
 	
 	// create dataspace
-	dataspace = H5Screate_simple(1, dataspaceMinSize, dataspaceMaxSize);
+	dataspaceForData = H5Screate_simple(1,  dataspaceForDataMinSize,    dataspaceForDataMaxSize);
+	dataspaceForLink = H5Screate_simple(1, dataspaceForLinkFixedSize, NULL);
 	
 	// create count datatype
-	count_datatype = countDatatype();
+	link_datatype = linkDatatype();
 	
 	// create datasets
 	ERROR_SWITCH_OFF
 	
 	pioDataset.identifier = H5Dcreate2(pioFile.identifier, internalPathToData, 
-									   pioDatatype.identifier, dataspace, 
+									   pioDatatype.identifier, dataspaceForData, 
 									   linkCreationProperty, datasetCreationProperty, H5P_DEFAULT);
 	
-	pioDataset.count_identifier = H5Dcreate2(pioFile.identifier, internalPathToCount, 
-											 count_datatype, dataspace, 
+	pioDataset.link_identifier = H5Dcreate2(pioFile.identifier, internalPathToCount, 
+											 link_datatype, dataspaceForLink, 
 											 linkCreationProperty, datasetCreationProperty, H5P_DEFAULT);
 	ERROR_SWITCH_ON
 	
@@ -116,9 +125,9 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	H5Pclose(datasetCreationProperty);
 	H5Pclose(linkCreationProperty);
 	// close dataspace
-	H5Sclose(dataspace);
+	H5Sclose(dataspaceForData);
 	// close datatype
-	H5Tclose(count_datatype);
+	H5Tclose(link_datatype);
 	
 	// check if dataset was created successfully
 	if (PIODatasetIsInvalid(pioDataset)) return PIODatasetInvalid;
@@ -126,28 +135,28 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	// add description as attribute of data dataset
 	if (H5LTset_attribute_string(pioDataset.identifier, ".", PIOAttribute_Description, description) < 0)
 	{
-		pioCloseDataset(pioDataset);
+		pioCloseDataset(&pioDataset);
 		return PIODatasetInvalid;
 	}
 	
 	// add pinocchIO version as attribute of dataset
 	if (H5LTset_attribute_string(pioDataset.identifier, ".", PIOAttribute_Version, PINOCCHIO_VERSION) < 0)
 	{
-		pioCloseDataset(pioDataset);
+		pioCloseDataset(&pioDataset);
 		return PIODatasetInvalid;
 	}
 	
 	// add path to timeline as attribute of dataset
 	if (H5LTset_attribute_string(pioDataset.identifier, ".", PIOAttribute_Timeline, pioTimeline.path) < 0)
 	{
-		pioCloseDataset(pioDataset);
+		pioCloseDataset(&pioDataset);
 		return PIODatasetInvalid;
 	}
 	
 	// increment timeline 'times_used' attribute
 	if (incrementTimesUsed(pioTimeline) < 0)
 	{
-		pioCloseDataset(pioDataset);
+		pioCloseDataset(&pioDataset);
 		return PIODatasetInvalid;
 	}
 	
@@ -161,7 +170,7 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	pioDataset.description[strlen(description)] = '\0';
 	
 	pioDataset.stored = 0;
-	pioDataset.allocated = 0;
+	pioDataset.ntimeranges = monoDimensionalDatasetExtent(pioDataset.link_identifier);
 	
 	return pioDataset;
 }
@@ -181,17 +190,23 @@ PIODataset pioOpenDataset(PIOObject pioObject, const char* path)
 	
 	// get internal path
 	internalPathToDatasetData(path, &internalPathToData);
-	internalPathToDatasetCount(path, &internalPathToCount);
+	internalPathToDatasetLink(path, &internalPathToCount);
 	
 	// open dataset
 	ERROR_SWITCH_OFF	
 	pioDataset.identifier = H5Dopen2(pioObject.identifier, internalPathToData, H5P_DEFAULT);
-	pioDataset.count_identifier = H5Dopen2(pioObject.identifier, internalPathToCount, H5P_DEFAULT);
+	pioDataset.link_identifier = H5Dopen2(pioObject.identifier, internalPathToCount, H5P_DEFAULT);
 	ERROR_SWITCH_ON
 	free(internalPathToData);
 	free(internalPathToCount);
 	
 	if (PIODatasetIsInvalid(pioDataset)) return PIODatasetInvalid;
+	
+	// get dimension of dataset
+	pioDataset.stored = monoDimensionalDatasetExtent(pioDataset.identifier);
+	
+	// get dimension of link dataset
+	pioDataset.ntimeranges = monoDimensionalDatasetExtent(pioDataset.link_identifier);
 	
 	// store path to dataset
 	pioDataset.path = (char*) malloc((strlen(path)+1)*sizeof(char));
@@ -215,29 +230,26 @@ PIODataset pioOpenDataset(PIOObject pioObject, const char* path)
 				"WARNING: pinocchIO versions do not match (you: %s, dataset: %s)\n",
 				PINOCCHIO_VERSION, version);
 	free(version);	
-	
-	pioDataset.stored = 0;
-	pioDataset.allocated = 0;
-		
+			
 	return pioDataset;
 }
 
-int pioCloseDataset(PIODataset pioDataset)
+int pioCloseDataset(PIODataset* pioDataset)
 {
-	if (pioDataset.path) free(pioDataset.path);
-	pioDataset.path = NULL;
+	if (pioDataset->path) free(pioDataset->path);
+	pioDataset->path = NULL;
 	
-	if (pioDataset.description) free(pioDataset.description);
-	pioDataset.description = NULL;
+	if (pioDataset->description) free(pioDataset->description);
+	pioDataset->description = NULL;
 	
-	pioDataset.stored = -1;
-	pioDataset.allocated = -1;
+	pioDataset->stored = -1;
+	pioDataset->ntimeranges = -1;
 	
-	if (H5Dclose(pioDataset.identifier) < 0) return 0;
-	pioDataset.identifier = -1;
+	if (H5Dclose(pioDataset->identifier) < 0) return 0;
+	pioDataset->identifier = -1;
 	
-	if (H5Dclose(pioDataset.count_identifier) < 0) return 0;
-	pioDataset.count_identifier = -1;
+	if (H5Dclose(pioDataset->link_identifier) < 0) return 0;
+	pioDataset->link_identifier = -1;
 	
 	return 1;
 }
@@ -252,7 +264,6 @@ int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets)
 												  PIOFile_Structure_Datasets_Data, 
 												  pathsToDatasets);
 	
-	
 	data_length = strlen(PIOFile_Structure_Datasets_Data);
 	for (ds=0; ds<numberOfDatasets; ds++)
 	{
@@ -262,6 +273,4 @@ int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets)
 	
 	return numberOfDatasets;
 }
-
-
 
