@@ -23,10 +23,7 @@ static int verbose_flag;
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
-			"USAGE: %s -p FILE\n", path2tool);
-	fprintf(stdout, 
-			"       -p FILE, --pinocchio=FILE\n"
-			"           Examine pinocchIO file FILE.\n");
+			"USAGE: %s FILE\n", path2tool);
 	fflush(stdout);
 }
 
@@ -44,13 +41,12 @@ int main (int argc, char *const  argv[])
 			{"brief",   no_argument, &verbose_flag, 0},
 			/* These options don't set a flag.
 			 We distinguish them by their indices. */
-			{"pinocchio",     required_argument, 0, 'p'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "hp:",
+		c = getopt_long (argc, argv, "h",
 						 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -69,10 +65,6 @@ int main (int argc, char *const  argv[])
 				//				printf ("\n");
 				break;
 				
-			case 'p':
-				pinocchio_file = optarg;
-				break;
-				
 			case 'h':
 				usage(argv[0]);
 				exit(-1);
@@ -88,13 +80,16 @@ int main (int argc, char *const  argv[])
 		}
 	}
 	
-	if (!pinocchio_file)
+	if (optind+1>argc)
 	{
 		fprintf(stderr, "Missing path to pinocchIO file.\n");
 		fflush(stderr); 
 		usage(argv[0]);
-		exit(-1);
+		exit(-1);		
 	}
+
+	pinocchio_file = argv[optind];
+	
 	
 	PIOFile pioFile = pioOpenFile(pinocchio_file, PINOCCHIO_READONLY);
 	if (PIOFileIsInvalid(pioFile))
