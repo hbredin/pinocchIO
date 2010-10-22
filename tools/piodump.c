@@ -28,7 +28,9 @@ void usage(const char * path2tool)
 			"       -t PATH, --timeline=PATH\n"
 			"           Dump timeline at PATH\n"
 			"       -d PATH, --dataset=PATH\n"
-			"           Dump dataset at PATH\n");
+			"           Dump dataset at PATH\n"
+			"       -s, --timestamp\n"
+			"           Show timestamps\n");
 	fflush(stdout);
 }
 
@@ -37,6 +39,7 @@ int main (int argc, char *const  argv[])
 	char* pinocchio_file = NULL;
 	char* timeline_path = NULL;
 	char* dataset_path = NULL;
+	int timestamp_flag = 0;
 	
 	int tr; // timerange index
 	void* buffer = NULL; // data buffer
@@ -62,12 +65,13 @@ int main (int argc, char *const  argv[])
 			 We distinguish them by their indices. */
 			{"timeline", required_argument, 0, 't'},
 			{"dataset",  required_argument, 0, 'd'},
+			{"timestamp", no_argument,      0, 's'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "ht:d:",
+		c = getopt_long (argc, argv, "ht:d:s",
 						 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -92,6 +96,10 @@ int main (int argc, char *const  argv[])
 				
 			case 'd':
 				dataset_path = optarg;
+				break;
+				
+			case 's':
+				timestamp_flag = 1;
 				break;
 				
 			case 'h':
@@ -192,9 +200,15 @@ int main (int argc, char *const  argv[])
 				break;				
 			}
 			
+						
 			for (n=0; n<numberOfVectors; n++)
-			{
-				if (numberOfVectors > 1) fprintf(stdout, "   ");
+			{				
+				if (timestamp_flag)
+				{
+					fprintf(stdout, "%lf %lf | ", 
+							(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
+							(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
+				}
 				for (d=0; d<pioDatatype.dimension; d++)
 				{					
 					switch (pioDatatype.type) {
@@ -214,9 +228,8 @@ int main (int argc, char *const  argv[])
 							break;
 					}
 				}
-				if (numberOfVectors > 1) fprintf(stdout, "\n");
+				fprintf(stdout, "\n");
 			}
-			fprintf(stdout, "\n");
 		}
 		
 		pioCloseDatatype(&pioDatatype);
