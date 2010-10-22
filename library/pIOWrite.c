@@ -15,6 +15,10 @@
 int pioWrite(PIODataset* pioDataset, int timerangeIndex, 
 			 void* dataBuffer, int dataNumber, PIODatatype dataType)
 {
+	ERROR_SWITCH_INIT
+	herr_t extend_err;
+	herr_t write_err;
+	
 	hsize_t newExtent[1] = {-1};
 	
 	hsize_t position[1] = {-1};
@@ -32,7 +36,10 @@ int pioWrite(PIODataset* pioDataset, int timerangeIndex,
 	
 	// extend dataset
 	newExtent[0] = (hsize_t)(pioDataset->stored + dataNumber);
-	H5Dextend(pioDataset->identifier, newExtent);
+	ERROR_SWITCH_OFF
+	extend_err = H5Dextend(pioDataset->identifier, newExtent);
+	ERROR_SWITCH_ON
+	if (extend_err < 0) return -1;	
 	
 	// append data to dataset
 	position[0] = (hsize_t)pioDataset->stored;
@@ -40,9 +47,12 @@ int pioWrite(PIODataset* pioDataset, int timerangeIndex,
 	dataspaceForData = H5Dget_space(pioDataset->identifier);
 	H5Sselect_hyperslab(dataspaceForData, H5S_SELECT_SET, position, NULL, number, NULL);
 	bufferDataspaceForData = H5Screate_simple(1, number, NULL);
-	H5Dwrite(pioDataset->identifier, dataType.identifier, bufferDataspaceForData, dataspaceForData, H5P_DEFAULT, dataBuffer);
+	ERROR_SWITCH_OFF
+	write_err = H5Dwrite(pioDataset->identifier, dataType.identifier, bufferDataspaceForData, dataspaceForData, H5P_DEFAULT, dataBuffer);
+	ERROR_SWITCH_ON
 	H5Sclose(bufferDataspaceForData);
 	H5Sclose(dataspaceForData);
+	if (write_err < 0) return -1;
 	
 	// update link dataset
 	link.number = dataNumber;
@@ -53,10 +63,13 @@ int pioWrite(PIODataset* pioDataset, int timerangeIndex,
 	H5Sselect_hyperslab(dataspaceForLink, H5S_SELECT_SET, position, NULL, number, NULL);
 	bufferDataspaceForLink = H5Screate_simple(1, number, NULL);
 	link_datatype = linkDatatype();
-	H5Dwrite(pioDataset->link_identifier, link_datatype, bufferDataspaceForLink, dataspaceForLink, H5P_DEFAULT, &link);
-	H5Tcopy(link_datatype);
+	ERROR_SWITCH_OFF
+	write_err = H5Dwrite(pioDataset->link_identifier, link_datatype, bufferDataspaceForLink, dataspaceForLink, H5P_DEFAULT, &link);
+	ERROR_SWITCH_ON
+	H5Tclose(link_datatype);
 	H5Sclose(bufferDataspaceForLink);
 	H5Sclose(dataspaceForLink);
+	if (write_err < 0) return -1;
 	
 	// update dataset
 	pioDataset->stored = pioDataset->stored + dataNumber;
