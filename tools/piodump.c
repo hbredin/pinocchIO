@@ -16,7 +16,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "pinocchIO/pinocchIO.h"
+#include "pinocchIO.h"
 
 static int verbose_flag;
 
