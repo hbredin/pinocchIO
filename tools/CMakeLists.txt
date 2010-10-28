@@ -1,6 +1,5 @@
 
-
-include_directories(${pinocchIO_SOURCE_DIR}/library)
+include_directories(${pinocchIO_SOURCE_DIR}/library ${HDF5_INCLUDE_DIR})
 link_directories(${CMAKE_BINARY_DIR}/library/pinocchIO})
 
 add_executable(piols piols.c)
