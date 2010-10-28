@@ -117,18 +117,30 @@ int main (int argc, char *const  argv[])
 	char** datasets = NULL;
 	int numberOfDatasets = pioGetListOfDatasets(pioFile, &datasets);
 	int ds;
-	fprintf(stdout, "== Datasets ==\n");
+	fprintf(stdout, "== %d datasets ==\n", numberOfDatasets);
+	
 	for (ds = 0; ds<numberOfDatasets; ds++) 
 	{
 		fprintf(stdout, "%s", datasets[ds]);
 		PIODataset pioDataset = pioOpenDataset(PIOMakeObject(pioFile), datasets[ds]);
+		if (PIODatasetIsInvalid(pioDataset))
+		  {
+		    fprintf(stdout, "Cannot open dataset %s\n", datasets[ds]);
+		    fflush(stdout);
+		  }
 		fprintf(stdout, " %s\n", pioDataset.description);
 		pioCloseDataset(&pioDataset);
 	}
-	for (ds = 0; ds<numberOfDatasets; ds++) free(datasets[ds]);
+	for (ds = 0; ds<numberOfDatasets; ds++) 
+	  {
+	    free(datasets[ds]);
+	    datasets[ds] = NULL;
+	  }
 	free(datasets);
-	
+	datasets = NULL;
 	
 	pioCloseFile(&pioFile);
-	return 1;
+
+
+return 1;
 }

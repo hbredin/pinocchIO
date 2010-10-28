@@ -94,35 +94,35 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC0620554660B00DB518D /* pinocchIO */;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D;
 			remoteInfo = pinocchIO;
 		};
 		283EF6E41271D4EF003F82A0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 2895EB7012706C3E00CA5A76 /* piols */;
+			remoteGlobalIDString = 2895EB7012706C3E00CA5A76;
 			remoteInfo = piols;
 		};
 		283EF6E61271D4F2003F82A0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 283EF64C1271C912003F82A0 /* piodump */;
+			remoteGlobalIDString = 283EF64C1271C912003F82A0;
 			remoteInfo = piodump;
 		};
 		283EF6EF1271D521003F82A0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 2895EBAF12706D6500CA5A76 /* test_PIODataset */;
+			remoteGlobalIDString = 2895EBAF12706D6500CA5A76;
 			remoteInfo = test_PIODataset;
 		};
 		283EF6F11271D521003F82A0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 28304EF312676DD6003292A5 /* test_PIOFile */;
+			remoteGlobalIDString = 28304EF312676DD6003292A5;
 			remoteInfo = test_PIOFile;
 		};
 		2895EB7512706C4500CA5A76 /* PBXContainerItemProxy */ = {
