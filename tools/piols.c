@@ -19,11 +19,18 @@
 #include "pinocchIO.h"
 
 static int verbose_flag;
+static int timeline_flag = 1;
+static int dataset_flag = 1;
 
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
-			"USAGE: %s FILE\n", path2tool);
+			"USAGE: %s [options] FILE\n", path2tool);
+	fprintf(stdout, 
+			"       --no-timeline\n"
+			"           Do not list timelines\n"
+			"       --no-dataset\n"
+			"           Do not list datasets\n");
 	fflush(stdout);
 }
 
@@ -41,6 +48,8 @@ int main (int argc, char *const  argv[])
 			{"brief",   no_argument, &verbose_flag, 0},
 			/* These options don't set a flag.
 			 We distinguish them by their indices. */
+			{"no-timeline", no_argument, &timeline_flag, 0},
+			{"no-dataset",  no_argument, &dataset_flag,  0},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -87,7 +96,7 @@ int main (int argc, char *const  argv[])
 		usage(argv[0]);
 		exit(-1);		
 	}
-
+	
 	pinocchio_file = argv[optind];
 	
 	
@@ -99,48 +108,57 @@ int main (int argc, char *const  argv[])
 		exit(-1);
 	}
 	
-	char** timelines = NULL;
-	int numberOfTimelines = pioGetListOfTimelines(pioFile, &timelines);
-	int tl;
-	fprintf(stdout, "== Timelines ==\n");
-	for (tl = 0; tl<numberOfTimelines; tl++) 
+	if (timeline_flag)
 	{
-		fprintf(stdout, "%s", timelines[tl]);
-		PIOTimeline pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), timelines[tl]);
-		fprintf(stdout, " %s\n", pioTimeline.description);
-		pioCloseTimeline(&pioTimeline);
+		
+		char** timelines = NULL;
+		int numberOfTimelines = pioGetListOfTimelines(pioFile, &timelines);
+		int tl;
+		fprintf(stdout, "== Timelines ==\n");
+		for (tl = 0; tl<numberOfTimelines; tl++) 
+		{
+			fprintf(stdout, "%s", timelines[tl]);
+			PIOTimeline pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), timelines[tl]);
+			if (PIOTimelineIsInvalid(pioTimeline))
+			{
+				fprintf(stdout, " - ERROR - CANNOT OPEN TIMELINE\n");
+				fflush(stdout);
+				continue;
+			}
+			
+			fprintf(stdout, " %s\n", pioTimeline.description);
+			pioCloseTimeline(&pioTimeline);
+		}
+		for (tl = 0; tl<numberOfTimelines; tl++) { free(timelines[tl]); timelines[tl] = NULL; }
+		free(timelines); timelines = NULL;
 	}
-	for (tl = 0; tl<numberOfTimelines; tl++) free(timelines[tl]);
-	free(timelines);
 	
-	
-	char** datasets = NULL;
-	int numberOfDatasets = pioGetListOfDatasets(pioFile, &datasets);
-	int ds;
-	fprintf(stdout, "== %d datasets ==\n", numberOfDatasets);
-	
-	for (ds = 0; ds<numberOfDatasets; ds++) 
+	if (dataset_flag)
 	{
-		fprintf(stdout, "%s", datasets[ds]);
-		PIODataset pioDataset = pioOpenDataset(PIOMakeObject(pioFile), datasets[ds]);
-		if (PIODatasetIsInvalid(pioDataset))
-		  {
-		    fprintf(stdout, "Cannot open dataset %s\n", datasets[ds]);
-		    fflush(stdout);
-		  }
-		fprintf(stdout, " %s\n", pioDataset.description);
-		pioCloseDataset(&pioDataset);
+		
+		char** datasets = NULL;
+		int numberOfDatasets = pioGetListOfDatasets(pioFile, &datasets);
+		int ds;
+		fprintf(stdout, "== %d datasets ==\n", numberOfDatasets);
+		
+		for (ds = 0; ds<numberOfDatasets; ds++) 
+		{
+			fprintf(stdout, "%s", datasets[ds]);
+			PIODataset pioDataset = pioOpenDataset(PIOMakeObject(pioFile), datasets[ds]);
+			if (PIODatasetIsInvalid(pioDataset))
+			{
+				fprintf(stdout, " - ERROR - CANNOT OPEN DATASET\n");
+				fflush(stdout);
+				continue;
+			}
+			fprintf(stdout, " %s\n", pioDataset.description);
+			pioCloseDataset(&pioDataset);
+		}
+		for (ds = 0; ds<numberOfDatasets; ds++) { free(datasets[ds]); datasets[ds] = NULL; }
+		free(datasets); datasets = NULL;
 	}
-	for (ds = 0; ds<numberOfDatasets; ds++) 
-	  {
-	    free(datasets[ds]);
-	    datasets[ds] = NULL;
-	  }
-	free(datasets);
-	datasets = NULL;
 	
 	pioCloseFile(&pioFile);
-
-
-return 1;
+	
+	return 1;
 }
