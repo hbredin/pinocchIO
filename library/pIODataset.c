@@ -260,17 +260,42 @@ int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets)
 	int ds;
 	int rawpath_length = -1;
 	int data_length = -1;
-	numberOfDatasets = allMatchingDatasetsInGroup(pioFile.identifier, PIOFile_Structure_Group_Datasets, 
-												  PIOFile_Structure_Datasets_Data, 
-												  pathsToDatasets);
 	
+	char** rawPathsToDatasets = NULL;
+	int rawNumberOfDatasets = -1;
+	
+	// get all HDF5 datasets in /dataset/
+	rawNumberOfDatasets = allDatasetsInGroup(pioFile.identifier, PIOFile_Structure_Group_Datasets, &rawPathsToDatasets);
+	
+	// count those matching /dataset/****/data
 	data_length = strlen(PIOFile_Structure_Datasets_Data);
-	for (ds=0; ds<numberOfDatasets; ds++)
+	numberOfDatasets = 0;
+	for (ds=0; ds<rawNumberOfDatasets; ds++)
 	{
-		rawpath_length = strlen((*pathsToDatasets)[ds]);
-		(*pathsToDatasets)[ds][rawpath_length-data_length-1] = '\0';
+		rawpath_length = strlen(rawPathsToDatasets[ds]);
+		printf("%s (%d)\n", rawPathsToDatasets[ds], rawpath_length);
+		if (strcmp(rawPathsToDatasets[ds]+rawpath_length-data_length, PIOFile_Structure_Datasets_Data) == 0)
+			numberOfDatasets++;
 	}
 	
+	// copy /dataset/**** path 
+	*pathsToDatasets = (char**) malloc(numberOfDatasets*sizeof(char*));
+	numberOfDatasets = 0;
+	for (ds=0; ds<rawNumberOfDatasets; ds++)
+	{
+		rawpath_length = strlen(rawPathsToDatasets[ds]);
+		if (strcmp(rawPathsToDatasets[ds]+rawpath_length-data_length, PIOFile_Structure_Datasets_Data) == 0)
+		{
+			(*pathsToDatasets)[numberOfDatasets] = (char*) malloc((rawpath_length-data_length)*sizeof(char));
+			memcpy((*pathsToDatasets)[numberOfDatasets], rawPathsToDatasets[ds], (rawpath_length-data_length-1)*sizeof(char));
+			(*pathsToDatasets)[numberOfDatasets][rawpath_length-data_length-1] = '\0';
+			numberOfDatasets++;
+		}		
+	}
+	
+	for (ds=0; ds<rawNumberOfDatasets; ds++) { free(rawPathsToDatasets[ds]); rawPathsToDatasets[ds] = NULL; }
+	free(rawPathsToDatasets); rawPathsToDatasets = NULL;
+		
 	return numberOfDatasets;
 }
 
