@@ -282,6 +282,7 @@ int allDatasetsInGroup(hid_t file,
 	if (group < 0) return -1;
 	
 	numberOfDatasets = recursiveListOfObjectsInGroup(group, H5G_DATASET, path, &type, 0, "");
+	if (type) free(type); type = NULL;
 	H5Gclose(group);
 	
 	return numberOfDatasets;
