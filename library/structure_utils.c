@@ -118,7 +118,6 @@ listOfPaths_t* listOfObjectsInGroup( hid_t group, H5G_obj_t filter)
 	H5G_info_t groupInfo; 
 	H5G_obj_t objType;
 	hsize_t i, numberOfLinks;
-	int counter = 0; 
 	size_t size;
 	char* name = NULL;
 	listOfPaths_t* listOfPaths = NULL;
@@ -155,15 +154,10 @@ listOfPaths_t* listOfObjectsInGroup( hid_t group, H5G_obj_t filter)
 				free(name);
 				return listOfPaths;
 			}
-			// set final character '\0'
-			name[size+1] = '\0';
 			
 			// add it into the list
 			listOfPaths = addCopyToList(listOfPaths, name);
-			free(name); name = NULL;
-			
-			// update number of objects
-			counter++;
+			free(name); name = NULL;			
 		}
 	}
 	return listOfPaths;	
