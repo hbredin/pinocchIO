@@ -256,46 +256,46 @@ int pioCloseDataset(PIODataset* pioDataset)
 
 int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets)
 {	
-	int numberOfDatasets = -1;
-	int ds;
+	int ds = -1;
+	listOfPaths_t* rawPaths = NULL;
+	listOfPaths_t* rawPath = NULL;
+		
 	int rawpath_length = -1;
 	int data_length = -1;
 	
-	char** rawPathsToDatasets = NULL;
-	int rawNumberOfDatasets = -1;
+	int numberOfDatasets = -1;
 	
 	// get all HDF5 datasets in /dataset/
-	rawNumberOfDatasets = allDatasetsInGroup(pioFile.identifier, PIOFile_Structure_Group_Datasets, &rawPathsToDatasets);
+	rawPaths = allDatasetsInGroup(pioFile.identifier, PIOFile_Structure_Group_Datasets);
 	
 	// count those matching /dataset/****/data
 	data_length = strlen(PIOFile_Structure_Datasets_Data);
+	rawPath = rawPaths;
 	numberOfDatasets = 0;
-	for (ds=0; ds<rawNumberOfDatasets; ds++)
+	while (rawPath != NULL) 
 	{
-		rawpath_length = strlen(rawPathsToDatasets[ds]);
-		printf("%s (%d)\n", rawPathsToDatasets[ds], rawpath_length);
-		if (strcmp(rawPathsToDatasets[ds]+rawpath_length-data_length, PIOFile_Structure_Datasets_Data) == 0)
+		rawpath_length = strlen(rawPath->path);
+		if (strcmp(rawPath->path+rawpath_length-data_length, PIOFile_Structure_Datasets_Data) == 0)
 			numberOfDatasets++;
+		rawPath = rawPath->next;
 	}
 	
 	// copy /dataset/**** path 
-	*pathsToDatasets = (char**) malloc(numberOfDatasets*sizeof(char*));
-	numberOfDatasets = 0;
-	for (ds=0; ds<rawNumberOfDatasets; ds++)
+	*pathsToDatasets = (char**) malloc(sizeof(char*)*numberOfDatasets);
+	rawPath = rawPaths;
+	ds = 0;
+	while (rawPath != NULL) 
 	{
-		rawpath_length = strlen(rawPathsToDatasets[ds]);
-		if (strcmp(rawPathsToDatasets[ds]+rawpath_length-data_length, PIOFile_Structure_Datasets_Data) == 0)
+		rawpath_length = strlen(rawPath->path);
+		if (strcmp(rawPath->path+rawpath_length-data_length, PIOFile_Structure_Datasets_Data) == 0)
 		{
-			(*pathsToDatasets)[numberOfDatasets] = (char*) malloc((rawpath_length-data_length)*sizeof(char));
-			memcpy((*pathsToDatasets)[numberOfDatasets], rawPathsToDatasets[ds], (rawpath_length-data_length-1)*sizeof(char));
-			(*pathsToDatasets)[numberOfDatasets][rawpath_length-data_length-1] = '\0';
-			numberOfDatasets++;
-		}		
+			(*pathsToDatasets)[ds] = (char*) malloc((rawpath_length-data_length)*sizeof(char));
+			rawPath->path[rawpath_length-data_length-1] = '\0';
+			sprintf((*pathsToDatasets)[ds], "%s", rawPath->path);
+			ds++;
+		}
+		rawPath = rawPath->next;
 	}
-	
-	for (ds=0; ds<rawNumberOfDatasets; ds++) { free(rawPathsToDatasets[ds]); rawPathsToDatasets[ds] = NULL; }
-	free(rawPathsToDatasets); rawPathsToDatasets = NULL;
-		
+	destroyList(rawPaths); rawPaths = NULL;
 	return numberOfDatasets;
 }
-

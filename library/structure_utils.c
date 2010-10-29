@@ -33,7 +33,32 @@ hid_t linkDatatype()
 	return tLink;
 }
 
+int lengthOfList( listOfPaths_t* list)
+{
+	if (list != NULL) 
+		return 1 + lengthOfList(list->next);
+	return 0;
+}
 
+listOfPaths_t* addCopyToList( listOfPaths_t* list, char* path)
+{
+	listOfPaths_t* new_element = (listOfPaths_t*) malloc(sizeof(listOfPaths_t));
+	new_element->path = (char*) malloc((strlen(path)+1)*sizeof(char));
+	sprintf(new_element->path, "%s", path);
+	new_element->next = list;
+	return new_element;
+}
+
+int destroyList( listOfPaths_t* list)
+{
+	if (list != NULL)
+	{
+		if (list->next != NULL) destroyList(list->next);
+		free(list->path);
+		free(list);
+	}
+	return 1;
+}
 
 int getTimesUsed(PIOTimeline pioTimeline)
 {
@@ -85,7 +110,7 @@ int decrementTimesUsed(PIOTimeline pioTimeline)
 	return times_used;
 }
 
-int listOfObjectsInGroup( hid_t group, H5G_obj_t filter, char*** objects_names)
+listOfPaths_t* listOfObjectsInGroup( hid_t group, H5G_obj_t filter)
 {
 	ERROR_SWITCH_INIT
 	
@@ -96,12 +121,13 @@ int listOfObjectsInGroup( hid_t group, H5G_obj_t filter, char*** objects_names)
 	int counter = 0; 
 	size_t size;
 	char* name = NULL;
+	listOfPaths_t* listOfPaths = NULL;
 	
 	// get number of links in group
 	ERROR_SWITCH_OFF
 	get_err = H5Gget_info(group, &groupInfo);
 	ERROR_SWITCH_ON
-	if (get_err < 0) return -1;
+	if (get_err < 0) return listOfPaths;
 	numberOfLinks = groupInfo.nlinks;
 	
 	// loop on all links in group
@@ -116,7 +142,7 @@ int listOfObjectsInGroup( hid_t group, H5G_obj_t filter, char*** objects_names)
 			ERROR_SWITCH_OFF
 			size = H5Lget_name_by_idx(group, ".", H5_INDEX_NAME, H5_ITER_INC, i, NULL, -1, H5P_DEFAULT);
 			ERROR_SWITCH_ON
-			if (size < 0) return counter;
+			if (size < 0) return listOfPaths;
 			
 			// get object name
 			// allocate with extra character for '\0'
@@ -127,44 +153,40 @@ int listOfObjectsInGroup( hid_t group, H5G_obj_t filter, char*** objects_names)
 			if (size < 0)
 			{
 				free(name);
-				return counter;
+				return listOfPaths;
 			}
 			// set final character '\0'
 			name[size+1] = '\0';
 			
-			// add it at the end of the list
-			(*objects_names) = (char **)realloc(*objects_names, (counter+1)*sizeof(char*));
-			(*objects_names)[counter] = (char *) malloc((size+2)* sizeof(char));
-			strcpy((*objects_names)[counter], name);
-			(*objects_names)[counter][size+1] = '\0';
-			free(name); 
+			// add it into the list
+			listOfPaths = addCopyToList(listOfPaths, name);
+			free(name); name = NULL;
 			
 			// update number of objects
 			counter++;
 		}
 	}
-	return counter;	
+	return listOfPaths;	
 }
 
-int listOfDatasetsInGroup( hid_t group, char*** datasets_names)
+listOfPaths_t* listOfDatasetsInGroup(hid_t group)
 {
-	return listOfObjectsInGroup(group, H5G_DATASET, datasets_names);
+	return listOfObjectsInGroup(group, H5G_DATASET);
 }
 
-int listOfGroupsInGroup( hid_t group, char*** groups_names)
+listOfPaths_t* listOfGroupsInGroup(hid_t group)
 {
-	return listOfObjectsInGroup(group, H5G_GROUP, groups_names);
+	return listOfObjectsInGroup(group, H5G_GROUP);
 }
 
-int recursiveListOfObjectsInGroup(hid_t group, H5G_obj_t filter, char*** paths, H5G_obj_t** type, int counter, char* current_path)
+int recursiveListOfObjectsInGroup(hid_t group, H5G_obj_t filter, listOfPaths_t** paths, int counter, char* current_path)
 {
-	char** datasets_names = NULL;
-	char** groups_names = NULL;
-	int datasets_count;
-	int groups_count;
-	int i;
+	listOfPaths_t* datasets_names = NULL;
+	listOfPaths_t* dataset_name = NULL;
+	listOfPaths_t* groups_names = NULL;
+	listOfPaths_t* group_name = NULL;
+
 	hid_t subgroup;
-	char* running_path;
 	
 	ERROR_SWITCH_INIT
 	
@@ -174,159 +196,122 @@ int recursiveListOfObjectsInGroup(hid_t group, H5G_obj_t filter, char*** paths, 
 	// get list of datasets if requested
 	if (filter == H5G_DATASET || filter == -1) 
 	{
-		datasets_count = listOfDatasetsInGroup(group, &datasets_names);
-		if (datasets_count > 0)
-		{
-			// extend list of paths
-			*paths = (char **) realloc(*paths, (running_counter+datasets_count)*sizeof(char*));
-			// extend list of types
-			*type = (H5G_obj_t *) realloc(*type, (running_counter+datasets_count)*sizeof(int));
-			
-			// loop on datasets
-			for (i=0; i<datasets_count; i++)
-			{
-				// save full path to dataset 
-				(*paths)[running_counter] = 
-				(char *) malloc((strlen(datasets_names[i])+strlen(current_path)+1) * sizeof(char));
-				sprintf((*paths)[running_counter], 
-						"%s%s", current_path, datasets_names[i]);
-				
-				// save type of path
-				(*type)[running_counter] = H5G_DATASET;
-				
-				// update running_counter
-				running_counter++;			
-			}
-		}
-		
-		// free memory
-		if ( datasets_names ) 
-		{
-			for (i=0; i<datasets_count; i++) free(datasets_names[i]);
-			free(datasets_names);
-		}
+		datasets_names = listOfDatasetsInGroup(group);
+		// loop on datasets
+		dataset_name = datasets_names;
+		while (dataset_name != NULL)
+		{				
+			// add dataset name at the end of current_path
+			char* path = (char*) malloc(sizeof(char)*(strlen(current_path)+strlen(dataset_name->path)+1));
+			sprintf(path, "%s%s", current_path, dataset_name->path);
+			// add resulting path to the list
+			*paths = addCopyToList(*paths, path);
+			free(path); path = NULL;
+			// go to next dataset
+			dataset_name = dataset_name->next;
+			// update running counter
+			running_counter++;			
+		}			
+		destroyList(datasets_names); datasets_names = NULL;	
 	}
-	
 	
 	// get list of groups
-	groups_count = listOfGroupsInGroup(group, &groups_names);
-	if (groups_count > 0)
+	groups_names = listOfGroupsInGroup(group);
+	// loop on groups
+	group_name = groups_names;
+	while (group_name != NULL) 
 	{
-		// loop on groups
-		for (i=0; i<groups_count; i++)
+		// add group name at the end of current_path
+		char* path = (char*) malloc(sizeof(char)*(strlen(current_path)+strlen(group_name->path)+2));
+		sprintf(path, "%s%s/", current_path, group_name->path);		
+		
+		if (filter == H5G_GROUP || filter == -1)
 		{
-			// add group in list of objects if requested
-			if (filter == H5G_GROUP || filter == -1)
-			{
-				// extend list of paths
-				*paths = (char **) realloc(*paths, (running_counter+1)*sizeof(char*));
-				// extend list of types
-				*type = (H5G_obj_t *) realloc(*type, (running_counter+1)*sizeof(int));
-				
-				// save full path to group
-				(*paths)[running_counter] = 
-				(char *) malloc((strlen(groups_names[i])+strlen(current_path)+2)* sizeof(char));
-				sprintf((*paths)[running_counter], 
-						"%s%s/", current_path, groups_names[i]);
-				
-				// save type of path
-				(*type)[running_counter] = H5G_GROUP;
-				
-				// update running_counter
-				running_counter++;
-			}
-			
-			// try to recursively dive into group
-			ERROR_SWITCH_OFF
-			subgroup = H5Gopen2(group, groups_names[i], H5P_DEFAULT);
-			ERROR_SWITCH_ON
-			if (subgroup < 0) continue;
-			
-			// set running_path
-			running_path = (char *) malloc((strlen(groups_names[i])+strlen(current_path)+2)* sizeof(char));
-			sprintf(running_path, 
-					"%s%s/", current_path, groups_names[i]);
-			
-			// recurse
-			running_counter = recursiveListOfObjectsInGroup(subgroup, filter, paths, type, running_counter, running_path);
-			// free running_path
-			free(running_path);
-			H5Gclose(subgroup);
+			// add resulting path to the list
+			*paths = addCopyToList(*paths, path);
+			// update running counter
+			running_counter++;			
 		}
+		
+		// try to recursively dive into group
+		ERROR_SWITCH_OFF
+		subgroup = H5Gopen2(group, group_name->path, H5P_DEFAULT);
+		ERROR_SWITCH_ON
+		if (subgroup < 0) continue;
+		
+		// recurse
+		running_counter = recursiveListOfObjectsInGroup(subgroup, filter, paths, running_counter, path);
+		H5Gclose(subgroup);
+
+		// free running path
+		free(path); path = NULL;
+		
+		// go to next group
+		group_name = group_name->next;
 	}
-	
-	// free memory
-	if ( groups_names ) 
-	{
-		for (i=0; i<groups_count; i++) free(groups_names[i]);
-		free(groups_names);
-	}
+	destroyList(groups_names); groups_names = NULL;
 	
 	return running_counter;
 }
 
-
-int allDatasetsInGroup(hid_t file,
-					   const char* path2group,
-					   char*** path)
+listOfPaths_t* allDatasetsInGroup(hid_t file, const char* path2group)
 {
 	
 	hid_t group;
-	H5G_obj_t *type = NULL;
 	int numberOfDatasets = -1;
+	listOfPaths_t* paths = NULL;
 	ERROR_SWITCH_INIT
 	
 	ERROR_SWITCH_OFF
 	group = H5Gopen2(file, path2group, H5P_DEFAULT);
 	ERROR_SWITCH_ON
-	if (group < 0) return -1;
+	if (group < 0) return NULL;
 	
-	numberOfDatasets = recursiveListOfObjectsInGroup(group, H5G_DATASET, path, &type, 0, "");
-	if (type) free(type); type = NULL;
+	numberOfDatasets = recursiveListOfObjectsInGroup(group, H5G_DATASET, &paths, 0, "");
 	H5Gclose(group);
 	
-	return numberOfDatasets;
+	return paths;
 }
 
 
-int allMatchingDatasetsInGroup(hid_t file,
-							   const char* path2group,
-							   const char* filter,
-							   char*** path)
-{
-	char** tofilter_path = NULL;
-	int numberOfDatasets = -1;
-	int numberOfMatchingDatasets = 0;
-	int ds;
-	
-	numberOfDatasets = allDatasetsInGroup(file, path2group, &tofilter_path);
-	if (numberOfDatasets < 0) return -1;
-	
-	int filter_length = strlen(filter);
-	int path_length;
-	
-	for (ds = 0; ds < numberOfDatasets; ds++)
-	{
-		path_length = strlen(tofilter_path[ds]);
-		if (strcmp(filter, tofilter_path[ds]+path_length-filter_length) == 0) numberOfMatchingDatasets++;
-	}
-	
-	*path = (char**) malloc(numberOfMatchingDatasets*sizeof(char*));
-	numberOfMatchingDatasets = 0;
-	for (ds = 0; ds < numberOfDatasets; ds++) 
-	{
-		path_length = strlen(tofilter_path[ds]);
-		if (strcmp(filter, tofilter_path[ds]+path_length-filter_length) == 0) 
-		{
-			(*path)[numberOfMatchingDatasets] = (char*) malloc((path_length+1)*sizeof(char));			
-			strncpy((*path)[numberOfMatchingDatasets], tofilter_path[ds], path_length); 
-			(*path)[numberOfMatchingDatasets][path_length] = '\0';
-			numberOfMatchingDatasets++;
-		}
-	}
-	
-	for (ds=0; ds<numberOfDatasets; ds++) free(tofilter_path[ds]);
-	free(tofilter_path);
-	
-	return numberOfMatchingDatasets;
-}
+//int allMatchingDatasetsInGroup(hid_t file,
+//							   const char* path2group,
+//							   const char* filter,
+//							   char*** path)
+//{
+//	char** tofilter_path = NULL;
+//	int numberOfDatasets = -1;
+//	int numberOfMatchingDatasets = 0;
+//	int ds;
+//	
+//	numberOfDatasets = allDatasetsInGroup(file, path2group, &tofilter_path);
+//	if (numberOfDatasets < 0) return -1;
+//	
+//	int filter_length = strlen(filter);
+//	int path_length;
+//	
+//	for (ds = 0; ds < numberOfDatasets; ds++)
+//	{
+//		path_length = strlen(tofilter_path[ds]);
+//		if (strcmp(filter, tofilter_path[ds]+path_length-filter_length) == 0) numberOfMatchingDatasets++;
+//	}
+//	
+//	*path = (char**) malloc(numberOfMatchingDatasets*sizeof(char*));
+//	numberOfMatchingDatasets = 0;
+//	for (ds = 0; ds < numberOfDatasets; ds++) 
+//	{
+//		path_length = strlen(tofilter_path[ds]);
+//		if (strcmp(filter, tofilter_path[ds]+path_length-filter_length) == 0) 
+//		{
+//			(*path)[numberOfMatchingDatasets] = (char*) malloc((path_length+1)*sizeof(char));			
+//			strncpy((*path)[numberOfMatchingDatasets], tofilter_path[ds], path_length); 
+//			(*path)[numberOfMatchingDatasets][path_length] = '\0';
+//			numberOfMatchingDatasets++;
+//		}
+//	}
+//	
+//	for (ds=0; ds<numberOfDatasets; ds++) free(tofilter_path[ds]);
+//	free(tofilter_path);
+//	
+//	return numberOfMatchingDatasets;
+//}

@@ -266,9 +266,25 @@ int pioCloseTimeline( PIOTimeline* pioTimeline )
 
 int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines)
 {
-	return allDatasetsInGroup(pioFile.identifier,
-							  PIOFile_Structure_Group_Timelines, 
-							  pathsToTimelines);
+	int tl = -1;
+	int numberOfTimelines = -1;
+	listOfPaths_t* paths = NULL;
+	listOfPaths_t* path = NULL;
+	paths = allDatasetsInGroup(pioFile.identifier, PIOFile_Structure_Group_Timelines);
+	numberOfTimelines = lengthOfList(paths);
+	
+	*pathsToTimelines = (char**) malloc(sizeof(char*)*numberOfTimelines);
+	path = paths;
+	tl = 0;
+	while (path != NULL) 
+	{
+		(*pathsToTimelines)[tl] = (char*) malloc(sizeof(char)*(strlen(path->path)+1));
+		sprintf((*pathsToTimelines)[tl], "%s", path->path);
+		tl++;
+		path = path->next;
+	}
+	destroyList(paths); paths = NULL;
+	return numberOfTimelines;
 }
 
 PIOTimeline pioGetTimeline(PIODataset pioDataset)

@@ -21,6 +21,14 @@ typedef struct {
 
 hid_t linkDatatype();
 
+typedef struct listOfPaths_s {
+    char* path;
+    struct listOfPaths_s *next;
+} listOfPaths_t;
+
+int lengthOfList( listOfPaths_t* list);
+listOfPaths_t* addCopyToList( listOfPaths_t* list, char* path );
+int destroyList( listOfPaths_t* list);
 
 int getTimesUsed(PIOTimeline pioTimeline);
 int incrementTimesUsed(PIOTimeline pioTimeline);
@@ -29,16 +37,15 @@ int decrementTimesUsed(PIOTimeline pioTimeline);
 /// \returns int
 ///		- number of datasets when successfull
 ///		- negative value otherwise
-int allDatasetsInGroup(hid_t file,
-					   const char* path2group,
-					   char*** path);
+listOfPaths_t* allDatasetsInGroup(hid_t file, const char* path2group);
 
-/// \returns int
-///		- number of matching datasets when successfull
-///		- negative value otherwise
-int allMatchingDatasetsInGroup(hid_t file,
-							   const char* path2group,
-							   const char* filter,
-							   char*** path);
-
+//
+///// \returns int
+/////		- number of matching datasets when successfull
+/////		- negative value otherwise
+//int allMatchingDatasetsInGroup(hid_t file,
+//							   const char* path2group,
+//							   const char* filter,
+//							   char*** path);
+//
 #endif
