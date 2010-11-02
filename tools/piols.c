@@ -16,7 +16,11 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "pinocchIO.h"
+
+
+#define PIOLS_PATH_MAX_LENGTH 40
 
 static int verbose_flag;
 static int timeline_flag = 1;
@@ -32,6 +36,29 @@ void usage(const char * path2tool)
 			"       --no-dataset\n"
 			"           Do not list datasets\n");
 	fflush(stdout);
+}
+
+void pretty_print(const char * path2dataset, const char * description)
+{
+	int pathLength = strlen(path2dataset);
+	//int descLength = strlen(description);
+	int dotsLength = PIOLS_PATH_MAX_LENGTH - pathLength;
+	int d;
+	
+	fprintf(stdout, "%s", path2dataset);
+	if (dotsLength > 2)
+	{
+		fprintf(stdout, " ");
+		for (d=0; d<dotsLength; d++) fprintf(stdout, ".");
+		fprintf(stdout, " ");
+	}
+	else
+	{
+		fprintf(stdout, "\n");
+		for (d=0; d<PIOLS_PATH_MAX_LENGTH-2; d++) fprintf(stdout, " ");
+		fprintf(stdout, "... ");
+	}
+	fprintf(stdout, "%s\n", description);
 }
 
 int main (int argc, char *const  argv[])
@@ -108,25 +135,25 @@ int main (int argc, char *const  argv[])
 		exit(-1);
 	}
 	
+	fprintf(stdout, "== Medium ==\n");
+	fprintf(stdout, "%s\n", pioFile.medium);
+	fflush(stdout);
+	
 	if (timeline_flag)
 	{
-		
 		char** timelines = NULL;
 		int numberOfTimelines = pioGetListOfTimelines(pioFile, &timelines);
 		int tl;
-		fprintf(stdout, "== Timelines ==\n");
+		fprintf(stdout, "== %d timeline(s) ==\n", numberOfTimelines);
 		for (tl = 0; tl<numberOfTimelines; tl++) 
 		{
-			fprintf(stdout, "%s", timelines[tl]);
 			PIOTimeline pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), timelines[tl]);
 			if (PIOTimelineIsInvalid(pioTimeline))
 			{
-				fprintf(stdout, " - ERROR - CANNOT OPEN TIMELINE\n");
-				fflush(stdout);
+				pretty_print(timelines[tl], "ERROR - CANNOT OPEN TIMELINE");
 				continue;
 			}
-			
-			fprintf(stdout, " %s\n", pioTimeline.description);
+			pretty_print(timelines[tl], pioTimeline.description);
 			pioCloseTimeline(&pioTimeline);
 		}
 		for (tl = 0; tl<numberOfTimelines; tl++) { free(timelines[tl]); timelines[tl] = NULL; }
@@ -139,19 +166,17 @@ int main (int argc, char *const  argv[])
 		char** datasets = NULL;
 		int numberOfDatasets = pioGetListOfDatasets(pioFile, &datasets);
 		int ds;
-		fprintf(stdout, "== %d datasets ==\n", numberOfDatasets);
+		fprintf(stdout, "== %d dataset(s) ==\n", numberOfDatasets);
 		
 		for (ds = 0; ds<numberOfDatasets; ds++) 
 		{
-			fprintf(stdout, "%s", datasets[ds]);
 			PIODataset pioDataset = pioOpenDataset(PIOMakeObject(pioFile), datasets[ds]);
 			if (PIODatasetIsInvalid(pioDataset))
 			{
-				fprintf(stdout, " - ERROR - CANNOT OPEN DATASET\n");
-				fflush(stdout);
+				pretty_print(datasets[ds], "ERROR - CANNOT OPEN DATASET");
 				continue;
 			}
-			fprintf(stdout, " %s\n", pioDataset.description);
+			pretty_print(datasets[ds], pioDataset.description);
 			pioCloseDataset(&pioDataset);
 		}
 		for (ds = 0; ds<numberOfDatasets; ds++) { free(datasets[ds]); datasets[ds] = NULL; }
