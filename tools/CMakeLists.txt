@@ -12,3 +12,8 @@ set(piodump_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
 target_link_libraries(piodump pinocchIO)
 install(TARGETS piodump RUNTIME DESTINATION bin)
 
+
+add_executable(pioversion pioversion.c)
+set(pioversion_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
+target_link_libraries(pioversion pinocchIO)
+install(TARGETS pioversion RUNTIME DESTINATION bin)
