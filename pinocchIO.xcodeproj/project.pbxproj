@@ -24,6 +24,7 @@
 			buildPhases = (
 			);
 			dependencies = (
+				28274076128174ED00E58030 /* PBXTargetDependency */,
 				283EF6E71271D4F2003F82A0 /* PBXTargetDependency */,
 				283EF6E51271D4EF003F82A0 /* PBXTargetDependency */,
 			);
@@ -45,6 +46,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		28274074128174DE00E58030 /* pioversion.c in Sources */ = {isa = PBXBuildFile; fileRef = 28274068128174B400E58030 /* pioversion.c */; };
 		282DD878126DDF7B007BA6F9 /* pIODataset.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD876126DDF7B007BA6F9 /* pIODataset.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		282DD8B4126EC999007BA6F9 /* pIODatatype.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD8B2126EC999007BA6F9 /* pIODatatype.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		282DD8FC126ED789007BA6F9 /* structure_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 282DD8FA126ED789007BA6F9 /* structure_utils.h */; };
@@ -76,6 +78,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		28274075128174ED00E58030 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 28274069128174BF00E58030 /* pioversion */;
+			remoteInfo = pioversion;
+		};
 		28304F2812685D29003292A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -142,6 +151,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		28274068128174B400E58030 /* pioversion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pioversion.c; sourceTree = "<group>"; };
+		28274072128174BF00E58030 /* pioversion */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pioversion; sourceTree = BUILT_PRODUCTS_DIR; };
 		282DD876126DDF7B007BA6F9 /* pIODataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIODataset.h; sourceTree = "<group>"; };
 		282DD877126DDF7B007BA6F9 /* pIODataset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIODataset.c; sourceTree = "<group>"; };
 		282DD8B2126EC999007BA6F9 /* pIODatatype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIODatatype.h; sourceTree = "<group>"; };
@@ -175,6 +186,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2827406E128174BF00E58030 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		28304EF212676DD6003292A5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -234,6 +252,7 @@
 				2895EB7112706C3E00CA5A76 /* piols */,
 				2895EBB912706D6500CA5A76 /* test_PIODataset */,
 				283EF6551271C912003F82A0 /* piodump */,
+				28274072128174BF00E58030 /* pioversion */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -278,6 +297,7 @@
 		2895EB6D12706C1A00CA5A76 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				28274068128174B400E58030 /* pioversion.c */,
 				2895EB3A127061E400CA5A76 /* piols.c */,
 				283EF64B1271C2E2003F82A0 /* piodump.c */,
 			);
@@ -309,6 +329,22 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		28274069128174BF00E58030 /* pioversion */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2827406F128174BF00E58030 /* Build configuration list for PBXNativeTarget "pioversion" */;
+			buildPhases = (
+				2827406C128174BF00E58030 /* Sources */,
+				2827406E128174BF00E58030 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = pioversion;
+			productName = piols;
+			productReference = 28274072128174BF00E58030 /* pioversion */;
+			productType = "com.apple.product-type.tool";
+		};
 		28304EF312676DD6003292A5 /* test_PIOFile */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 28304EF912676DFF003292A5 /* Build configuration list for PBXNativeTarget "test_PIOFile" */;
@@ -410,6 +446,7 @@
 				283EF6E11271D4E6003F82A0 /* tools */,
 				283EF6EC1271D516003F82A0 /* test */,
 				D2AAC0620554660B00DB518D /* pinocchIO */,
+				28274069128174BF00E58030 /* pioversion */,
 				2895EB7012706C3E00CA5A76 /* piols */,
 				283EF64C1271C912003F82A0 /* piodump */,
 				28304EF312676DD6003292A5 /* test_PIOFile */,
@@ -419,6 +456,14 @@
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2827406C128174BF00E58030 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				28274074128174DE00E58030 /* pioversion.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		28304EF112676DD6003292A5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -471,6 +516,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		28274076128174ED00E58030 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 28274069128174BF00E58030 /* pioversion */;
+			targetProxy = 28274075128174ED00E58030 /* PBXContainerItemProxy */;
+		};
 		28304F2912685D29003292A5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC0620554660B00DB518D /* pinocchIO */;
@@ -572,6 +622,10 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"VERSION=\\\"0.1.0\\\"",
+					"RELEASEDATE=\\\"2010-11-03\\\"",
+				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -590,6 +644,10 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"VERSION=\\\"0.1.0\\\"",
+					"RELEASEDATE=\\\"2010-11-03\\\"",
+				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -599,6 +657,38 @@
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
 				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Release;
+		};
+		28274070128174BF00E58030 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = pioversion;
+			};
+			name = Debug;
+		};
+		28274071128174BF00E58030 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = pioversion;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -806,6 +896,15 @@
 			buildConfigurations = (
 				1DEB914F08733D8E0010E9CD /* Debug */,
 				1DEB915008733D8E0010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2827406F128174BF00E58030 /* Build configuration list for PBXNativeTarget "pioversion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				28274070128174BF00E58030 /* Debug */,
+				28274071128174BF00E58030 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
