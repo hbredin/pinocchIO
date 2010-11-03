@@ -8,7 +8,7 @@ include_directories(${pinocchIO_INCLUDE_DIRS})
 
 add_library (pinocchIO SHARED ${pinocchIO_SOURCES} ${pinocchIO_HEADERS})
 
-set_target_properties(pinocchIO PROPERTIES VERSION ${PINOCCHIO_LIBVERSION} SOVERSION ${PINOCCHIO_API_VERSION})
+set_target_properties(pinocchIO PROPERTIES VERSION ${PINOCCHIO_VERSION} SOVERSION ${PINOCCHIO_API_VERSION})
 set_target_properties(pinocchIO PROPERTIES LINKER_LANGUAGE C)
 
 target_link_libraries(pinocchIO ${pinocchIO_LIBS})
