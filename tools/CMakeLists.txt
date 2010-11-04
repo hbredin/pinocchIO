@@ -12,6 +12,10 @@ set(piodump_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
 target_link_libraries(piodump pinocchIO)
 install(TARGETS piodump RUNTIME DESTINATION bin)
 
+add_executable(ascii2pio ascii2pio.c fgetln.c)
+set(ascii2pio_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
+target_link_libraries(ascii2pio pinocchIO)
+install(TARGETS ascii2pio RUNTIME DESTINATION bin)
 
 add_executable(pioversion pioversion.c)
 set(pioversion_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
