@@ -27,6 +27,7 @@
 				28274076128174ED00E58030 /* PBXTargetDependency */,
 				283EF6E71271D4F2003F82A0 /* PBXTargetDependency */,
 				283EF6E51271D4EF003F82A0 /* PBXTargetDependency */,
+				28EF86C41282BDAB0031E147 /* PBXTargetDependency */,
 			);
 			name = tools;
 			productName = tools;
@@ -75,6 +76,7 @@
 		2895EB7712706C4B00CA5A76 /* piols.c in Sources */ = {isa = PBXBuildFile; fileRef = 2895EB3A127061E400CA5A76 /* piols.c */; };
 		2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304EED12676DB5003292A5 /* test_PIOFile.c */; };
 		2895EBB512706D6500CA5A76 /* libpinocchIO.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libpinocchIO.dylib */; };
+		28FC1CAB1281D6560039E4B5 /* ascii2pio.c in Sources */ = {isa = PBXBuildFile; fileRef = 282740B512817B0D00E58030 /* ascii2pio.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,7 +84,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 28274069128174BF00E58030 /* pioversion */;
+			remoteGlobalIDString = 28274069128174BF00E58030;
 			remoteInfo = pioversion;
 		};
 		28304F2812685D29003292A5 /* PBXContainerItemProxy */ = {
@@ -148,11 +150,26 @@
 			remoteGlobalIDString = D2AAC0620554660B00DB518D;
 			remoteInfo = pinocchIO;
 		};
+		28EF86C31282BDAB0031E147 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 28FC1CA01281D60C0039E4B5 /* ascii2pio */;
+			remoteInfo = ascii2pio;
+		};
+		28FC1CA21281D60C0039E4B5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D;
+			remoteInfo = pinocchIO;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		28274068128174B400E58030 /* pioversion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pioversion.c; sourceTree = "<group>"; };
 		28274072128174BF00E58030 /* pioversion */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pioversion; sourceTree = BUILT_PRODUCTS_DIR; };
+		282740B512817B0D00E58030 /* ascii2pio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ascii2pio.c; sourceTree = "<group>"; };
 		282DD876126DDF7B007BA6F9 /* pIODataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIODataset.h; sourceTree = "<group>"; };
 		282DD877126DDF7B007BA6F9 /* pIODataset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIODataset.c; sourceTree = "<group>"; };
 		282DD8B2126EC999007BA6F9 /* pIODatatype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIODatatype.h; sourceTree = "<group>"; };
@@ -182,6 +199,7 @@
 		2895EB3A127061E400CA5A76 /* piols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = piols.c; sourceTree = "<group>"; };
 		2895EB7112706C3E00CA5A76 /* piols */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = piols; sourceTree = BUILT_PRODUCTS_DIR; };
 		2895EBB912706D6500CA5A76 /* test_PIODataset */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_PIODataset; sourceTree = BUILT_PRODUCTS_DIR; };
+		28FC1CA91281D60C0039E4B5 /* ascii2pio */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ascii2pio; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2AAC0630554660B00DB518D /* libpinocchIO.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpinocchIO.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -223,6 +241,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		28FC1CA51281D60C0039E4B5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D289988505E68E00004EDB86 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -253,6 +278,7 @@
 				2895EBB912706D6500CA5A76 /* test_PIODataset */,
 				283EF6551271C912003F82A0 /* piodump */,
 				28274072128174BF00E58030 /* pioversion */,
+				28FC1CA91281D60C0039E4B5 /* ascii2pio */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -297,6 +323,7 @@
 		2895EB6D12706C1A00CA5A76 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				282740B512817B0D00E58030 /* ascii2pio.c */,
 				28274068128174B400E58030 /* pioversion.c */,
 				2895EB3A127061E400CA5A76 /* piols.c */,
 				283EF64B1271C2E2003F82A0 /* piodump.c */,
@@ -413,6 +440,23 @@
 			productReference = 2895EBB912706D6500CA5A76 /* test_PIODataset */;
 			productType = "com.apple.product-type.tool";
 		};
+		28FC1CA01281D60C0039E4B5 /* ascii2pio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 28FC1CA61281D60C0039E4B5 /* Build configuration list for PBXNativeTarget "ascii2pio" */;
+			buildPhases = (
+				28FC1CA31281D60C0039E4B5 /* Sources */,
+				28FC1CA51281D60C0039E4B5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				28FC1CA11281D60C0039E4B5 /* PBXTargetDependency */,
+			);
+			name = ascii2pio;
+			productName = piols;
+			productReference = 28FC1CA91281D60C0039E4B5 /* ascii2pio */;
+			productType = "com.apple.product-type.tool";
+		};
 		D2AAC0620554660B00DB518D /* pinocchIO */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB914A08733D8E0010E9CD /* Build configuration list for PBXNativeTarget "pinocchIO" */;
@@ -451,6 +495,7 @@
 				283EF64C1271C912003F82A0 /* piodump */,
 				28304EF312676DD6003292A5 /* test_PIOFile */,
 				2895EBAF12706D6500CA5A76 /* test_PIODataset */,
+				28FC1CA01281D60C0039E4B5 /* ascii2pio */,
 			);
 		};
 /* End PBXProject section */
@@ -493,6 +538,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		28FC1CA31281D60C0039E4B5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				28FC1CAB1281D6560039E4B5 /* ascii2pio.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -565,6 +618,16 @@
 			isa = PBXTargetDependency;
 			target = D2AAC0620554660B00DB518D /* pinocchIO */;
 			targetProxy = 2895EBB112706D6500CA5A76 /* PBXContainerItemProxy */;
+		};
+		28EF86C41282BDAB0031E147 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 28FC1CA01281D60C0039E4B5 /* ascii2pio */;
+			targetProxy = 28EF86C31282BDAB0031E147 /* PBXContainerItemProxy */;
+		};
+		28FC1CA11281D60C0039E4B5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC0620554660B00DB518D /* pinocchIO */;
+			targetProxy = 28FC1CA21281D60C0039E4B5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -879,6 +942,38 @@
 			};
 			name = Release;
 		};
+		28FC1CA71281D60C0039E4B5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lpinocchIO";
+				PREBINDING = NO;
+				PRODUCT_NAME = ascii2pio;
+			};
+			name = Debug;
+		};
+		28FC1CA81281D60C0039E4B5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lpinocchIO";
+				PREBINDING = NO;
+				PRODUCT_NAME = ascii2pio;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -968,6 +1063,15 @@
 			buildConfigurations = (
 				2895EBB712706D6500CA5A76 /* Debug */,
 				2895EBB812706D6500CA5A76 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		28FC1CA61281D60C0039E4B5 /* Build configuration list for PBXNativeTarget "ascii2pio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				28FC1CA71281D60C0039E4B5 /* Debug */,
+				28FC1CA81281D60C0039E4B5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
