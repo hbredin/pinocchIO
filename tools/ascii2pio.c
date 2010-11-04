@@ -13,12 +13,15 @@
  @discussion 
  */
 
-#include <pinocchIO/pinocchIO.h>
+#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <getopt.h>
-#include <time.h>
+#include "pinocchIO.h"
+
+#ifndef __APPLE__
+#include "fgetln.h"
+#endif
 
 #define DEBUG_LINE fprintf(stderr, "Line %d\n", __LINE__); fflush(stderr);
 
@@ -397,12 +400,7 @@ int main (int argc, char *const  argv[])
 		if (string_flag)
 		{
 			strings = (char**) malloc(ntimeranges*sizeof(char*));
-			readStringDataset(in_ascii, ntimeranges, &strings);
-			
-			for (lineId=0; lineId<ntimeranges; lineId++) {
-				fprintf(stdout, "%s\n", strings[lineId]);
-			}
-			
+			readStringDataset(in_ascii, ntimeranges, &strings);			
 		}
 		else
 		{
