@@ -33,7 +33,7 @@ void usage(const char * path2tool)
 			"           Dump dataset at PATH\n"
 			"       -s, --timestamp\n"
 			"           Show timestamps\n"
-			"           --text\n",
+			"           --text\n"
 			"           Display char as text\n");
 	fflush(stdout);
 }
