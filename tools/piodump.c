@@ -16,9 +16,11 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "pinocchIO.h"
 
-static int verbose_flag;
+static int verbose_flag = 0;
+static int string_flag = 0;
 
 void usage(const char * path2tool)
 {
@@ -30,7 +32,9 @@ void usage(const char * path2tool)
 			"       -d PATH, --dataset=PATH\n"
 			"           Dump dataset at PATH\n"
 			"       -s, --timestamp\n"
-			"           Show timestamps\n");
+			"           Show timestamps\n"
+			"           --text\n",
+			"           Display char as text\n");
 	fflush(stdout);
 }
 
@@ -48,6 +52,7 @@ int main (int argc, char *const  argv[])
 	float* buffer_float;
 	double* buffer_double;
 	char* buffer_char;
+	char* string = NULL;
 	
 	int numberOfVectors; // number of vector for each timerange
 	int n; // vector counter
@@ -66,6 +71,7 @@ int main (int argc, char *const  argv[])
 			{"timeline", required_argument, 0, 't'},
 			{"dataset",  required_argument, 0, 'd'},
 			{"timestamp", no_argument,      0, 's'},
+			{"text",      no_argument,      &string_flag, 1},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -200,35 +206,53 @@ int main (int argc, char *const  argv[])
 				break;				
 			}
 			
-						
-			for (n=0; n<numberOfVectors; n++)
-			{				
+			if (string_flag & (pioDatatype.type==PINOCCHIO_TYPE_CHAR) & (pioDatatype.dimension == 1))
+			{
 				if (timestamp_flag)
 				{
 					fprintf(stdout, "%lf %lf | ", 
 							(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
 							(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
 				}
-				for (d=0; d<pioDatatype.dimension; d++)
-				{					
-					switch (pioDatatype.type) {
-						case PINOCCHIO_TYPE_INT:
-							fprintf(stdout, "%d ", buffer_int[n*pioDatatype.dimension+d]);
-							break;
-						case PINOCCHIO_TYPE_FLOAT:
-							fprintf(stdout, "%f ", buffer_float[n*pioDatatype.dimension+d]);
-							break;
-						case PINOCCHIO_TYPE_DOUBLE:
-							fprintf(stdout, "%lf ", buffer_double[n*pioDatatype.dimension+d]);
-							break;
-						case PINOCCHIO_TYPE_CHAR:
-							fprintf(stdout, "%c", buffer_char[n*pioDatatype.dimension+d]);
-							break;
-						default:
-							break;
+
+				string = (char*) malloc((numberOfVectors+1)*sizeof(char*));
+				memcpy(string, buffer_char, numberOfVectors);
+				string[numberOfVectors] = '\0';
+				fprintf(stdout, "%s\n", string);
+				free(string);
+			}
+			else
+			{
+				for (n=0; n<numberOfVectors; n++)
+				{				
+					if (timestamp_flag)
+					{
+						fprintf(stdout, "%lf %lf | ", 
+								(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
+								(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
 					}
+					
+					for (d=0; d<pioDatatype.dimension; d++)
+					{					
+						switch (pioDatatype.type) {
+							case PINOCCHIO_TYPE_INT:
+								fprintf(stdout, "%d ", buffer_int[n*pioDatatype.dimension+d]);
+								break;
+							case PINOCCHIO_TYPE_FLOAT:
+								fprintf(stdout, "%f ", buffer_float[n*pioDatatype.dimension+d]);
+								break;
+							case PINOCCHIO_TYPE_DOUBLE:
+								fprintf(stdout, "%lf ", buffer_double[n*pioDatatype.dimension+d]);
+								break;
+							case PINOCCHIO_TYPE_CHAR:
+								fprintf(stdout, "%c", buffer_char[n*pioDatatype.dimension+d]);
+								break;
+							default:
+								break;
+						}
+					}
+					fprintf(stdout, "\n");
 				}
-				fprintf(stdout, "\n");
 			}
 		}
 		
