@@ -155,7 +155,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 28FC1CA01281D60C0039E4B5 /* ascii2pio */;
+			remoteGlobalIDString = 28FC1CA01281D60C0039E4B5;
 			remoteInfo = ascii2pio;
 		};
 		28FC1CA21281D60C0039E4B5 /* PBXContainerItemProxy */ = {
@@ -484,7 +484,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB914E08733D8E0010E9CD /* Build configuration list for PBXProject "pinocchIO" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* pinocchIO2 */;
 			projectDirPath = "";
 			projectRoot = "";
