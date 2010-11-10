@@ -45,20 +45,8 @@ int getLink(PIODataset pioDataset, int timerangeIndex, link_t* link)
 	return 1;
 }
 
-int pioReallocBuffer(PIODataset pioDataset, int timerangeIndex,
-					 void** buffer, PIODatatype datatype)
-{
-	link_t link = {-1, -1};
-	
-	if (getLink(pioDataset, timerangeIndex, &link)<0) return -1;
-	(*buffer) = realloc(*buffer, link.number*H5Tget_size(datatype.identifier));
-	if ((*buffer) == NULL) return -1;
-	
-	return 1;
-}
-
-int pioRead(PIODataset pioDataset, int timerangeIndex, 
-			void* buffer, PIODatatype dataType)
+int pioRead(PIODataset* pioDataset, int timerangeIndex, 
+			PIODatatype pioDatatype, void** buffer)
 {
 	ERROR_SWITCH_INIT
 	herr_t read_err;
@@ -70,22 +58,49 @@ int pioRead(PIODataset pioDataset, int timerangeIndex,
 	
 	hid_t dataspaceForData = -1;
 	hid_t bufferDataspaceForData = -1;
-	
-	if (getLink(pioDataset, timerangeIndex, &link)<0) return -1;
+    size_t new_buffer_size = -1;
+
+	if (getLink(*pioDataset, timerangeIndex, &link)<0) return -1;
+    
+    // 
+    if (link.number == 0) return 0; 
+    
+    // realloc internal buffer if necessary
+    new_buffer_size = link.number*H5Tget_size(pioDatatype.identifier);
+    if (new_buffer_size > pioDataset->buffer_size)
+    {
+        pioDataset->buffer = realloc(pioDataset->buffer, new_buffer_size);
+        if (pioDataset->buffer == NULL) 
+        {
+            pioDataset->buffer_size = 0;
+            return -1;
+        }
+        pioDataset->buffer_size = new_buffer_size;
+    }
 	
 	// read dataset
 	position[0] = (hsize_t)(link.position);
 	number[0] = (hsize_t)(link.number);
-	dataspaceForData = H5Dget_space(pioDataset.identifier);
+	dataspaceForData = H5Dget_space(pioDataset->identifier);
 	H5Sselect_hyperslab(dataspaceForData, H5S_SELECT_SET, position, NULL, number, NULL);
 	bufferDataspaceForData = H5Screate_simple(1, number, NULL);
 	ERROR_SWITCH_OFF
-	read_err = H5Dread(pioDataset.identifier, dataType.identifier, bufferDataspaceForData, dataspaceForData, H5P_DEFAULT, buffer);
+	read_err = H5Dread(pioDataset->identifier, pioDatatype.identifier, 
+                       bufferDataspaceForData, dataspaceForData, H5P_DEFAULT, pioDataset->buffer);
 	ERROR_SWITCH_ON
 	H5Sclose(bufferDataspaceForData);
 	H5Sclose(dataspaceForData);
 	if (read_err < 0) return -1;
 	
+    *buffer = pioDataset->buffer;
+    
 	return link.number;
+}
+
+int pioReadNumber(PIODataset pioDataset, int timerangeIndex)
+{
+	link_t link = {-1, -1};	
+	if (getLink(pioDataset, timerangeIndex, &link)<0) return -1;
+    return link.number;    
 }
 

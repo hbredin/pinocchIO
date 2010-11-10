@@ -186,26 +186,19 @@ int main (int argc, char *const  argv[])
 		
 		for (tr=0; tr<pioDataset.ntimeranges; tr++)
 		{
-			if (pioReallocBuffer(pioDataset, tr, &buffer, pioDatatype) < 0)
-			{
-				fprintf(stderr, "Error. Cannot realloc buffer for timerange #%d\n", tr);
-				fflush(stderr);
-				break;
-			}
-
-			buffer_int = (int*)buffer;
-			buffer_float = (float*)buffer;
-			buffer_double = (double*)buffer;
-			buffer_char = (char*)buffer;			
-			
-			numberOfVectors = pioRead(pioDataset, tr, buffer, pioDatatype);
+			numberOfVectors = pioRead(&pioDataset, tr, pioDatatype, &buffer);
 			if (numberOfVectors < 0)
 			{
 				fprintf(stderr, "Error. Cannot read dataset for timerange #%d\n", tr);
 				fflush(stderr);
 				break;				
 			}
-			
+
+            buffer_int = (int*)buffer;
+			buffer_float = (float*)buffer;
+			buffer_double = (double*)buffer;
+			buffer_char = (char*)buffer;			            
+            
 			if (string_flag & (pioDatatype.type==PINOCCHIO_TYPE_CHAR) & (pioDatatype.dimension == 1))
 			{
 				if (timestamp_flag)
@@ -259,7 +252,6 @@ int main (int argc, char *const  argv[])
 		pioCloseDatatype(&pioDatatype);
 		pioCloseTimeline(&pioTimeline);
 		pioCloseDataset(&pioDataset);
-		free(buffer);
 	}
 	
 	if (timeline_path)

@@ -13,10 +13,10 @@
 
 #include "pIOTypes.h"
 
-int pioReallocBuffer(PIODataset pioDataset, int timerangeIndex,
-					 void** buffer, PIODatatype datatype);
+int pioRead(PIODataset* pioDataset, int timerangeIndex, 
+            PIODatatype dataType, void** buffer);
+#define pioReadData pioRead
 
-int pioRead(PIODataset pioDataset, int timerangeIndex, 
-			 void* buffer, PIODatatype dataType);
+int pioReadNumber(PIODataset pioDataset, int timerangeIndex);
 
 #endif
