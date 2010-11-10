@@ -121,9 +121,30 @@ typedef struct {
 	char* description;
 	int stored; // number of stored elements
 	int ntimeranges; // number of timeranges in dataset timeline ( = extent of link dataset)
+    void* buffer;
+    size_t buffer_size;
 } PIODataset;
 
-#define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL, -1, -1})
+#define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL, -1, -1, NULL, 0})
+
+/// pinocchIO server
+typedef struct {
+    int nfiles;
+    char** files;
+    char* dataset;
+    int* ntimeranges;
+    int* stored;
+    PIODatatype datatype;
+    
+    int         current_file_index;
+    PIOFile     current_file;
+    
+    int         current_timerange_index;
+    PIODataset  current_dataset;
+    PIOTimeline current_timeline;    
+} PIOServer;
+
+#define PIOServerInvalid ((PIOServer) {-1, NULL, NULL, NULL, NULL, PIODatatypeInvalid, -1, PIOFileInvalid, -1, PIODatasetInvalid, PIOTimelineInvalid})
 
 
 #endif

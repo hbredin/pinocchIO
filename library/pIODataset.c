@@ -172,6 +172,9 @@ PIODataset pioNewDataset(PIOFile pioFile,
 	pioDataset.stored = 0;
 	pioDataset.ntimeranges = monoDimensionalDatasetExtent(pioDataset.link_identifier);
 	
+    pioDataset.buffer = NULL;
+    pioDataset.buffer_size = 0;
+    
 	return pioDataset;
 }
 
@@ -208,6 +211,10 @@ PIODataset pioOpenDataset(PIOObject pioObject, const char* path)
 	// get dimension of link dataset
 	pioDataset.ntimeranges = monoDimensionalDatasetExtent(pioDataset.link_identifier);
 	
+    // internal read buffer
+    pioDataset.buffer = NULL;
+    pioDataset.buffer_size = 0;
+    
 	// store path to dataset
 	pioDataset.path = (char*) malloc((strlen(path)+1)*sizeof(char));
 	strncpy( pioDataset.path, path, strlen(path));
@@ -245,12 +252,17 @@ int pioCloseDataset(PIODataset* pioDataset)
 	pioDataset->stored = -1;
 	pioDataset->ntimeranges = -1;
 	
+    if (pioDataset->buffer) free(pioDataset->buffer);
+    pioDataset->buffer = NULL;
+    
+    pioDataset->buffer_size = 0;
+    
 	if (H5Dclose(pioDataset->identifier) < 0) return 0;
 	pioDataset->identifier = -1;
 	
 	if (H5Dclose(pioDataset->link_identifier) < 0) return 0;
 	pioDataset->link_identifier = -1;
-	
+    
 	return 1;
 }
 
