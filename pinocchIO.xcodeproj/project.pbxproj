@@ -73,6 +73,8 @@
 		283EF6351271AF3D003F82A0 /* pIORead.h in Headers */ = {isa = PBXBuildFile; fileRef = 283EF6331271AF3D003F82A0 /* pIORead.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		283EF6361271AF3D003F82A0 /* pIORead.c in Sources */ = {isa = PBXBuildFile; fileRef = 283EF6341271AF3D003F82A0 /* pIORead.c */; };
 		283EF6571271C935003F82A0 /* piodump.c in Sources */ = {isa = PBXBuildFile; fileRef = 283EF64B1271C2E2003F82A0 /* piodump.c */; };
+		28758C20128ACE5F004606E6 /* pIOServer.c in Sources */ = {isa = PBXBuildFile; fileRef = 28074BFB1289CEEC0042E4D5 /* pIOServer.c */; };
+		28758C21128ACE68004606E6 /* pIOServer.h in Headers */ = {isa = PBXBuildFile; fileRef = 28074BFA1289CEEC0042E4D5 /* pIOServer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2895EB7712706C4B00CA5A76 /* piols.c in Sources */ = {isa = PBXBuildFile; fileRef = 2895EB3A127061E400CA5A76 /* piols.c */; };
 		2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304EED12676DB5003292A5 /* test_PIOFile.c */; };
 		2895EBB512706D6500CA5A76 /* libpinocchIO.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libpinocchIO.dylib */; };
@@ -168,6 +170,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		28074BFA1289CEEC0042E4D5 /* pIOServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pIOServer.h; sourceTree = "<group>"; };
+		28074BFB1289CEEC0042E4D5 /* pIOServer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIOServer.c; sourceTree = "<group>"; };
 		28274068128174B400E58030 /* pioversion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pioversion.c; sourceTree = "<group>"; };
 		28274072128174BF00E58030 /* pioversion */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pioversion; sourceTree = BUILT_PRODUCTS_DIR; };
 		282740B512817B0D00E58030 /* ascii2pio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ascii2pio.c; sourceTree = "<group>"; };
@@ -310,6 +314,8 @@
 				283EF53E12718ACA003F82A0 /* pIOWrite.c */,
 				283EF6331271AF3D003F82A0 /* pIORead.h */,
 				283EF6341271AF3D003F82A0 /* pIORead.c */,
+				28074BFA1289CEEC0042E4D5 /* pIOServer.h */,
+				28074BFB1289CEEC0042E4D5 /* pIOServer.c */,
 			);
 			path = library;
 			sourceTree = "<group>";
@@ -353,6 +359,7 @@
 				282DD8FC126ED789007BA6F9 /* structure_utils.h in Headers */,
 				283EF53F12718ACA003F82A0 /* pIOWrite.h in Headers */,
 				283EF6351271AF3D003F82A0 /* pIORead.h in Headers */,
+				28758C21128ACE68004606E6 /* pIOServer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -574,6 +581,7 @@
 				282DDB13126F2F6D007BA6F9 /* pIODataset.c in Sources */,
 				283EF54012718ACA003F82A0 /* pIOWrite.c in Sources */,
 				283EF6361271AF3D003F82A0 /* pIORead.c in Sources */,
+				28758C20128ACE5F004606E6 /* pIOServer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -697,8 +705,8 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\\\"0.1.0\\\"",
-					"RELEASEDATE=\\\"2010-11-03\\\"",
+					"VERSION=\\\"0.2.0\\\"",
+					"RELEASEDATE=\\\"2010-11-10\\\"",
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
