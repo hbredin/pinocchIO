@@ -13,6 +13,7 @@
 #include "pIOTypes.h"
 
 #define PIOFileIsInvalid PIOObjectIsInvalid 
+#define PIOFileIsValid   PIOObjectIsValid
 
 #define PIOFile_Structure_Group_Timelines "timeline"
 #define PIOFile_Structure_Group_Datasets  "dataset"
