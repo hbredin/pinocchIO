@@ -20,6 +20,7 @@ set(CMAKE_C_FLAGS_DEBUG "-DDEBUG -DBZ_DEBUG -g2" CACHE STRING "C DEBUG FLAGS" FO
 add_definitions(-Wno-write-strings)
 
 find_package(HDF5 REQUIRED)
+find_package(LIBCONFIG REQUIRED)
 
 # install paths
 set(CMAKE_INSTALL_BINDIR bin CACHE PATH "Output directory for programs")
