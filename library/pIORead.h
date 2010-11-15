@@ -13,10 +13,20 @@
 
 #include "pIOTypes.h"
 
-int pioRead(PIODataset* pioDataset, int timerangeIndex, 
-            PIODatatype dataType, void** buffer);
-#define pioReadData pioRead
+int pioReadData(PIODataset* pioDataset, 
+                int timerangeIndex, 
+                PIODatatype pioDatatype, 
+                void** buffer);
+#define pioRead pioReadData
 
-int pioReadNumber(PIODataset pioDataset, int timerangeIndex);
+int pioReadNumber(PIODataset pioDataset, 
+                  int timerangeIndex);
+
+// 2 steps usage:
+//   - already_allocated_buffer = malloc(pioDumpDataset(pioDataset, pioDatatype, NULL))
+//   - number = pioDumpDataset(pioDataset, pioDatatype, already_allocated_buffer)
+int pioDumpDataset(PIODataset* pioDataset, 
+                   PIODatatype pioDatatype, 
+                   void* already_allocated_buffer);
 
 #endif

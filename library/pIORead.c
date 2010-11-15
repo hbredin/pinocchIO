@@ -10,6 +10,7 @@
 #include "pIORead.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "pIODataset.h"
 #include "structure_utils.h"
@@ -45,8 +46,8 @@ int getLink(PIODataset pioDataset, int timerangeIndex, link_t* link)
 	return 1;
 }
 
-int pioRead(PIODataset* pioDataset, int timerangeIndex, 
-			PIODatatype pioDatatype, void** buffer)
+int pioReadData(PIODataset* pioDataset, int timerangeIndex, 
+                PIODatatype pioDatatype, void** buffer)
 {
 	ERROR_SWITCH_INIT
 	herr_t read_err;
@@ -103,4 +104,60 @@ int pioReadNumber(PIODataset pioDataset, int timerangeIndex)
 	if (getLink(pioDataset, timerangeIndex, &link)<0) return -1;
     return link.number;    
 }
+
+int pioDumpDataset(PIODataset* pioDataset, 
+                   PIODatatype pioDatatype, 
+                   void* already_allocated_buffer)
+{
+    int tr = 0;
+    
+    int tmp_number = -1;
+    int number = 0;
+
+    size_t tmp_size = -1;
+    size_t size = 0;
+    void* tmp_buffer = NULL;
+    
+    if (already_allocated_buffer)
+    {
+        for (tr=0; tr<pioDataset->ntimeranges; tr++)
+        {
+            // read data for timerange tr
+            tmp_number = pioReadData(pioDataset, tr, pioDatatype, &tmp_buffer);
+            if (tmp_number < 0) return -1; // stop if something bad happened
+            
+            // deduce buffer size from number of read data
+            tmp_size = tmp_number * H5Tget_size(pioDatatype.identifier);
+            
+            // copy buffer at correct position
+            memcpy(already_allocated_buffer+size, tmp_buffer, tmp_size);
+            
+            // update position in output buffer
+            size = size + tmp_size;
+            
+            // update total number of read data
+            number = number + tmp_number;
+        }
+    }
+    else 
+    {
+        for (tr=0; tr<pioDataset->ntimeranges; tr++)
+        {
+            // read number of data for timerange tr
+            tmp_number = pioReadNumber(*pioDataset, tr);
+            if (tmp_number < 0) return -1; // stop if something bad happened
+                        
+            // update total number of data
+            number = number + tmp_number;
+        }
+        
+        // deduce buffer size from number of data
+        size = number * H5Tget_size(pioDatatype.identifier);
+        
+        return size;
+    }
+    
+    return number;
+}
+
 
