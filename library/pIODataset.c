@@ -232,7 +232,7 @@ PIODataset pioOpenDataset(PIOObject pioObject, const char* path)
 	storage = H5Aget_storage_size(attr); H5Aclose(attr);
 	version = (char*)malloc( storage + sizeof(char));
 	H5LTget_attribute_string(pioDataset.identifier, ".", PIOAttribute_Version, version);
-	if (strcmp(version, PINOCCHIO_VERSION)!=0)
+	if (strcmp(version, PINOCCHIO_VERSION)>0)
 		fprintf(stdout, 
 				"WARNING: pinocchIO versions do not match (you: %s, dataset: %s)\n",
 				PINOCCHIO_VERSION, version);
