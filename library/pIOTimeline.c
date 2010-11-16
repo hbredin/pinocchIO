@@ -73,9 +73,12 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
 	
 	// check if timeranges are sorted in chronological order
 	for (t=1; t<numberOfTimeRanges; t++)
-		if (pioCompareTimeRanges(timeranges[t-1], timeranges[t]) != PINOCCHIO_TIMERANGE_COMPARISON_ASCENDING)
-			return PIOTimelineInvalid;
-	
+		if (pioCompareTimeRanges(timeranges[t-1], timeranges[t]) == PINOCCHIO_TIMERANGE_COMPARISON_DESCENDING)
+        {
+            fprintf(stderr, "Timeranges should be sorted in chronological order (see timerange %d).\n", t+1);
+			fflush(stderr);
+            return PIOTimelineInvalid;
+        }
 	// get internal path
 	internalPathToTimeline(path, &internalPath);
 	
