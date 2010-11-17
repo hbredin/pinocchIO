@@ -145,7 +145,7 @@ PIOTimelineComparison pioCompareTimeLines (PIOTimeRange* tr1, int n1, PIOTimeRan
 		// switch roles of tr1 and tr2
 		result = pioCompareTimeLines( tr2, n2, tr1, n1 );
 		// result can be either PINOCCHIO_TIMELINE_SUBSET or PINOCCHIO_TIMELINE_OTHER
-		if (( result = PINOCCHIO_TIMELINE_COMPARISON_SUBSET ))
+		if (result == PINOCCHIO_TIMELINE_COMPARISON_SUBSET)
 			result = PINOCCHIO_TIMELINE_COMPARISON_SUPERSET;
 	}
 	else if (n1 == n2)
