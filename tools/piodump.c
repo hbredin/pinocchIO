@@ -154,7 +154,7 @@ int main (int argc, char *const  argv[])
 		PIODataset pioDataset = pioOpenDataset(PIOMakeObject(pioFile), dataset_path);
 		if (PIODatasetIsInvalid(pioDataset)) 
 		{
-			fprintf(stderr, "Cannot open dataset %s.\n", dataset_path);
+			fprintf(stderr, "Cannot open dataset %s in file %s.\n", dataset_path, pinocchio_file);
 			fflush(stderr);
 			pioCloseFile(&pioFile);
 			exit(-1);
@@ -163,7 +163,7 @@ int main (int argc, char *const  argv[])
 		PIOTimeline pioTimeline = pioGetTimeline(pioDataset);
 		if (PIOTimelineIsInvalid(pioTimeline))
 		{
-			fprintf(stderr, "Cannot get timeline from dataset %s.\n", dataset_path);
+			fprintf(stderr, "Cannot get timeline from dataset %s in file %s.\n", dataset_path, pinocchio_file);
 			fflush(stderr);
 			pioCloseDataset(&pioDataset);
 			pioCloseFile(&pioFile);
@@ -173,7 +173,7 @@ int main (int argc, char *const  argv[])
 		PIODatatype pioDatatype = pioGetDatatype(pioDataset);
 		if (PIODatatypeIsInvalid(pioDatatype))
 		{
-			fprintf(stderr, "Cannot get datatype from dataset %s.\n", dataset_path);
+			fprintf(stderr, "Cannot get datatype from dataset %s in file %s.\n", dataset_path, pinocchio_file);
 			fflush(stderr);
 			pioCloseTimeline(&pioTimeline);
 			pioCloseDataset(&pioDataset);
@@ -259,7 +259,7 @@ int main (int argc, char *const  argv[])
 		PIOTimeline pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), timeline_path);
 		if (PIOTimelineIsInvalid(pioTimeline))
 		{
-			fprintf(stderr, "Cannot open timeline %s.\n", timeline_path);
+			fprintf(stderr, "Cannot open timeline %s in file %s.\n", timeline_path, pinocchio_file);
 			fflush(stderr);
 			pioCloseFile(&pioFile);
 			exit(-1);
