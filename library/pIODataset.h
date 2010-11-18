@@ -20,6 +20,7 @@ PIODataset pioNewDataset(PIOFile pioFile,
 						 PIOTimeline pioTimeline,
 						 PIODatatype pioDatatype); 
 
+int pioRemoveDataset(PIOObject pioObject, const char* path);
 
 PIODataset pioOpenDataset(PIOObject pioObject, const char* path);
 
