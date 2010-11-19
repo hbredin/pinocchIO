@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "pIODataset.h"
+#include "pIODatatype.h"
 #include "structure_utils.h"
 
 int getLink(PIODataset pioDataset, int timerangeIndex, link_t* link)
@@ -67,7 +68,7 @@ int pioReadData(PIODataset* pioDataset, int timerangeIndex,
     if (link.number == 0) return 0; 
     
     // realloc internal buffer if necessary
-    new_buffer_size = link.number*H5Tget_size(pioDatatype.identifier);
+    new_buffer_size = link.number*pioGetSize(pioDatatype);
     if (new_buffer_size > pioDataset->buffer_size)
     {
         pioDataset->buffer = realloc(pioDataset->buffer, new_buffer_size);
@@ -127,7 +128,7 @@ int pioDumpDataset(PIODataset* pioDataset,
             if (tmp_number < 0) return -1; // stop if something bad happened
             
             // deduce buffer size from number of read data
-            tmp_size = tmp_number * H5Tget_size(pioDatatype.identifier);
+            tmp_size = tmp_number*pioGetSize(pioDatatype);
             
             // copy buffer at correct position
             memcpy(already_allocated_buffer+size, tmp_buffer, tmp_size);
@@ -152,7 +153,7 @@ int pioDumpDataset(PIODataset* pioDataset,
         }
         
         // deduce buffer size from number of data
-        size = number * H5Tget_size(pioDatatype.identifier);
+        size = number*pioGetSize(pioDatatype);
         
         return size;
     }
