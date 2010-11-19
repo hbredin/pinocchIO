@@ -146,3 +146,8 @@ PIODatatype pioGetDatatype(PIODataset pioDataset)
 	pioDatatype = pioNewDatatype(type, dimension);
 	return pioDatatype;
 }
+
+size_t pioGetSize(PIODatatype pioDatatype)
+{
+    return H5Tget_size(pioDatatype.identifier);
+}

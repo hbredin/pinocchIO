@@ -40,4 +40,6 @@ int pioCloseDatatype( PIODatatype* datatype );
 
 PIODatatype pioGetDatatype(PIODataset pioDataset);
 
+size_t pioGetSize(PIODatatype pioDatatype);
+
 #endif
