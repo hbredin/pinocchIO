@@ -16,6 +16,20 @@
 #include "gptConfig.h"
 #include "gptServer.h"
 
+#define GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_FILTER "filter"
+
+#define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_NONE "none"
+#define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_EQUALS_TO "equalsTo"
+#define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_DIFFERS_FROM "differsFrom"
+#define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_GREATER_THAN "greaterThan"
+#define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_SMALLER_THAN "smallerThan"
+
+#define GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_DATA   "data"
+#define GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_LABEL  "label"
+
+#define GEPETTO_CONFIGURATION_FILE_PATH_TO_DATASET "dataset"
+#define GEPETTO_CONFIGURATION_FILE_LIST_OF_FILES "files"
+
 int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* labelFilterType, int* labelFilterReference)
 {
     config_t config;
@@ -37,22 +51,32 @@ int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* lab
     *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_UNDEFINED;
     *labelFilterReference = -1;    
     
-    filter_section = config_lookup(&config, "filter");
+    filter_section = config_lookup(&config, GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_FILTER);
     if (filter_section)
     {
-        if (config_setting_lookup_int(filter_section, "none", labelFilterReference) == CONFIG_TRUE)
+        if (config_setting_lookup_int(filter_section,
+                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_NONE,
+                                      labelFilterReference) == CONFIG_TRUE)
             *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
         
-        if (config_setting_lookup_int(filter_section, "equalsTo", labelFilterReference) == CONFIG_TRUE)
+        if (config_setting_lookup_int(filter_section, 
+                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_EQUALS_TO, 
+                                      labelFilterReference) == CONFIG_TRUE)
             *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_EQUALS_TO;
         
-        if (config_setting_lookup_int(filter_section, "differsFrom", labelFilterReference) == CONFIG_TRUE)
+        if (config_setting_lookup_int(filter_section, 
+                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_DIFFERS_FROM, 
+                                      labelFilterReference) == CONFIG_TRUE)
             *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_DIFFERS_FROM;
         
-        if (config_setting_lookup_int(filter_section, "greaterThan", labelFilterReference) == CONFIG_TRUE)
+        if (config_setting_lookup_int(filter_section, 
+                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_GREATER_THAN, 
+                                      labelFilterReference) == CONFIG_TRUE)
             *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_GREATER_THAN;
         
-        if (config_setting_lookup_int(filter_section, "smallerThan", labelFilterReference) == CONFIG_TRUE)
+        if (config_setting_lookup_int(filter_section, 
+                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_SMALLER_THAN, 
+                                      labelFilterReference) == CONFIG_TRUE)
             *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_SMALLER_THAN;        
     }
     
@@ -183,13 +207,10 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     int f;
     
     // parse "data" section
-    if (!getPathsFromConfigurationFile(filename, "data", &numberOfDataFiles, &pathToDataFile, &pathToDataDataset))
+    if (!getPathsFromConfigurationFile(filename, 
+                                       GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_DATA, 
+                                       &numberOfDataFiles, &pathToDataFile, &pathToDataDataset))
         return GPTServerInvalid;
-//    else {
-//        for (f=0; f<numberOfDataFiles; f++) {
-//            fprintf(stdout, "  %s\n", pathToDataFile[f]);
-//        }
-//    }
     
     // try and parse "filter" section
     if (!getFilterFromConfigurationFile(filename, &labelFilterType, &labelFilterReference))
@@ -202,7 +223,9 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     // if filter section parsing proved to provided a filter (even NONE filter), parse "label" section
     if (labelFilterType != GEPETTO_LABEL_FILTER_TYPE_UNDEFINED)
     {
-        if (!getPathsFromConfigurationFile(filename, "label", &numberOfLabelFiles, &pathToLabelFile, &pathToLabelDataset))
+        if (!getPathsFromConfigurationFile(filename, 
+                                           GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_LABEL,
+                                           &numberOfLabelFiles, &pathToLabelFile, &pathToLabelDataset))
         {
             for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile);
             free(pathToDataDataset);
@@ -227,87 +250,3 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     
     return gptServer;
 }
-
-
-//GPTServer gptNewServerFromConfigurationFile(const char* filename)
-//{
-//    config_t config;
-//    const config_setting_t *config_setting = NULL;
-//    
-//    char** files = NULL;
-//    int nfiles = 0;
-//    int f, ff;
-//    const char* cur_file = NULL;
-//    const char* cur_dataset = NULL;
-//    char* dataset = NULL;
-//    
-//    // initialize server 
-//    GPTServer server = GPTServerInvalid;
-//    
-//    // initialize configuration file parser
-//    config_init(&config);
-//    // read configuration file
-//    config_read_file(&config, filename);
-//    
-//    
-//    
-//    if (config_lookup_string(&config, "dataset", &cur_dataset) == CONFIG_FALSE)
-//    {
-//        fprintf(stderr, "Could not find path to dataset in configuration file %s.\n",
-//                filename);
-//        config_destroy(&config);
-//        return GPTServerInvalid;        
-//    }
-//    
-//    dataset = (char*)malloc((strlen(cur_dataset)+1)*sizeof(char));
-//    sprintf(dataset, "%s", cur_dataset);
-//    
-//    config_setting = config_lookup(&config, "files");
-//    if (config_setting)
-//    {
-//        if (config_setting_is_list(config_setting) != CONFIG_TRUE)
-//        {
-//            fprintf(stderr, "Files must be provided as a list of files.\n");
-//            fprintf(stderr, "Example: files = ( \"file1\", \"file2\" );");
-//            config_destroy(&config);
-//            return GPTServerInvalid;            
-//        }
-//        
-//        nfiles = config_setting_length(config_setting);
-//        *pathToFile = (char**) malloc(nfiles * sizeof(char*));
-//        for (f=0; f<nfiles; f++)
-//        {
-//            cur_file = config_setting_get_string_elem(config_setting, f);
-//            
-//            if (!cur_file)
-//            {
-//                fprintf(stderr, 
-//                        "There must be something wrong with %dth file in list.\n", 
-//                        f+1);
-//                for (ff=0; ff<f; ff++) free(files[ff]); free(files);
-//                config_destroy(&config);
-//                return GPTServerInvalid;                            
-//            }
-//            
-//            files[f] = (char*) malloc((strlen(cur_file)+1)*sizeof(char));
-//            sprintf(files[f], "%s", cur_file);
-//        }
-//    }
-//    else
-//    {
-//        fprintf(stderr, "Could not find list of files in configuration file %s.\n",
-//                filename);
-//        config_destroy(&config);
-//        return GPTServerInvalid;
-//    }
-//    
-//    config_destroy(&config);
-//    
-//    server = gptNewServer(files, nfiles, dataset);
-//    
-//    for (f=0; f<nfiles; f++) free(files[f]); free(files);
-//    free(dataset);
-//    
-//    return server;
-//}
-
