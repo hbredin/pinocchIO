@@ -30,6 +30,7 @@
 				283EF6E51271D4EF003F82A0 /* PBXTargetDependency */,
 				28EF86C41282BDAB0031E147 /* PBXTargetDependency */,
 				28967AEF12951F4400F34412 /* PBXTargetDependency */,
+				2890C4EC129AADE60018F31E /* PBXTargetDependency */,
 			);
 			name = tools;
 			productName = tools;
@@ -76,6 +77,9 @@
 		283EF6351271AF3D003F82A0 /* pIORead.h in Headers */ = {isa = PBXBuildFile; fileRef = 283EF6331271AF3D003F82A0 /* pIORead.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		283EF6361271AF3D003F82A0 /* pIORead.c in Sources */ = {isa = PBXBuildFile; fileRef = 283EF6341271AF3D003F82A0 /* pIORead.c */; };
 		283EF6571271C935003F82A0 /* piodump.c in Sources */ = {isa = PBXBuildFile; fileRef = 283EF64B1271C2E2003F82A0 /* piodump.c */; };
+		2890C3A2129A79D90018F31E /* gptConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 2890C3A0129A79D90018F31E /* gptConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2890C3A3129A79D90018F31E /* gptConfig.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890C3A1129A79D90018F31E /* gptConfig.c */; };
+		2890C3EF129A87D30018F31E /* gptdump.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890C3A4129A7BBC0018F31E /* gptdump.c */; };
 		2895EB7712706C4B00CA5A76 /* piols.c in Sources */ = {isa = PBXBuildFile; fileRef = 2895EB3A127061E400CA5A76 /* piols.c */; };
 		2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304EED12676DB5003292A5 /* test_PIOFile.c */; };
 		2895EBB512706D6500CA5A76 /* libpinocchIO.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libpinocchIO.dylib */; };
@@ -147,6 +151,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 28304EF312676DD6003292A5;
 			remoteInfo = test_PIOFile;
+		};
+		2890C3ED129A87C60018F31E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 28967BD312956EC600F34412;
+			remoteInfo = gepetto;
+		};
+		2890C4EB129AADE60018F31E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2890C3E2129A87B40018F31E;
+			remoteInfo = gptdump;
 		};
 		2895EB7512706C4500CA5A76 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -245,6 +263,10 @@
 		283EF6341271AF3D003F82A0 /* pIORead.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pIORead.c; sourceTree = "<group>"; };
 		283EF64B1271C2E2003F82A0 /* piodump.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = piodump.c; sourceTree = "<group>"; };
 		283EF6551271C912003F82A0 /* piodump */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = piodump; sourceTree = BUILT_PRODUCTS_DIR; };
+		2890C3A0129A79D90018F31E /* gptConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gptConfig.h; sourceTree = "<group>"; };
+		2890C3A1129A79D90018F31E /* gptConfig.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptConfig.c; sourceTree = "<group>"; };
+		2890C3A4129A7BBC0018F31E /* gptdump.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptdump.c; sourceTree = "<group>"; };
+		2890C3EB129A87B40018F31E /* gptdump */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gptdump; sourceTree = BUILT_PRODUCTS_DIR; };
 		2895EB3A127061E400CA5A76 /* piols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = piols.c; sourceTree = "<group>"; };
 		2895EB7112706C3E00CA5A76 /* piols */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = piols; sourceTree = BUILT_PRODUCTS_DIR; };
 		2895EBB912706D6500CA5A76 /* test_PIODataset */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_PIODataset; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -278,6 +300,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		283EF6511271C912003F82A0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2890C3E7129A87B40018F31E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -362,6 +391,7 @@
 				28F29C1F12916F450007866F /* test_server */,
 				28967AE512951F0100F34412 /* piorm */,
 				28967BD412956EC600F34412 /* libgepetto.dylib */,
+				2890C3EB129A87B40018F31E /* gptdump */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -396,6 +426,8 @@
 				28967BDC12956F5E00F34412 /* gptTypes.h */,
 				28967BDD12956F5E00F34412 /* gptTypes.c */,
 				28967BE01295706500F34412 /* gepetto.h */,
+				2890C3A0129A79D90018F31E /* gptConfig.h */,
+				2890C3A1129A79D90018F31E /* gptConfig.c */,
 			);
 			path = library;
 			sourceTree = "<group>";
@@ -418,6 +450,7 @@
 				283EF64B1271C2E2003F82A0 /* piodump.c */,
 				28EF86F61282CFD80031E147 /* fgetln.c */,
 				28967ADB12951D6400F34412 /* piorm.c */,
+				2890C3A4129A7BBC0018F31E /* gptdump.c */,
 			);
 			path = tools;
 			sourceTree = "<group>";
@@ -432,6 +465,7 @@
 				28967BDE12956F5E00F34412 /* gptTypes.h in Headers */,
 				28967BF5129572EA00F34412 /* gptServer.h in Headers */,
 				28967BE11295706500F34412 /* gepetto.h in Headers */,
+				2890C3A2129A79D90018F31E /* gptConfig.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -505,6 +539,23 @@
 			name = piodump;
 			productName = piols;
 			productReference = 283EF6551271C912003F82A0 /* piodump */;
+			productType = "com.apple.product-type.tool";
+		};
+		2890C3E2129A87B40018F31E /* gptdump */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2890C3E8129A87B40018F31E /* Build configuration list for PBXNativeTarget "gptdump" */;
+			buildPhases = (
+				2890C3E5129A87B40018F31E /* Sources */,
+				2890C3E7129A87B40018F31E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2890C3EE129A87C60018F31E /* PBXTargetDependency */,
+			);
+			name = gptdump;
+			productName = piols;
+			productReference = 2890C3EB129A87B40018F31E /* gptdump */;
 			productType = "com.apple.product-type.tool";
 		};
 		2895EB7012706C3E00CA5A76 /* piols */ = {
@@ -655,6 +706,7 @@
 				283EF64C1271C912003F82A0 /* piodump */,
 				28FC1CA01281D60C0039E4B5 /* ascii2pio */,
 				28967ADC12951F0100F34412 /* piorm */,
+				2890C3E2129A87B40018F31E /* gptdump */,
 				28304EF312676DD6003292A5 /* test_PIOFile */,
 				2895EBAF12706D6500CA5A76 /* test_PIODataset */,
 				28F29C1E12916F450007866F /* test_server */,
@@ -684,6 +736,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				283EF6571271C935003F82A0 /* piodump.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2890C3E5129A87B40018F31E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2890C3EF129A87D30018F31E /* gptdump.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -717,6 +777,7 @@
 			files = (
 				28967BDF12956F5E00F34412 /* gptTypes.c in Sources */,
 				28967BF4129572E600F34412 /* gptServer.c in Sources */,
+				2890C3A3129A79D90018F31E /* gptConfig.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -796,6 +857,16 @@
 			isa = PBXTargetDependency;
 			target = 28304EF312676DD6003292A5 /* test_PIOFile */;
 			targetProxy = 283EF6F11271D521003F82A0 /* PBXContainerItemProxy */;
+		};
+		2890C3EE129A87C60018F31E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 28967BD312956EC600F34412 /* gepetto */;
+			targetProxy = 2890C3ED129A87C60018F31E /* PBXContainerItemProxy */;
+		};
+		2890C4EC129AADE60018F31E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2890C3E2129A87B40018F31E /* gptdump */;
+			targetProxy = 2890C4EB129AADE60018F31E /* PBXContainerItemProxy */;
 		};
 		2895EB7612706C4500CA5A76 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1093,6 +1164,38 @@
 			};
 			name = Release;
 		};
+		2890C3E9129A87B40018F31E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lgepetto";
+				PREBINDING = NO;
+				PRODUCT_NAME = gptdump;
+			};
+			name = Debug;
+		};
+		2890C3EA129A87B40018F31E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lgepetto";
+				PREBINDING = NO;
+				PRODUCT_NAME = gptdump;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		2895EB7312706C3E00CA5A76 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1360,6 +1463,15 @@
 			buildConfigurations = (
 				283EF6ED1271D516003F82A0 /* Debug */,
 				283EF6EE1271D516003F82A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2890C3E8129A87B40018F31E /* Build configuration list for PBXNativeTarget "gptdump" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2890C3E9129A87B40018F31E /* Debug */,
+				2890C3EA129A87B40018F31E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
