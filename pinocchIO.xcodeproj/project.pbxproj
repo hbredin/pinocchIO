@@ -399,6 +399,24 @@
 		28304ECF126757F7003292A5 /* library */ = {
 			isa = PBXGroup;
 			children = (
+				2890C564129AC24D0018F31E /* gpt */,
+				2890C563129AC2480018F31E /* pio */,
+			);
+			path = library;
+			sourceTree = "<group>";
+		};
+		28304EEC12676D98003292A5 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				28304EED12676DB5003292A5 /* test_PIOFile.c */,
+				28F29C1512916BC70007866F /* test_server.c */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
+		2890C563129AC2480018F31E /* pio */ = {
+			isa = PBXGroup;
+			children = (
 				28304ED012675811003292A5 /* pinocchIO.h */,
 				28304ED21267584A003292A5 /* pIOFile.h */,
 				28304ED31267584A003292A5 /* pIOFile.c */,
@@ -421,6 +439,13 @@
 				283EF53E12718ACA003F82A0 /* pIOWrite.c */,
 				283EF6331271AF3D003F82A0 /* pIORead.h */,
 				283EF6341271AF3D003F82A0 /* pIORead.c */,
+			);
+			path = pio;
+			sourceTree = "<group>";
+		};
+		2890C564129AC24D0018F31E /* gpt */ = {
+			isa = PBXGroup;
+			children = (
 				28074BFA1289CEEC0042E4D5 /* gptServer.h */,
 				28074BFB1289CEEC0042E4D5 /* gptServer.c */,
 				28967BDC12956F5E00F34412 /* gptTypes.h */,
@@ -429,16 +454,7 @@
 				2890C3A0129A79D90018F31E /* gptConfig.h */,
 				2890C3A1129A79D90018F31E /* gptConfig.c */,
 			);
-			path = library;
-			sourceTree = "<group>";
-		};
-		28304EEC12676D98003292A5 /* test */ = {
-			isa = PBXGroup;
-			children = (
-				28304EED12676DB5003292A5 /* test_PIOFile.c */,
-				28F29C1512916BC70007866F /* test_server.c */,
-			);
-			path = test;
+			path = gpt;
 			sourceTree = "<group>";
 		};
 		2895EB6D12706C1A00CA5A76 /* tools */ = {
