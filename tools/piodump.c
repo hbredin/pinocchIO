@@ -181,9 +181,6 @@ int main (int argc, char *const  argv[])
 			exit(-1);
 		}
 		
-		
-		buffer = malloc(1);
-		
 		for (tr=0; tr<pioDataset.ntimeranges; tr++)
 		{
 			numberOfVectors = pioRead(&pioDataset, tr, pioDatatype, &buffer);
