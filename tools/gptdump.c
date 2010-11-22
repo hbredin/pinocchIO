@@ -16,14 +16,15 @@
 static int verbose_flag = 0;
 static int string_flag = 0;
 static int label_flag = 0;
+static int svmlight_flag = 0;
 
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
 			"USAGE: %s [options] FILE\n", path2tool);
     fprintf(stdout, 
-//			"       -s, --timestamp\n"
-//			"           Show timestamps\n"
+            "           --svmlight\n"
+            "           Use SVMlight format\n"
             "       -L, --label\n"
             "           Show label\n"
 			"           --text\n"
@@ -59,9 +60,9 @@ int main (int argc, char *const  argv[])
 			{"brief",   no_argument, &verbose_flag, 0},
 			/* These options don't set a flag.
 			 We distinguish them by their indices. */
-//			{"timestamp", no_argument,      0, 's'},
-            {"label", no_argument,      0, 'L'},
-			{"text",      no_argument,      &string_flag, 1},
+            {"svmlight", no_argument, &svmlight_flag, 1},
+            {"label",    no_argument, 0,              'L'},
+			{"text",     no_argument, &string_flag,   1},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -111,6 +112,15 @@ int main (int argc, char *const  argv[])
 		}
 	}
 	
+    if (svmlight_flag) label_flag = 1;
+    if (svmlight_flag && string_flag)
+    {
+        fprintf(stderr, "Incompatible options (svmlight and text)\n");
+        fflush(stderr);
+        usage(argv[0]);
+        exit(-1);
+    }
+    
 	if (optind+1>argc)
 	{
 		fprintf(stderr, "Missing path to gepetto configuration file.\n");
@@ -160,16 +170,28 @@ int main (int argc, char *const  argv[])
                 {					
                     switch (gptServer.datatype.type) {
                         case PINOCCHIO_TYPE_INT:
-                            fprintf(stdout, "%d ", buffer_int[n*dimension+d]);
+                            if (svmlight_flag && (buffer_int[n*dimension+d]))
+                                fprintf(stdout, "%d:%d ", d, buffer_int[n*dimension+d]);
+                            else
+                                if (!svmlight_flag) fprintf(stdout, "%d ", buffer_int[n*dimension+d]);
                             break;
                         case PINOCCHIO_TYPE_FLOAT:
-                            fprintf(stdout, "%f ", buffer_float[n*dimension+d]);
+                            if (svmlight_flag && (buffer_float[n*dimension+d]))
+                                fprintf(stdout, "%d:%f ", d, buffer_float[n*dimension+d]);
+                            else
+                                if (!svmlight_flag) fprintf(stdout, "%f ", buffer_float[n*dimension+d]);
                             break;
                         case PINOCCHIO_TYPE_DOUBLE:
-                            fprintf(stdout, "%lf ", buffer_double[n*dimension+d]);
+                            if (svmlight_flag && (buffer_double[n*dimension+d]))
+                                fprintf(stdout, "%d:%lf ", d, buffer_double[n*dimension+d]);
+                            else
+                                if (!svmlight_flag) fprintf(stdout, "%lf ", buffer_double[n*dimension+d]);
                             break;
                         case PINOCCHIO_TYPE_CHAR:
-                            fprintf(stdout, "%c", buffer_char[n*dimension+d]);
+                            if (svmlight_flag && (buffer_char[n*dimension+d]))
+                                fprintf(stdout, "%d:%c ", d, buffer_char[n*dimension+d]);
+                            else
+                                if (!svmlight_flag) fprintf(stdout, "%c ", buffer_char[n*dimension+d]);                            
                             break;
                         default:
                             break;
