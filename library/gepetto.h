@@ -12,5 +12,6 @@
 
 #include "gptTypes.h"
 #include "gptServer.h"
+#include "gptConfig.h"
 
 #endif
