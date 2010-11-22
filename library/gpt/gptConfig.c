@@ -30,6 +30,55 @@
 #define GEPETTO_CONFIGURATION_FILE_PATH_TO_DATASET "dataset"
 #define GEPETTO_CONFIGURATION_FILE_LIST_OF_FILES "files"
 
+
+int getNumberOfLines( const char* ascii_file )
+{
+	char* line = NULL;
+	FILE* file = NULL;
+	int numberOfLines = -1;
+	size_t length = -1;
+	
+	file = fopen(ascii_file, "r");
+	if (!file) return -1;
+	
+	numberOfLines = 0;
+	while (!feof(file)) 
+	{
+		line = fgetln(file, &length);
+		if (!line) break;
+		numberOfLines++;
+	}
+	
+	fclose(file);
+	return numberOfLines;
+}
+
+int readLines(const char* ascii_file, int nLines, char** *strings)
+{
+	char* line = NULL;
+	FILE* file = NULL;
+	int lineId = -1;
+	size_t length = -1;
+	char* newline = "\r\n";
+	char* string = NULL;
+	int dimension = -1;
+	
+	file = fopen(ascii_file, "r");
+	if (!file) return -1;
+	
+	for (lineId = 0; lineId < nLines; lineId++) 
+	{
+		line = fgetln(file, &length);
+		string = strtok(line, newline);
+		dimension = strlen(string)+1;		
+		
+		(*strings)[lineId] = (char*)malloc(dimension*sizeof(char));
+        memcpy((*strings)[lineId], string, dimension);
+	}
+	fclose(file);
+	return lineId;	
+}
+
 int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* labelFilterType, int* labelFilterReference)
 {
     config_t config;
@@ -88,13 +137,22 @@ int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* lab
 int getPathsFromConfigurationFile(const char* filename, const char* data_or_label,
                                   int* numberOfFiles, char*** pathToFile, char** pathToDataset)
 {
+    int f, ff; // file counter
+    
     config_t config;
     const config_setting_t *data_or_label_section = NULL;
     const config_setting_t *files_section = NULL;
     
     const char* cur_dataset = NULL;
+
+    int is_list = CONFIG_FALSE;
     const char* cur_file = NULL;
-    int f, ff; // file counter
+    
+    int is_group = CONFIG_FALSE;
+    const char* prefix = NULL;
+    const char* suffix = NULL;
+    const char* base_list = NULL;
+    char** base_path = NULL;
     
     // initialize configuration file parser
     config_init(&config);
@@ -148,7 +206,10 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
         return 0;
     }
     
-    if (config_setting_is_list(files_section) != CONFIG_TRUE)
+    is_list = config_setting_is_list(files_section);
+    is_group = config_setting_is_group(files_section);
+    
+    if (!(is_list || is_group))
     {
         fprintf(stderr, "Files must be provided as a list of files.\n");
         fprintf(stderr, "Example: files = ( \"file1\", \"file2\" );");
@@ -160,29 +221,79 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
     *pathToDataset = (char*)malloc((strlen(cur_dataset)+1)*sizeof(char));
     sprintf(*pathToDataset, "%s", cur_dataset);
     
-    // get number of files
-    *numberOfFiles = config_setting_length(files_section);
-    
-    // get paths to files
-    *pathToFile = (char**) malloc((*numberOfFiles) * sizeof(char*));
-    for (f=0; f<*numberOfFiles; f++)
+    if (is_list)
     {
-        cur_file = config_setting_get_string_elem(files_section, f);
+        // get number of files
+        *numberOfFiles = config_setting_length(files_section);
         
-        if (!cur_file)
+        // get paths to files
+        *pathToFile = (char**) malloc((*numberOfFiles) * sizeof(char*));
+        for (f=0; f<*numberOfFiles; f++)
         {
-            fprintf(stderr, 
-                    "There must be something wrong with %dth file in list.\n", 
-                    f+1);
-            for (ff=0; ff<f; ff++) free((*pathToFile)[ff]); free((*pathToFile));
+            cur_file = config_setting_get_string_elem(files_section, f);
+            
+            if (!cur_file)
+            {
+                fprintf(stderr, 
+                        "There must be something wrong with %dth file in list.\n", 
+                        f+1);
+                for (ff=0; ff<f; ff++) free((*pathToFile)[ff]); free((*pathToFile));
+                free(*pathToDataset);
+                config_destroy(&config);
+                return 0;                            
+            }
+            
+            (*pathToFile)[f] = (char*) malloc((strlen(cur_file)+1)*sizeof(char));
+            sprintf((*pathToFile)[f], "%s", cur_file);        
+        }
+    }
+    
+    if (is_group)
+    {
+        if (config_setting_lookup_string(files_section, "prefix", &prefix) == CONFIG_FALSE)
+            prefix = "";
+        
+        if (config_setting_lookup_string(files_section, "suffix", &suffix) == CONFIG_FALSE)
+            suffix = "";
+        
+        if (config_setting_lookup_string(files_section, "list", &base_list) == CONFIG_FALSE)
+        {
+            fprintf(stderr, "Missing %s>%s> list  section in file %s.\n", 
+                    data_or_label, 
+                    GEPETTO_CONFIGURATION_FILE_LIST_OF_FILES, 
+                    filename);
+            fflush(stderr);
             free(*pathToDataset);
             config_destroy(&config);
-            return 0;                            
+            return 0;
+        }
+
+        // get number of files
+        *numberOfFiles = getNumberOfLines(base_list);
+        if (*numberOfFiles < 0)
+        {
+            fprintf(stderr, "Problem with list %s.\n", base_list);
+            fflush(stderr);
+            free(*pathToDataset);
+            config_destroy(&config);
+            return 0;
         }
         
-        (*pathToFile)[f] = (char*) malloc((strlen(cur_file)+1)*sizeof(char));
-        sprintf((*pathToFile)[f], "%s", cur_file);        
+        // get base paths to files
+        base_path = (char**) malloc((*numberOfFiles)*sizeof(char*));
+        readLines(base_list, *numberOfFiles, &base_path);
+        
+        // get paths to files
+        *pathToFile = (char**) malloc((*numberOfFiles)*sizeof(char*));
+        for (f=0; f<*numberOfFiles; f++) 
+        {
+            (*pathToFile)[f] = (char*) malloc(strlen(prefix)+strlen(suffix)+strlen(base_path[f])+1);
+            sprintf((*pathToFile)[f], "%s%s%s", prefix, base_path[f], suffix);
+        }
+        
+        for (f=0; f<*numberOfFiles; f++) free(base_path[f]); free(base_path);
     }
+    
     config_destroy(&config);
     
     return 1;
