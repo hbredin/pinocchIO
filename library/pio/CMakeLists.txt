@@ -1,9 +1,9 @@
 file(GLOB pinocchIO_SOURCES *.c)
 file(GLOB pinocchIO_HEADERS *.h)
-set(pinocchIO_PUBLICHEADERS pIOAttributes.h pIODataset.h pIODatatype.h pIOFile.h pIOServer.h pIORead.h pIOTimeComparison.h pIOTimeline.h pIOTypes.h pIOWrite.h pinocchIO.h)
+set(pinocchIO_PUBLICHEADERS pinocchIO.h pIOAttributes.h pIODataset.h pIODatatype.h pIOFile.h pIORead.h pIOTimeComparison.h pIOTimeline.h pIOTypes.h pIOWrite.h)
 
-set(pinocchIO_INCLUDE_DIRS ${HDF5_INCLUDE_DIR} ${LIBCONFIG_INCLUDE_DIR})
-set(pinocchIO_LIBS ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY} ${LIBCONFIG_LIBRARY})
+set(pinocchIO_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
+set(pinocchIO_LIBS ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
 include_directories(${pinocchIO_INCLUDE_DIRS})
 
 add_library (pinocchIO SHARED ${pinocchIO_SOURCES} ${pinocchIO_HEADERS})

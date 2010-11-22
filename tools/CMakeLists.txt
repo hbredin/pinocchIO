@@ -1,5 +1,5 @@
 
-include_directories(${pinocchIO_SOURCE_DIR}/library ${HDF5_INCLUDE_DIR})
+include_directories(${pinocchIO_SOURCE_DIR}/library/pio ${pinocchIO_SOURCE_DIR}/library/gpt ${HDF5_INCLUDE_DIR})
 link_directories(${CMAKE_BINARY_DIR}/library/pinocchIO})
 
 add_executable(piols piols.c)
@@ -26,3 +26,8 @@ add_executable(pioversion pioversion.c)
 set(pioversion_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
 target_link_libraries(pioversion pinocchIO)
 install(TARGETS pioversion RUNTIME DESTINATION bin)
+
+add_executable(gptdump gptdump.c)
+set(gptdump_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
+target_link_libraries(gptdump gepetto)
+install(TARGETS gptdump RUNTIME DESTINATION bin)
