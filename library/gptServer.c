@@ -12,82 +12,6 @@
 
 #include "gptServer.h"
 
-//GPTServer gptNewServerFromConfigurationFile(const char* filename)
-//{
-//    config_t config;
-//    const config_setting_t *config_setting = NULL;
-//    
-//    char** files = NULL;
-//    int nfiles = 0;
-//    int f, ff;
-//    const char* cur_file = NULL;
-//    const char* cur_dataset = NULL;
-//    char* dataset = NULL;
-//    
-//    GPTServer server = GPTServerInvalid;
-//    config_init(&config);
-//    config_read_file(&config, filename);
-//    if (config_lookup_string(&config, "dataset", &cur_dataset) == CONFIG_FALSE)
-//    {
-//        fprintf(stderr, "Could not find path to dataset in configuration file %s.\n",
-//                filename);
-//        config_destroy(&config);
-//        return GPTServerInvalid;        
-//    }
-//    
-//    dataset = (char*)malloc((strlen(cur_dataset)+1)*sizeof(char));
-//    sprintf(dataset, "%s", cur_dataset);
-//    
-//    config_setting = config_lookup(&config, "files");
-//    if (config_setting)
-//    {
-//        if (config_setting_is_list(config_setting) != CONFIG_TRUE)
-//        {
-//            fprintf(stderr, "Files must be provided as a list of files.\n");
-//            fprintf(stderr, "Example: files = ( \"file1\", \"file2\" );");
-//            config_destroy(&config);
-//            return GPTServerInvalid;            
-//        }
-//        
-//        nfiles = config_setting_length(config_setting);
-//        files = (char**) malloc(nfiles * sizeof(char*));
-//        for (f=0; f<nfiles; f++)
-//        {
-//            cur_file = config_setting_get_string_elem(config_setting, f);
-//            
-//            if (!cur_file)
-//            {
-//                fprintf(stderr, 
-//                        "There must be something wrong with %dth file in list.\n", 
-//                        f+1);
-//                for (ff=0; ff<f; ff++) free(files[ff]); free(files);
-//                config_destroy(&config);
-//                return GPTServerInvalid;                            
-//            }
-//
-//            files[f] = (char*) malloc((strlen(cur_file)+1)*sizeof(char));
-//            sprintf(files[f], "%s", cur_file);
-//        }
-//    }
-//    else
-//    {
-//        fprintf(stderr, "Could not find list of files in configuration file %s.\n",
-//                filename);
-//        config_destroy(&config);
-//        return GPTServerInvalid;
-//    }
-//
-//    config_destroy(&config);
-//    
-//    server = gptNewServer(files, nfiles, dataset);
-//
-//    for (f=0; f<nfiles; f++) free(files[f]); free(files);
-//    free(dataset);
-//    
-//    return server;
-//}
-
-
 int isFiltered(int label, 
                GPTLabelFilterType labelFilterType,
                int labelFilterReference)
@@ -120,19 +44,23 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
                        int numberOfLabelFiles, char** pathToLabelFile, const char* pathToLabelDataset)
 {
     int f = 0; // file counter
-    int t = 0; // timerange counter
     int label_t = 0; // label timerange counter
     int data_t = 0;  // data timerange counter
     
     GPTServer gptServer = GPTServerInvalid;
     
     // if a label filter is applied, make sure there is as many data files than label files
-    if ((labelFilterType != GEPETTO_LABEL_FILTER_TYPE_NONE) && 
+    if ((labelFilterType != GEPETTO_LABEL_FILTER_TYPE_UNDEFINED) && 
         (numberOfDataFiles != numberOfLabelFiles))
+    {
+        fprintf(stderr, "Number of data files (%d) and number of label files (%d) do not match.\n",
+                numberOfDataFiles, numberOfLabelFiles);
+        fflush(stderr);
         return GPTServerInvalid;
-    
+    }
+        
     // if a label filter is applied
-    if (labelFilterType != GEPETTO_LABEL_FILTER_TYPE_NONE)
+    if (labelFilterType != GEPETTO_LABEL_FILTER_TYPE_UNDEFINED)
     {
         // initialize server label stuff
         
@@ -214,8 +142,8 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
             
             gptServer.lengthOfLabelTimeline[f] = gptServer.current_timeline.ntimeranges;
             gptServer.labelTimeline[f] = (PIOTimeRange*) malloc(gptServer.lengthOfLabelTimeline[f]*sizeof(PIOTimeRange));
-            for (t=0; t<gptServer.lengthOfLabelTimeline[f]; t++) 
-                gptServer.labelTimeline[f][t] = gptServer.current_timeline.timeranges[t];
+            for (label_t=0; label_t<gptServer.lengthOfLabelTimeline[f]; label_t++) 
+                gptServer.labelTimeline[f][label_t] = gptServer.current_timeline.timeranges[label_t];
             
             // load label data
             gptServer.label[f] = (int*) malloc(gptServer.lengthOfLabelTimeline[f]*sizeof(int));
@@ -256,7 +184,7 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
     {
         gptServer.pathToDataFile[f] = (char*) malloc((strlen(pathToDataFile[f])+1)*sizeof(char));
         sprintf(gptServer.pathToDataFile[f], "%s", pathToDataFile[f]);
-        
+                
         // test fth data file
         gptServer.current_file = pioOpenFile(gptServer.pathToDataFile[f], PINOCCHIO_READONLY);
         if (PIOFileIsInvalid(gptServer.current_file)) 
@@ -333,8 +261,8 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
         }
         gptServer.lengthOfDataTimeline[f] = gptServer.current_timeline.ntimeranges;
         gptServer.dataTimeline[f] = (PIOTimeRange*) malloc(gptServer.lengthOfDataTimeline[f]*sizeof(PIOTimeRange));
-        for (t=0; t<gptServer.lengthOfDataTimeline[f]; t++) 
-            gptServer.dataTimeline[f][t] = gptServer.current_timeline.timeranges[t];
+        for (data_t=0; data_t<gptServer.lengthOfDataTimeline[f]; data_t++) 
+            gptServer.dataTimeline[f][data_t] = gptServer.current_timeline.timeranges[data_t];
         
         // prepare for next file
         pioCloseTimeline(&(gptServer.current_timeline));
@@ -343,18 +271,23 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
         pioCloseFile(&(gptServer.current_file));
     }
     
-    // initialize filter mask 
+    // initialize filter mask and propagate labels
+    gptServer.propagatedLabel = (int**) malloc(gptServer.numberOfDataFiles*sizeof(int*));
     gptServer.filterMask = (int**) malloc(gptServer.numberOfDataFiles*sizeof(int*));
     gptServer.labelFilterType = labelFilterType;
     gptServer.labelFilterReference = labelFilterReference;
     
     for (f=0; f<gptServer.numberOfDataFiles; f++) 
     {
+        gptServer.propagatedLabel[f] = (int*) malloc(gptServer.lengthOfDataTimeline[f]*sizeof(int));
         gptServer.filterMask[f] = (int*) malloc(gptServer.lengthOfDataTimeline[f]*sizeof(int));
-        if (labelFilterType == GEPETTO_LABEL_FILTER_TYPE_NONE)
+        if (labelFilterType == GEPETTO_LABEL_FILTER_TYPE_UNDEFINED)
         {
             for (data_t=0; data_t<gptServer.lengthOfDataTimeline[f]; data_t++) 
+            {
+                gptServer.propagatedLabel[f][data_t] = -1;
                 gptServer.filterMask[f][data_t] = 1;
+            }
         }
         else 
         {
@@ -383,18 +316,20 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
                 if (pioTimeRangeIntersectsTimeRange(gptServer.labelTimeline[f][label_t], 
                                                     gptServer.dataTimeline[f][data_t]))
                 {
-                    gptServer.filterMask[f][t] = isFiltered(gptServer.label[f][label_t], 
+                    gptServer.propagatedLabel[f][data_t] = gptServer.label[f][label_t];
+                    gptServer.filterMask[f][data_t] = isFiltered(gptServer.label[f][label_t], 
                                                             gptServer.labelFilterType, 
                                                             gptServer.labelFilterReference);
                 }
                 else 
                 {
+                    gptServer.propagatedLabel[f][data_t] = -1;
                     gptServer.filterMask[f][data_t] = -1;
                 }
             }
         }
     }
-    
+        
     gptServer.current_file_index = 0;
     gptServer.current_file = PIOFileInvalid;
     gptServer.current_timerange_index = 0;
@@ -404,141 +339,17 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
     return gptServer;
 }
 
-
-
-
-//GPTServer gptNewServer(char** pathToLabelFile, int numberOfDataFile, const char* pathToLabelDataset)
-//{
-//    int f = 0;
-//    PIODatatype pioCommonDatatype = PIODatatypeInvalid;
-//    GPTServer gptServer = GPTServerInvalid;
-//    
-//    // test file/dataset accessibility & similarity
-//    for (f=0; f<numberOfDataFile; f++)
-//    {
-//        gptServer.current_file = pioOpenFile(pathToLabelFile[f], PINOCCHIO_READONLY);
-//        if (PIOFileIsInvalid(gptServer.current_file)) 
-//        {
-//            fprintf(stderr, "PIOServer > Cannot open file %s.\n", pathToLabelFile[f]);
-//            fflush(stderr);
-//            gptCloseServer(&gptServer);
-//            return GPTServerInvalid;
-//        }
-//        
-//        gptServer.current_dataset = pioOpenDataset(PIOMakeObject(gptServer.current_file),
-//                                                   pathToLabelDataset);
-//        if (PIODatasetIsInvalid(gptServer.current_dataset))
-//        {
-//            fprintf(stderr, "PIOServer > Cannot open dataset %s in file %s.\n",
-//                    pathToLabelDataset, pathToLabelFile[f]);
-//            fflush(stderr);
-//            gptCloseServer(&gptServer);
-//            return GPTServerInvalid;
-//        }
-//        
-//        gptServer.datatype = pioGetDatatype(gptServer.current_dataset);
-//        if (PIODatatypeIsInvalid(gptServer.datatype))
-//        {
-//            fprintf(stderr, "PIOServer > Cannot get datatype of dataset %s in file %s.\n",
-//                    pathToLabelDataset, pathToLabelFile[f]);
-//            fflush(stderr);
-//            gptCloseServer(&gptServer);
-//            return GPTServerInvalid;            
-//        }
-//        
-//        if (f == 0)
-//        {
-//            pioCommonDatatype = pioNewDatatype(gptServer.datatype.type, 
-//                                               gptServer.datatype.dimension);
-//            if (PIODatatypeIsInvalid(pioCommonDatatype))
-//            {
-//                fprintf(stderr, "PIOServer > Invalid datatype of dataset %s in file %s.\n",
-//                        pathToLabelDataset, pathToLabelFile[f]);
-//                fflush(stderr);
-//             
-//                gptCloseServer(&gptServer);
-//                return GPTServerInvalid;            
-//            }
-//        }
-//        else
-//        {
-//            if ((gptServer.datatype.dimension != pioCommonDatatype.dimension) ||
-//                (gptServer.datatype.type      != pioCommonDatatype.type))
-//            {
-//                fprintf(stderr, 
-//                        "PIOServer > Datatype of dataset %s in file %s do not match the one in file %s.\n",
-//                        pathToLabelDataset, pathToLabelFile[f], pathToLabelFile[0]);
-//                fflush(stderr);
-//                
-//                pioCloseDatatype(&pioCommonDatatype);
-//                gptCloseServer(&gptServer);
-//                return GPTServerInvalid;            
-//            }
-//        }
-//        gptCloseServer(&gptServer);
-//    }
-//    
-//    // initialize
-//    gptServer.nfiles = numberOfDataFile;
-//    gptServer.files = (char**) malloc(numberOfDataFile*sizeof(char*));
-//    for (f=0; f<numberOfDataFile; f++) {
-//        gptServer.files[f] = (char*) malloc((strlen(pathToLabelFile[f])+1)*sizeof(char));
-//        sprintf(gptServer.files[f], "%s", pathToLabelFile[f]);
-//    }
-//    
-//    gptServer.dataset = (char*) malloc((strlen(pathToLabelDataset)+1)*sizeof(char));
-//    sprintf(gptServer.dataset, "%s", pathToLabelDataset);
-//    
-//    gptServer.ntimeranges = (int*) malloc(numberOfDataFile*sizeof(int));
-//    gptServer.stored = (int*) malloc(numberOfDataFile*sizeof(int));
-//    for (f=0; f<numberOfDataFile; f++)
-//    {
-//        gptServer.current_file = pioOpenFile(pathToLabelFile[f], PINOCCHIO_READONLY);
-//        if (PIOFileIsInvalid(gptServer.current_file)) 
-//        {
-//            fprintf(stderr, "PIOServer > Cannot open file %s.\n", pathToLabelFile[f]);
-//            fflush(stderr);
-//            gptCloseServer(&gptServer);
-//            return GPTServerInvalid;
-//        }
-//        
-//        gptServer.current_dataset = pioOpenDataset(PIOMakeObject(gptServer.current_file), pathToLabelDataset);
-//        if (PIODatasetIsInvalid(gptServer.current_dataset))
-//        {
-//            fprintf(stderr, "PIOServer > Cannot open dataset %s in file %s.\n",
-//                    pathToLabelDataset, pathToLabelFile[f]);
-//            fflush(stderr);
-//            gptCloseServer(&gptServer);
-//            return GPTServerInvalid;
-//        }
-//        
-//        gptServer.ntimeranges[f] = gptServer.current_dataset.ntimeranges;
-//        gptServer.stored[f] = gptServer.current_dataset.stored;
-//        
-//        pioCloseDataset(&(gptServer.current_dataset));
-//        pioCloseFile(&(gptServer.current_file));
-//    }
-//    
-//    gptServer.datatype = pioCommonDatatype;
-//    
-//    gptServer.current_file_index = 0;
-//    gptServer.current_file = PIOFileInvalid;
-//    gptServer.current_timerange_index = 0;
-//    gptServer.current_dataset = PIODatasetInvalid;
-//    gptServer.current_timeline = PIOTimelineInvalid;
-//    
-//    return gptServer;
-//}
-
+// get data dimension
 int gptGetServerDimension(GPTServer gptServer)
 {
     return gptServer.datatype.dimension;
 }
 
-int gptReadNextData(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer)
+int gptReadNextData(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer, int* label)
 {
     int number = -1;
     
+    // if last timerange is processed, go to first timerange of next file
     if (gptServer->current_timerange_index == gptServer->lengthOfDataTimeline[gptServer->current_file_index])
     {
         if (PIODatasetIsValid(gptServer->current_dataset))
@@ -549,6 +360,7 @@ int gptReadNextData(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer
         gptServer->current_file_index++;
     }
     
+    // if last file is processed, stop
     if (gptServer->current_file_index == gptServer->numberOfDataFiles)
     {
         gptServer->current_file_index = 0;
@@ -556,6 +368,7 @@ int gptReadNextData(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer
         return -1;
     }
     
+    // open next file/dataset if necessary
     if (gptServer->current_timerange_index == 0)
     {
         gptServer->current_file = pioOpenFile(gptServer->pathToDataFile[gptServer->current_file_index],
@@ -564,19 +377,25 @@ int gptReadNextData(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer
                                                  gptServer->pathToDataDataset);
     }
     
-    if (gptServer->filterMask[gptServer->current_file_index][gptServer->current_timerange_index] == 1)
+    // if not filtered, read next data
+    if (gptServer->filterMask[gptServer->current_file_index][gptServer->current_timerange_index])
     {
         number = pioRead(&(gptServer->current_dataset), 
                          gptServer->current_timerange_index,
                          pioDatatype, 
                          buffer);
+        if (label) 
+            *label = gptServer->propagatedLabel[gptServer->current_file_index][gptServer->current_timerange_index];
+        gptServer->current_timerange_index++;
     }
+    // otherwise, go to next timerange
     else 
     {
         gptServer->current_timerange_index++;
-        number = gptReadNextData(gptServer, pioDatatype, buffer);
+        number = gptReadNextData(gptServer, pioDatatype, buffer, label);
     }
     
+    // return number of data
     return number;
 }
 
@@ -682,8 +501,6 @@ int gptCloseServer(GPTServer* gptServer)
     if (gptServer->lengthOfDataTimeline) free(gptServer->lengthOfDataTimeline);
     gptServer->lengthOfDataTimeline = NULL;
 
-    
-    
     // free pathToLabelFile
     if (gptServer->pathToLabelFile)
     {
@@ -714,7 +531,6 @@ int gptCloseServer(GPTServer* gptServer)
     if (gptServer->lengthOfLabelTimeline) free(gptServer->lengthOfLabelTimeline);
     gptServer->lengthOfLabelTimeline = NULL;
     
-    
     // free label
     if (gptServer->label)
     {
@@ -726,7 +542,17 @@ int gptCloseServer(GPTServer* gptServer)
     }
     gptServer->label = NULL;
     
-
+    // free propagatedLabel
+    if (gptServer->propagatedLabel)
+    {
+        for (f=0; f<gptServer->numberOfDataFiles; f++) {
+            if (gptServer->propagatedLabel[f]) free(gptServer->propagatedLabel[f]); 
+            gptServer->propagatedLabel[f] = NULL;
+        }
+        free(gptServer->propagatedLabel);
+    }
+    gptServer->propagatedLabel = NULL;
+    
     // free filterMask
     if (gptServer->filterMask)
     {

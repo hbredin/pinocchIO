@@ -14,7 +14,7 @@
 
 #include "gptTypes.h"
 
-#define GPTServerIsInvalid(o)   ((o).nfiles < 1)
+#define GPTServerIsInvalid(o)   ((o).numberOfDataFiles < 1)
 #define GPTServerIsValid(o)     (!GPTServerIsInvalid(o))
 
 
@@ -22,16 +22,14 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
                        GPTLabelFilterType labelFilterType, int labelFilterReference,
                        int numberOfLabelFiles, char** pathToLabelFile, const char* pathToLabelDataset);
 
-
-//GPTServer gptNewServerFromConfigurationFile(const char* path);
-
 int gptCloseServer(GPTServer* gptServer);
 
 int gptGetServerDimension(GPTServer gptServer);
 
-//int gptReadNextData(GPTServer* server,
-//                    PIODatatype pioDatatype,
-//                    void** buffer);
+int gptReadNextData(GPTServer* gptServer,
+                    PIODatatype pioDatatype,
+                    void** buffer,
+                    int* label);
 
 // 2 steps usage:
 //   - already_allocated_buffer = malloc(pioDumpServer(pioServer, pioDatatype, NULL))

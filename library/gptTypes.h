@@ -14,6 +14,7 @@
 
 
 typedef enum {
+    GEPETTO_LABEL_FILTER_TYPE_UNDEFINED = -1,
     GEPETTO_LABEL_FILTER_TYPE_NONE,
     GEPETTO_LABEL_FILTER_TYPE_EQUALS_TO,
     GEPETTO_LABEL_FILTER_TYPE_DIFFERS_FROM,
@@ -56,6 +57,7 @@ typedef struct {
     int labelFilterReference;
 
     // labels are propagated from label timeline to data timeline
+    int** propagatedLabel;
     int** filterMask; 
     
     // === SAMPLING ===
@@ -73,32 +75,33 @@ typedef struct {
     PIODataset  current_dataset;
     PIODatatype current_datatype;
     PIOTimeline current_timeline;    
-
+    
 } GPTServer;
 
-#define GPTServerInvalid ((GPTServer) {           \
-/* numberOfDataFiles */       -1,                 \
-/* pathToDataFile */          NULL,               \
-/* pathToDataDataset */       NULL,               \
-/* dataTimeline */            NULL,               \
-/* lengthOfDataTimeline */    NULL,               \
-/* numberOfLabelFiles */      -1,                 \
-/* pathToLabelFile */         NULL,               \
-/* pathToLabelDataset */      NULL,               \
-/* labelTimeline */           NULL,               \
-/* lengthOfLabelTimeline */   NULL,               \
-/* label */                   NULL,               \
-/* labelFilterType */         -1,                 \
-/* labelFilterReference */    -1,                 \
-/* filterMask */              NULL,               \
-/* datatype */                PIODatatypeInvalid, \
-/* labelDatatype */           PIODatatypeInvalid, \
-/* current_file_index */      -1,                 \
-/* curent_file */             PIOFileInvalid,     \
-/* current_timerange_index */ -1,                 \
-/* current_dataset */         PIODatasetInvalid,  \
-/* current_datatype */        PIODatatypeInvalid, \
-/* current_timeline */        PIOTimelineInvalid  \
+#define GPTServerInvalid ((GPTServer) {             \
+/* numberOfDataFiles */         -1,                 \
+/* pathToDataFile */            NULL,               \
+/* pathToDataDataset */         NULL,               \
+/* dataTimeline */              NULL,               \
+/* lengthOfDataTimeline */      NULL,               \
+/* numberOfLabelFiles */        -1,                 \
+/* pathToLabelFile */           NULL,               \
+/* pathToLabelDataset */        NULL,               \
+/* labelTimeline */             NULL,               \
+/* lengthOfLabelTimeline */     NULL,               \
+/* label */                     NULL,               \
+/* labelFilterType */           -1,                 \
+/* labelFilterReference */      -1,                 \
+/* propagatedLabel */           NULL,               \
+/* filterMask */                NULL,               \
+/* datatype */                  PIODatatypeInvalid, \
+/* labelDatatype */             PIODatatypeInvalid, \
+/* current_file_index */        -1,                 \
+/* curent_file */               PIOFileInvalid,     \
+/* current_timerange_index */   -1,                 \
+/* current_dataset */           PIODatasetInvalid,  \
+/* current_datatype */          PIODatatypeInvalid, \
+/* current_timeline */          PIOTimelineInvalid  \
 })
 
 
