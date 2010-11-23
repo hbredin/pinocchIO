@@ -1,4 +1,4 @@
-file(GLOB gepetto_SOURCES *.c)
+file(GLOB gepetto_SOURCES *.c ../../tools/fgetln.c)
 file(GLOB gepetto_HEADERS *.h)
 set(gepetto_PUBLICHEADERS gepetto.h gptTypes.h gptServer.h gptConfig.h)
 

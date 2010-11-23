@@ -16,6 +16,10 @@
 #include "gptConfig.h"
 #include "gptServer.h"
 
+#ifndef __APPLE__
+char* fgetln(FILE *fp, size_t *lenp);
+#endif
+
 #define GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_FILTER "filter"
 
 #define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_NONE "none"
