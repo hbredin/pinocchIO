@@ -21,6 +21,7 @@
 
 static int verbose_flag = 0;
 static int string_flag = 0;
+static int svmlight_flag = 0;
 
 void usage(const char * path2tool)
 {
@@ -31,6 +32,8 @@ void usage(const char * path2tool)
 			"           Dump timeline at PATH\n"
 			"       -d PATH, --dataset=PATH\n"
 			"           Dump dataset at PATH\n"
+            "                --svmlight\n"
+            "           Use SVMlight format\n"
 			"       -s, --timestamp\n"
 			"           Show timestamps\n"
 			"           --text\n"
@@ -53,9 +56,11 @@ int main (int argc, char *const  argv[])
 	double* buffer_double;
 	char* buffer_char;
 	char* string = NULL;
+    
 	
 	int numberOfVectors; // number of vector for each timerange
-	int n; // vector counter
+	int dimension;
+    int n; // vector counter
 	int d; // dimension counter
 	
 	int c;
@@ -64,14 +69,15 @@ int main (int argc, char *const  argv[])
 		static struct option long_options[] =
 		{
 			/* These options set a flag. */
-			{"verbose", no_argument, &verbose_flag, 1},
-			{"brief",   no_argument, &verbose_flag, 0},
+			{"verbose",   no_argument,       &verbose_flag, 1},
+			{"brief",     no_argument,       &verbose_flag, 0},
 			/* These options don't set a flag.
 			 We distinguish them by their indices. */
-			{"timeline", required_argument, 0, 't'},
-			{"dataset",  required_argument, 0, 'd'},
-			{"timestamp", no_argument,      0, 's'},
-			{"text",      no_argument,      &string_flag, 1},
+			{"timeline",  required_argument, 0, 't'},
+			{"dataset",   required_argument, 0, 'd'},
+			{"timestamp", no_argument,       0, 's'},
+            {"svmlight",  no_argument,       &svmlight_flag, 1},
+			{"text",      no_argument,       &string_flag, 1},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -138,6 +144,22 @@ int main (int argc, char *const  argv[])
 		usage(argv[0]);
 		exit(-1);		
 	}
+    
+    if (svmlight_flag && string_flag)
+    {
+        fprintf(stderr, "Incompatible options (svmlight and text)\n");
+        fflush(stderr);
+        usage(argv[0]);
+        exit(-1);
+    }
+    if (svmlight_flag && timeline_path)
+    {
+        fprintf(stderr, "Incompatible options (svmlight and timeline)\n");
+        fflush(stderr);
+        usage(argv[0]);
+        exit(-1);        
+    }
+    if (svmlight_flag) timestamp_flag = 0;
 	
 	pinocchio_file = argv[optind];
 	
@@ -196,7 +218,9 @@ int main (int argc, char *const  argv[])
 			buffer_double = (double*)buffer;
 			buffer_char = (char*)buffer;			            
             
-			if (string_flag & (pioDatatype.type==PINOCCHIO_TYPE_CHAR) & (pioDatatype.dimension == 1))
+            dimension = pioDatatype.dimension;
+            
+			if (string_flag & (pioDatatype.type==PINOCCHIO_TYPE_CHAR) & (dimension == 1))
 			{
 				if (timestamp_flag)
 				{
@@ -222,23 +246,37 @@ int main (int argc, char *const  argv[])
 								(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
 					}
 					
-					for (d=0; d<pioDatatype.dimension; d++)
+                    if (svmlight_flag) fprintf(stdout, "-1 ");
+                    
+					for (d=0; d<dimension; d++)
 					{					
 						switch (pioDatatype.type) {
-							case PINOCCHIO_TYPE_INT:
-								fprintf(stdout, "%d ", buffer_int[n*pioDatatype.dimension+d]);
-								break;
-							case PINOCCHIO_TYPE_FLOAT:
-								fprintf(stdout, "%f ", buffer_float[n*pioDatatype.dimension+d]);
-								break;
-							case PINOCCHIO_TYPE_DOUBLE:
-								fprintf(stdout, "%lf ", buffer_double[n*pioDatatype.dimension+d]);
-								break;
-							case PINOCCHIO_TYPE_CHAR:
-								fprintf(stdout, "%c", buffer_char[n*pioDatatype.dimension+d]);
-								break;
-							default:
-								break;
+                            case PINOCCHIO_TYPE_INT:
+                                if (svmlight_flag && (buffer_int[n*dimension+d]))
+                                    fprintf(stdout, "%d:%d ", d, buffer_int[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%d ", buffer_int[n*dimension+d]);
+                                break;
+                            case PINOCCHIO_TYPE_FLOAT:
+                                if (svmlight_flag && (buffer_float[n*dimension+d]))
+                                    fprintf(stdout, "%d:%f ", d, buffer_float[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%f ", buffer_float[n*dimension+d]);
+                                break;
+                            case PINOCCHIO_TYPE_DOUBLE:
+                                if (svmlight_flag && (buffer_double[n*dimension+d]))
+                                    fprintf(stdout, "%d:%lf ", d, buffer_double[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%lf ", buffer_double[n*dimension+d]);
+                                break;
+                            case PINOCCHIO_TYPE_CHAR:
+                                if (svmlight_flag && (buffer_char[n*dimension+d]))
+                                    fprintf(stdout, "%d:%c ", d, buffer_char[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%c ", buffer_char[n*dimension+d]);                            
+                                break;
+                            default:
+                                break;                                
 						}
 					}
 					fprintf(stdout, "\n");
