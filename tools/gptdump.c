@@ -139,15 +139,6 @@ int main (int argc, char *const  argv[])
         exit(-1);
     }
     
-#ifdef DEBUG
-    int i;
-    for (i=0; i<gptServer.numberOfDataFiles; i++) {
-        fprintf(stderr, "File %02d: %04d timeranges\n", i+1, gptServer.lengthOfDataTimeline[i]);
-        gptServer.
-    }
-    
-#endif
-    
     dimension = gptGetServerDimension(gptServer);
     
     numberOfVectors = gptReadNextData(&gptServer, gptServer.datatype, &buffer, &label);
