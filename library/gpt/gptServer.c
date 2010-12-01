@@ -336,6 +336,8 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
     gptServer.current_dataset = PIODatasetInvalid;
     gptServer.current_timeline = PIOTimelineInvalid;
     
+    gptServer.eof = 0;
+    
     return gptServer;
 }
 
@@ -365,6 +367,7 @@ int gptReadNextData(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer
     {
         gptServer->current_file_index = 0;
         gptServer->current_timerange_index = 0;
+        gptServer->eof = 1;
         return -1;
     }
     
