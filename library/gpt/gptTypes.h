@@ -74,7 +74,9 @@ typedef struct {
     int         current_timerange_index;
     PIODataset  current_dataset;
     PIODatatype current_datatype;
-    PIOTimeline current_timeline;    
+    PIOTimeline current_timeline;   
+    
+    int         eof;
     
 } GPTServer;
 
@@ -101,7 +103,8 @@ typedef struct {
 /* current_timerange_index */   -1,                 \
 /* current_dataset */           PIODatasetInvalid,  \
 /* current_datatype */          PIODatatypeInvalid, \
-/* current_timeline */          PIOTimelineInvalid  \
+/* current_timeline */          PIOTimelineInvalid, \
+/* eof */                       -1                  \
 })
 
 
