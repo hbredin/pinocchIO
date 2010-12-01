@@ -139,68 +139,79 @@ int main (int argc, char *const  argv[])
         exit(-1);
     }
     
+#ifdef DEBUG
+    int i;
+    for (i=0; i<gptServer.numberOfDataFiles; i++) {
+        fprintf(stderr, "File %02d: %04d timeranges\n", i+1, gptServer.lengthOfDataTimeline[i]);
+        gptServer.
+    }
+    
+#endif
+    
     dimension = gptGetServerDimension(gptServer);
     
     numberOfVectors = gptReadNextData(&gptServer, gptServer.datatype, &buffer, &label);
-    while (numberOfVectors >= 0) 
+    while (gptServer.eof == 0) 
     {
-        buffer_int = (int*)buffer;
-        buffer_float = (float*)buffer;
-        buffer_double = (double*)buffer;
-        buffer_char = (char*)buffer;			            
-        
-        if (label_flag)
-            fprintf(stdout, "%d ", label);
-        
-        if (string_flag & 
-            (gptServer.datatype.type==PINOCCHIO_TYPE_CHAR) & 
-            (dimension == 1))
-        {            
-            string = (char*) malloc((numberOfVectors+1)*sizeof(char*));
-            memcpy(string, buffer_char, numberOfVectors);
-            string[numberOfVectors] = '\0';
-            fprintf(stdout, "%s\n", string);
-            free(string);
-        }
-        else
+        if (numberOfVectors > 0)
         {
-            for (n=0; n<numberOfVectors; n++)
-            {				                
-                for (d=0; d<dimension; d++)
-                {					
-                    switch (gptServer.datatype.type) {
-                        case PINOCCHIO_TYPE_INT:
-                            if (svmlight_flag && (buffer_int[n*dimension+d]))
-                                fprintf(stdout, "%d:%d ", d, buffer_int[n*dimension+d]);
-                            else
-                                if (!svmlight_flag) fprintf(stdout, "%d ", buffer_int[n*dimension+d]);
-                            break;
-                        case PINOCCHIO_TYPE_FLOAT:
-                            if (svmlight_flag && (buffer_float[n*dimension+d]))
-                                fprintf(stdout, "%d:%f ", d, buffer_float[n*dimension+d]);
-                            else
-                                if (!svmlight_flag) fprintf(stdout, "%f ", buffer_float[n*dimension+d]);
-                            break;
-                        case PINOCCHIO_TYPE_DOUBLE:
-                            if (svmlight_flag && (buffer_double[n*dimension+d]))
-                                fprintf(stdout, "%d:%lf ", d, buffer_double[n*dimension+d]);
-                            else
-                                if (!svmlight_flag) fprintf(stdout, "%lf ", buffer_double[n*dimension+d]);
-                            break;
-                        case PINOCCHIO_TYPE_CHAR:
-                            if (svmlight_flag && (buffer_char[n*dimension+d]))
-                                fprintf(stdout, "%d:%c ", d, buffer_char[n*dimension+d]);
-                            else
-                                if (!svmlight_flag) fprintf(stdout, "%c ", buffer_char[n*dimension+d]);                            
-                            break;
-                        default:
-                            break;
+            buffer_int = (int*)buffer;
+            buffer_float = (float*)buffer;
+            buffer_double = (double*)buffer;
+            buffer_char = (char*)buffer;			            
+            
+            if (label_flag)
+                fprintf(stdout, "%d ", label);
+            
+            if (string_flag & 
+                (gptServer.datatype.type==PINOCCHIO_TYPE_CHAR) & 
+                (dimension == 1))
+            {            
+                string = (char*) malloc((numberOfVectors+1)*sizeof(char*));
+                memcpy(string, buffer_char, numberOfVectors);
+                string[numberOfVectors] = '\0';
+                fprintf(stdout, "%s\n", string);
+                free(string);
+            }
+            else
+            {
+                for (n=0; n<numberOfVectors; n++)
+                {				                
+                    for (d=0; d<dimension; d++)
+                    {					
+                        switch (gptServer.datatype.type) {
+                            case PINOCCHIO_TYPE_INT:
+                                if (svmlight_flag && (buffer_int[n*dimension+d]))
+                                    fprintf(stdout, "%d:%d ", d, buffer_int[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%d ", buffer_int[n*dimension+d]);
+                                break;
+                            case PINOCCHIO_TYPE_FLOAT:
+                                if (svmlight_flag && (buffer_float[n*dimension+d]))
+                                    fprintf(stdout, "%d:%f ", d, buffer_float[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%f ", buffer_float[n*dimension+d]);
+                                break;
+                            case PINOCCHIO_TYPE_DOUBLE:
+                                if (svmlight_flag && (buffer_double[n*dimension+d]))
+                                    fprintf(stdout, "%d:%lf ", d, buffer_double[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%lf ", buffer_double[n*dimension+d]);
+                                break;
+                            case PINOCCHIO_TYPE_CHAR:
+                                if (svmlight_flag && (buffer_char[n*dimension+d]))
+                                    fprintf(stdout, "%d:%c ", d, buffer_char[n*dimension+d]);
+                                else
+                                    if (!svmlight_flag) fprintf(stdout, "%c ", buffer_char[n*dimension+d]);                            
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                    fprintf(stdout, "\n");
                 }
-                fprintf(stdout, "\n");
             }
         }
-        
         numberOfVectors = gptReadNextData(&gptServer, gptServer.datatype, &buffer, &label);        
     }
     
