@@ -210,7 +210,7 @@ int main (int argc, char *const  argv[])
 			{
 				fprintf(stderr, "Error. Cannot read dataset for timerange #%d\n", tr);
 				fflush(stderr);
-				break;				
+				continue;				
 			}
 
             buffer_int = (int*)buffer;
