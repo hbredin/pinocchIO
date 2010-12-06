@@ -17,6 +17,11 @@ set(piorm_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
 target_link_libraries(piorm pinocchIO)
 install(TARGETS piorm RUNTIME DESTINATION bin)
 
+add_executable(pioaggregate pioaggregate.c)
+set(pioaggregate_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
+target_link_libraries(pioaggregate pinocchIO)
+install(TARGETS pioaggregate RUNTIME DESTINATION bin)
+
 add_executable(piocp piocp.c)
 set(piocp_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
 target_link_libraries(piocp pinocchIO)
