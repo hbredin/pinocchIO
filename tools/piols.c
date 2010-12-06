@@ -25,6 +25,12 @@
 static int verbose_flag;
 static int timeline_flag = 1;
 static int dataset_flag = 1;
+static int show_flag = 0;
+static int show_timeline_path_flag = 0;
+static int show_timeline_description_flag = 0;
+static int show_dataset_path_flag = 0;
+static int show_dataset_description_flag = 0;
+
 
 void usage(const char * path2tool)
 {
@@ -38,7 +44,12 @@ void usage(const char * path2tool)
             "   -t, --timeline=PATH\n"
             "           Show more detail about timeline at PATH\n"
             "   -d, --dataset=PATH\n"
-            "           Show more detail about dataset at PATH\n");
+            "           Show more detail about dataset at PATH\n"
+            "       --show-timeline-path\n"
+            "       --show-timeline-description\n"
+            "       --show-dataset-path\n"
+            "       --show-dataset-description\n"
+            );
 	fflush(stdout);
 }
 
@@ -85,6 +96,10 @@ int main (int argc, char *const  argv[])
 			{"no-dataset",  no_argument, &dataset_flag,  0},
             {"timeline",    required_argument, 0, 't'},
             {"dataset",     required_argument, 0, 'd'},
+            {"show-timeline-path",        no_argument, 0, 1},
+            {"show-timeline-description", no_argument, 0, 2},
+            {"show-dataset-path",         no_argument, 0, 3},
+            {"show-dataset-description",  no_argument, 0, 4},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -126,6 +141,22 @@ int main (int argc, char *const  argv[])
 				/* getopt_long already printed an error message. */
 				usage(argv[0]);
 				break;
+                
+            case 1:
+                show_timeline_path_flag = 1;
+                break;
+                
+            case 2:
+                show_timeline_description_flag = 1;
+                break;
+                
+            case 3:
+                show_dataset_path_flag = 1;
+                break;
+                
+            case 4:
+                show_dataset_description_flag = 1;
+                break;
 				
 			default:
 				abort ();
@@ -140,6 +171,15 @@ int main (int argc, char *const  argv[])
 		exit(-1);		
 	}
 	
+    show_flag = show_dataset_path_flag + show_dataset_description_flag + show_timeline_path_flag + show_timeline_description_flag;
+    
+    if (show_flag > 1)
+    {
+        fprintf(stderr, "--show-XXX options are mutually exclusive.\n");
+        fflush(stderr);
+        exit(-1);
+    }
+    
 	pinocchio_file = argv[optind];
 	
 	
@@ -162,9 +202,24 @@ int main (int argc, char *const  argv[])
             exit(-1);
         }
         
-        fprintf(stdout, "Path        = %s\n", pioDataset.path);
-        fprintf(stdout, "Description = %s\n", pioDataset.description);
-        fflush(stdout);
+        if (show_flag == 0)
+        {
+            fprintf(stdout, "Path        = %s\n", pioDataset.path);
+            fprintf(stdout, "Description = %s\n", pioDataset.description);
+            fflush(stdout);
+        }
+        
+        if (show_dataset_path_flag)
+        {
+            fprintf(stdout, "%s\n", pioDataset.path); 
+            fflush(stdout);
+        }
+        
+        if (show_dataset_description_flag)
+        {
+            fprintf(stdout, "%s\n", pioDataset.description); 
+            fflush(stdout);
+        }
         
         PIOTimeline pioTimeline = pioGetTimeline(pioDataset);
         if (PIOTimelineIsInvalid(pioTimeline))
@@ -175,11 +230,28 @@ int main (int argc, char *const  argv[])
             pioCloseFile(&pioFile);
             exit(-1);
         }
-        fprintf(stdout, "Timeline\n");
-        fprintf(stdout, "   Path        = %s\n", pioTimeline.path);
-        fprintf(stdout, "   Description = %s\n", pioTimeline.description);
-        fprintf(stdout, "   Length      = %d\n", pioTimeline.ntimeranges);
-        fflush(stdout);
+        
+        if (show_flag == 0)
+        {
+            fprintf(stdout, "Timeline\n");
+            fprintf(stdout, "   Path        = %s\n", pioTimeline.path);
+            fprintf(stdout, "   Description = %s\n", pioTimeline.description);
+            fprintf(stdout, "   Length      = %d\n", pioTimeline.ntimeranges);
+            fflush(stdout);
+        }
+        
+        if (show_timeline_path_flag)
+        {
+            fprintf(stdout, "%s\n", pioTimeline.path);
+            fflush(stdout);
+        }
+        
+        if (show_timeline_description_flag)
+        {
+            fprintf(stdout, "%s\n", pioTimeline.description); 
+            fflush(stdout);
+        }
+        
         pioCloseTimeline(&pioTimeline);
         
         PIODatatype pioDatatype = pioGetDatatype(pioDataset);
@@ -192,27 +264,30 @@ int main (int argc, char *const  argv[])
             exit(-1);            
         }
         
-        fprintf(stdout, "Datatype\n");
-        fprintf(stdout, "   Dimension = %d\n", pioDatatype.dimension);
-        switch (pioDatatype.type) 
+        if (show_flag == 0)
         {
-            case PINOCCHIO_TYPE_CHAR:
-                fprintf(stdout, "   Base type = CHAR\n");                
-                break;
-            case PINOCCHIO_TYPE_INT:
-                fprintf(stdout, "   Base type = INT\n");                
-                break;
-            case PINOCCHIO_TYPE_FLOAT:
-                fprintf(stdout, "   Base type = FLOAT\n");                
-                break;
-            case PINOCCHIO_TYPE_DOUBLE:
-                fprintf(stdout, "   Base type = DOUBLE\n");                
-                break;
-            default:
-                fprintf(stdout, "   Base type = UNKNOWN\n");                
-                break;
+            fprintf(stdout, "Datatype\n");
+            fprintf(stdout, "   Dimension = %d\n", pioDatatype.dimension);
+            switch (pioDatatype.type) 
+            {
+                case PINOCCHIO_TYPE_CHAR:
+                    fprintf(stdout, "   Base type = CHAR\n");                
+                    break;
+                case PINOCCHIO_TYPE_INT:
+                    fprintf(stdout, "   Base type = INT\n");                
+                    break;
+                case PINOCCHIO_TYPE_FLOAT:
+                    fprintf(stdout, "   Base type = FLOAT\n");                
+                    break;
+                case PINOCCHIO_TYPE_DOUBLE:
+                    fprintf(stdout, "   Base type = DOUBLE\n");                
+                    break;
+                default:
+                    fprintf(stdout, "   Base type = UNKNOWN\n");                
+                    break;
+            }
+            fflush(stdout);
         }
-        fflush(stdout);
         pioCloseDatatype(&pioDatatype);
         
         pioCloseDataset(&pioDataset);
@@ -231,12 +306,27 @@ int main (int argc, char *const  argv[])
             pioCloseFile(&pioFile);
             exit(-1);
         }
+        if (show_flag == 0)
+        {
+            fprintf(stdout, "Path        = %s\n", pioTimeline.path);
+            fprintf(stdout, "Description = %s\n", pioTimeline.description);
+            fprintf(stdout, "Length      = %d\n", pioTimeline.ntimeranges);
+            fflush(stdout);
+        }
         
-        fprintf(stdout, "Path        = %s\n", pioTimeline.path);
-        fprintf(stdout, "Description = %s\n", pioTimeline.description);
-        fprintf(stdout, "Length      = %d\n", pioTimeline.ntimeranges);
-        fflush(stdout);
-
+        if (show_timeline_path_flag)
+        {
+            fprintf(stdout, "%s\n", pioTimeline.path);
+            fflush(stdout);
+        }
+        
+        if (show_timeline_description_flag)
+        {
+            fprintf(stdout, "%s\n", pioTimeline.description); 
+            fflush(stdout);
+        }
+        
+        
         pioCloseTimeline(&pioTimeline);        
         pioCloseFile(&pioFile);
         exit(-1);
