@@ -176,7 +176,8 @@
  \defgroup file File API
  \ingroup api
  
- @brief 
+ @brief This section describes the pinocchIO file structure and the functions
+ performing basic operations on pinocchIO files.
  
  @{
  */

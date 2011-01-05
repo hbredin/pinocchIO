@@ -114,7 +114,10 @@ typedef struct {
 } PIOFile;
 
 /**
-	Invalid pinocchIO file
+	@brief Invalid pinocchIO file
+ 
+    Invalid pinocchIO file handle returned by pioNewFile() and pioOpenFile()
+    in case of failure.
  */
 #define PIOFileInvalid ((PIOFile) {-1, -1, NULL})
 
@@ -123,12 +126,8 @@ typedef struct {
  */
 
 /**
- \addtogroup timeline
- @{
- */
-
-/**
-    pinocchIO time storage
+ @brief pinocchIO time storage
+ \ingroup timeline
  */
 typedef struct {
 	int64_t time; /**< time in number of units */
@@ -136,7 +135,8 @@ typedef struct {
 } PIOTime;
 
 /**
-	Result of time comparison
+ @brief Result of time comparison
+ \ingroup timecomparison
  */
 typedef enum {
 	PINOCCHIO_TIME_COMPARISON_ASCENDING = -1, /**< Ascending order */
@@ -144,8 +144,10 @@ typedef enum {
 	PINOCCHIO_TIME_COMPARISON_DESCENDING /**< Descending order */
 } PIOTimeComparison;
 
+
 /**
-	pinocchIO time range storage
+ @brief pinocchIO time range storage
+ \ingroup timeline
  */
 typedef struct {
     int64_t time; /**< start time in number of units */
@@ -154,7 +156,8 @@ typedef struct {
 } PIOTimeRange;
 
 /**
-	Result of time range comparison
+ @brief Result of time range comparison
+ \ingroup timecomparison
  */
 typedef enum {
 	PINOCCHIO_TIMERANGE_COMPARISON_ASCENDING = -1, /**< Ascending order */
@@ -163,7 +166,8 @@ typedef enum {
 } PIOTimeRangeComparison;
 
 /**
-	pinocchIO timeline
+ @brief pinocchIO timeline
+ \ingroup timeline
  */
 typedef struct {
 	hid_t identifier;           /**< HDF5 dataset identifier */
@@ -174,22 +178,15 @@ typedef struct {
 } PIOTimeline;
 
 /**
-	Invalid pinocchIO timeline
+ @brief Invalid pinocchIO timeline
+ \ingroup timeline
  */
 #define PIOTimelineInvalid ((PIOTimeline) {-1, -1, NULL, NULL, NULL})
 
-/**
- @}
- */
 
 /**
- \addtogroup timecomparison
- @{
- */
-
-
-/**
-	Result of timeline comparison
+ @brief Result of timeline comparison
+ \ingroup timecomparison
  */
 typedef enum {
     PINOCCHIO_TIMELINE_COMPARISON_SAME,     /**< Timelines are identical */
@@ -199,14 +196,9 @@ typedef enum {
 } PIOTimelineComparison;
 
 /**
- @}
- */
-
-/**
  \addtogroup datatype
  @{
  */
-
 
 /**
 	pinocchIO base type
