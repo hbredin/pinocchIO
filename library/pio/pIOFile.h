@@ -33,8 +33,6 @@
  
  <center><b>one medium + multiple descriptions = one pinocchIO file</b></center>
  
- 
- 
  The idea behind pinocchIO is to be able to store and organize all the information
  related to a given medium into one single file.
  
@@ -177,7 +175,9 @@
 /**
  \defgroup file File API
  \ingroup api
-  
+ 
+ @brief 
+ 
  @{
  */
 
@@ -187,45 +187,111 @@
 
 #include "pIOTypes.h"
 
-#define PIOFileIsInvalid PIOObjectIsInvalid 
-#define PIOFileIsValid   PIOObjectIsValid
-
-#define PIOFile_Structure_Group_Timelines "timeline"
-#define PIOFile_Structure_Group_Datasets  "dataset"
-
-#define PIOFile_Structure_Datasets_Data  "data"
-#define PIOFile_Structure_Datasets_Link "link"
-
+/**
+ @brief Check file invalidity
+ 
+ Check whether the pinocchIO file handle is invalid.
+ 
+ @param pioFile pinocchIO file handle
+ @returns
+    - TRUE if the pinocchIO file handle is invalid
+    - FALSE otherwise
+ */
+#define PIOFileIsInvalid PIOObjectIsInvalid
 
 /**
-	Create new pinocchIO file
+ @brief Check file validity
  
-	@param[in] path Path to new file
+ Check whether the pinocchIO file handle is valid.
+ 
+ @param pioFile pinocchIO file handle
+ @returns
+    - TRUE if the pinocchIO file handle is valid
+    - FALSE otherwise
+ */
+#define PIOFileIsValid   PIOObjectIsValid
+
+/**
+ @brief Name of the HDF5 group meant to contain timelines
+ 
+ pinocchIO files actually are based on the HDF5 format.\n
+ pinocchIO timelines are actually HDF5 datasets gathered in a predefined HDF5 group.\n
+ The name of this group is defined here. 
+ */
+#define PIOFile_Structure_Group_Timelines "timeline"
+
+/**
+ @brief Name of the HDF5 group meant to contain datasets
+
+ pinocchIO files actually are based on the HDF5 format.\n
+ pinocchIO datasets are actually HDF5 groups gathered in a predefined HDF5 group.\n
+ The name of this group is defined here.  
+ */
+#define PIOFile_Structure_Group_Datasets  "dataset"
+
+/**
+ @brief Name of the HDF5 dataset meant to contain the actual data
+ 
+ pinocchIO dataset actually are HDF5 groups containing two HDF5 datasets.\n
+ One of them is meant to store the actual data.\n
+ The name of this HDF5 dataset is defined here.
+ */
+#define PIOFile_Structure_Datasets_Data  "data"
+
+/**
+ @brief Name of the HDF5 dataset meant to contain the number of vectors per time range.
+ 
+ pinocchIO dataset actually are HDF5 groups containing two HDF5 datasets.\n
+ One of them is meant to store the number of vectors per time range.\n
+ The name of this HDF5 dataset is defined here.
+ */
+#define PIOFile_Structure_Datasets_Link "link"
+
+/**
+	@brief Create new pinocchIO file
+
+    Create a new pinocchIO file at location \a path 
+    meant to describe the medium stored at location \a medium.  
+
+    - The directory meant to store the pinocchIO file must exist.
+    - The user must be granted writing rights inside this directory.
+    - There must not be any existing file at location \a path.
+ 
+	@param[in] path Path to the new pinocchIO file
 	@param[in] medium Path to the medium described by this new file
 	@returns 
-        - valid pinocchIO file with read-and-write authorisation when successful
-        - invalid pinocchIO file (PIOFileInvalid) otherwise
+        - a writable pinocchIO file handle when successful
+        - \ref PIOFileInvalid otherwise
  */
 PIOFile pioNewFile  ( const char* path, const char* medium );
 
 /**
-	Open an existing pinocchIO file
-	@param[in] path Path to existing file
-	@param[in] rights Indicates whether to grant read-only (PINOCCHIO_READONLY) or read-and-write (PINOCCHIO_READNWRITE) authorisation
+	@brief Open pinocchIO file
+ 
+    Open the pinocchIO file at location \a path 
+    with required access \a rights.
+ 
+    - A pinocchIO file must exist at location \a path.
+    - The user must be granted the requested rights on this file.
+ 
+	@param[in] path Path to the existing pinocchIO file
+	@param[in] rights Requested rights on this file (see \ref PIOFileRights)
 	@returns
-        - valid pinocchIO file with requested authorisation when succesful  
-        - invalid pinocchIO file otherwise
+        - a readable pinocchIO file handle when successful and \a rights is \ref PINOCCHIO_READONLY
+        - a readable and writable pinocchIO file handle when successful \a rights is \ref PINOCCHIO_READNWRITE
+        - \ref PIOFileInvalid otherwise
  */
 PIOFile pioOpenFile( const char* path, PIOFileRights rights );
 
 /**
 	@brief Close pinocchIO file
  
-    Close a valid pinocchIO file and make it invalid 
+    Close a previously opened pinocchIO file.
+    Upon success, the pinocchIO file handle will be set to \ref PIOFileInvalid.
  
-	@param[in,out] file pointer to pinocchIO file 
-	@returns 
-        - 1 when succesful
+	@param[in,out] file pinocchIO file
+	@returns
+        - 1 when file is successfully closed
         - 0 otherwise
  */
 int pioCloseFile( PIOFile* file );
@@ -233,7 +299,5 @@ int pioCloseFile( PIOFile* file );
 /**
 	@}
  */
-
-
 
 #endif

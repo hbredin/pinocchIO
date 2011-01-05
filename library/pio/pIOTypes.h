@@ -18,10 +18,6 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
-/**
- \defgroup definitions Definitions
- \ingroup api 
- */
 
 #ifndef _PINOCCHIO_TYPES_H
 #define _PINOCCHIO_TYPES_H
@@ -33,7 +29,12 @@
 #define ERROR_SWITCH_ON   H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
 
 /**
- \addtogroup definitions
+ \defgroup objects Generic object
+ \ingroup api
+ 
+ @brief Some pinocchIO functions ask for PIOObject input arguments. 
+ 
+ 
  @{
  */
 
@@ -43,14 +44,14 @@ typedef struct {
 } PIOObject;
 
 /**
-	Make generic pinocchIO object from pinocchIO file, timeline or dataset
+	@brief Make generic pinocchIO object from pinocchIO file, timeline or dataset
 	@param any pinocchIO file, timeline or dataset
 	@returns Generic pinocchIO object
  */
 #define PIOMakeObject( any )  ((PIOObject){ any.identifier })
  
 /**
-	Test validity of pinocchIO object
+	@brief Test validity of pinocchIO object
 	@param o pinocchIO object
 	@returns 
         - 1 if object is valid
@@ -59,7 +60,7 @@ typedef struct {
 #define PIOObjectIsValid(o)   ((o).identifier > 0)
 
 /**
-	Test validity of pinocchIO object
+	@brief Test validity of pinocchIO object
 	@param o pinocchIO object
 	@returns
         - 1 if object is invalid
@@ -77,20 +78,39 @@ typedef struct {
  */
 
 
-/// pinocchIO file authorisation flag
+/**
+ @brief File access rights
+
+ pinocchIO provides a way for opening pinocchIO files in read-only mode
+ or read-and-write mode (see \ref pioOpenFile).\n
+ Note that \ref pioNewFile returns a pinocchIO file handle in read-and-write mode.
+ */
 typedef enum {
-	PINOCCHIO_READONLY, /**< Read only */
-	PINOCCHIO_READNWRITE /**< Read and write */
+    /** Read-only mode */
+	PINOCCHIO_READONLY,
+    /** Read and write mode */
+	PINOCCHIO_READNWRITE 
 } PIOFileRights;
 
-
 /**
-	pinocchIO file
+	@brief pinocchIO file handle
+ 
+    \ref PIOFile provides some kind of file object interface that can be manipulated
+    by high-level pinocchIO functions.
+
+    pinocchIO files are stored internally as HDF5 files.
+    Developpers should not have to worry about \ref PIOFile internals.
+    Their structure is strictly constrained by the pinocchIO library.
+    However, we provide here a short description of the entrails of
+    pinocchIO file handles.
  */
 typedef struct {
-	hid_t identifier; /**< HDF5 file identifier */
-	PIOFileRights rights; /**< whether the file is open with read-only or read-and-write authorisation */
-	char* medium; /**< path to medium described by the file */
+    /**	HDF5 file identifier */
+    hid_t identifier;
+    /** Access rights granted to the user */
+	PIOFileRights rights; 
+    /** Path to the medium described by the pinocchIO file */
+    char* medium; 
 } PIOFile;
 
 /**
@@ -202,7 +222,7 @@ typedef enum {
 	pinocchIO datatype
  */
 typedef struct {
-	hid_t identifier; /**< HDF5 datatype identifier */
+	hid_t identifier; /**< @brief HDF5 datatype identifier */
 	PIOBaseType type; /**< array base type */
 	int dimension; /**< array dimension */
 } PIODatatype;
