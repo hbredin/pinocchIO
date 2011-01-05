@@ -18,6 +18,85 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \page ascii2pio ascii2pio
+ 
+ \a ascii2pio adds a timeline or a dataset to a pinocchIO file, from a text file.
+ 
+ \section usage Usage 
+\verbatim
+ $ ascii2pio file.txt file.pio [options]
+ 
+    -d, --dataset=PATH                                              
+                    Read dataset from INPUT text file and add it    
+                    into OUTPUT pinocchIO file at internal PATH.    
+                    Timeline provided by option --timeline is used. 
+                                                                    
+        --char      Data is stored as char array.                   
+        --int       Data is stored as int array.                    
+        --float     Data is stored as float array.                  
+        --double    Data is stored as double array.
+ 
+    -n, --dimension=D                                               
+                    Set array dimension. Default is 1               
+                                                                    
+        --string    Data is stored as string.                       
+                                                                    
+    -t, --timeline=PATH                                             
+                    If timeline at PATH does not exist:             
+                        Read timeline from INPUT text file and add  
+                        it into OUTPUT pinocchIO file at PATH.      
+                    If it exists:                                   
+                        Timeline in OUTPUT pinocchIO file at PATH is
+                        used as timeline for new dataset.           
+                                                                    
+    -p, --precision=SCALE                                           
+                    Set precision used for new timeline.           
+                    Default is 1000 (1 ms precision).              
+                                                                   
+    -D, --description=DESCR                              
+                    Set dataset/timeline description                   
+                                                                   
+                                                                   
+  Timeline format - one segment per line: TIMERANGE                
+  Data format - one descriptor per line: TIMERANGE DATA            
+  TIMERANGE equals 'start stop'           
+  DATA equals 'x1 x2 ... xD' (with option --char/int/float/double) 
+       equals 'string'       (with option --string)                 
+\endverbatim 
+ \section example Example
+ - Add 3-dimensional integer dataset to file.pio 
+\verbatim
+ # file.txt
+ # start stop x1 x2 x3
+ 0.00 5.23 3 12 5
+ 5.8  9    4  8 1
+ 7.43 9.92 2 23 7
+\endverbatim
+    -# Adds timeline first
+\verbatim
+ $ ascii2pio file.txt file.pio --timeline=/path/to/timeline --description="Timeline description"
+\endverbatim
+    -# Adds dataset
+\verbatim
+ $ ascii2pio file.txt file.pio --timeline=/path/to/timeline
+                               --dataset=/path/to/dataset   --description="Dataset description"
+                               --dimension=3 --int
+\endverbatim
+ - Add text dataset with same timeline
+\verbatim
+ # file.txt
+ 0 0 hello there
+ 0 0 how do you do?
+ 0 0 nice, and you?
+\endverbatim
+\verbatim
+ $ ascii2pio file.txt file.pio --timeline=/path/to/timeline
+                               --dataset=/path/to/text/dataset --description="Text dataset description"
+                               --string
+\endverbatim
+ */
+
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -158,7 +237,7 @@ int usage(int argc, char *const argv[])
 			"   -n, --dimension=D                                               \n" \
 			"                   Set array dimension. Default is 1               \n" \
 			"                                                                   \n" \
-			"       --string    Data is store as string.                        \n" \
+			"       --string    Data is stored as string.                        \n" \
 			"                                                                   \n" \
 			"   -t, --timeline=PATH                                             \n" \
 			"                   If timeline at PATH does not exist:             \n" \
@@ -178,8 +257,7 @@ int usage(int argc, char *const argv[])
 			"                                                                   \n" \
 			" Timeline format - one segment per line: TIMERANGE                 \n" \
 			" Data format - one descriptor per line: TIMERANGE DATA             \n" \
-			" TIMERANGE equals 'start stop' (with option --time-read)           \n" \
-			"           is empty            (with option --time-copy)           \n" \
+			" TIMERANGE equals 'start stop'                                     \n" \
 			" DATA equals 'x1 x2 ... xD' (with option --char/int/float/double)  \n" \
 			"      equals 'string'       (with option --string)                 \n",
 			argv[0]);

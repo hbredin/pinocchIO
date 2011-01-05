@@ -21,9 +21,37 @@
 #ifndef _PINOCCHIO_WRITE_H
 #define _PINOCCHIO_WRITE_H
 
+/**
+ \defgroup write Writer
+ \ingroup dataset
+ @{
+ */
+
+
 #include "pIOTypes.h"
 
-int pioWrite(PIODataset* pioDataset, int timerangeIndex, 
+/**
+	Writes data into dataset for a given timerange.
+ 
+    
+ 
+	@param pioDataset Dataset
+	@param timerangeIndex Index of timerange
+	@param dataBuffer Data buffer
+	@param dataNumber Number of data
+	@param dataType Type of data buffer
+	@returns 
+        - dataNumber when successful
+        - -1 otherwise
+ */
+int pioWrite(PIODataset* pioDataset, int timerangeIndex,
 			 void* dataBuffer, int dataNumber, PIODatatype dataType);
 
+
 #endif
+
+
+/**
+	@}
+ */
+

@@ -21,6 +21,12 @@
 #ifndef _PINOCCHIO_TIMERANGE_H
 #define _PINOCCHIO_TIMERANGE_H
 
+/**
+ \defgroup timecomparison Time(line) comparison
+ \ingroup timeline
+ @{
+ */
+
 #include "pIOTypes.h"
 
 /// Time range comparison. 
@@ -113,5 +119,11 @@ int pioFindTimeRangeInTimeLine( PIOTimeRange tr, PIOTimeRange* tl, int n);
 /// \returns	int
 ///		
 PIOTimelineComparison pioCompareTimeLines (PIOTimeRange* tr1, int n1, PIOTimeRange* tr2, int n2);
+
+/**
+	@}
+ */
+
+
 
 #endif

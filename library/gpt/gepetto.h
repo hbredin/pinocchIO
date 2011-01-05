@@ -18,6 +18,13 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \defgroup gepetto Gepetto
+ \ingroup api
+ 
+ @{
+ */
+
 #ifndef _GEPETTO_H
 #define _GEPETTO_H
 
@@ -26,3 +33,8 @@
 #include "gptConfig.h"
 
 #endif
+
+/**
+	@}
+ */
+

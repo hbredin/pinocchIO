@@ -18,9 +18,29 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+
+/**
+ \defgroup config Server configuration
+ \ingroup gepetto
+ 
+ @{
+ */
+
 #ifndef _GEPETTO_CONFIG_H
 #define _GEPETTO_CONFIG_H
 
+/**
+	Creates new gepetto server from configuration file
+	@param filename path to configuration file
+	@returns
+        - gepetto server if successful
+        - invalid gepetto server otherwise 
+ */
 GPTServer gptNewServerFromConfigurationFile(const char* filename);
 
 #endif
+
+/**
+	@}
+ */
+

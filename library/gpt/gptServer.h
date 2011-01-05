@@ -18,11 +18,19 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+
+/**
+ \defgroup server Server API
+ \ingroup gepetto
+ 
+ @{
+ */
+
+
 #ifndef _GEPETTO_SERVER_H
 #define _GEPETTO_SERVER_H
 
 #include <libconfig.h>
-
 #include "gptTypes.h"
 
 #define GPTServerIsInvalid(o)   ((o).numberOfDataFiles < 1)
@@ -50,3 +58,8 @@ int gptReadNextData(GPTServer* gptServer,
 //                  void* already_allocated_buffer);
 
 #endif
+
+/**
+	@}
+ */
+

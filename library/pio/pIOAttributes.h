@@ -18,6 +18,13 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \defgroup attribute Attribute API 
+ \ingroup api
+ @{
+ */
+
+
 #ifndef _PINOCCHIO_ATTRIBUTES_H
 #define _PINOCCHIO_ATTRIBUTES_H
 
@@ -31,14 +38,15 @@
 
 #define PIOAttribute_NumberProtected 5
 
-/// Checks attribute protection
-///
-/// \param[in] attr_name	Name of attribute
-///
-/// \returns int
-///		- 1 if attribute name is reserved for pinocchIO internal use
-///		- 0 if attribute name can be used
+/**
+	Check if attribute name is protected 
+	@param attr_name Attribute name
+	@returns 
+        - 1 if attribute name is reserved for pinocchIO internal use
+        - 0 otherwise
+ */
 int pioAttributeIsProtected( const char* attr_name);
+
 
 /// Checks attribute existence. 
 ///
@@ -154,4 +162,9 @@ int pioReadAttributeDouble (PIOObject pioObject,
 							const char* attr_name, double* attr_value);
 
 #endif
+
+/**
+	@}
+ */
+
 

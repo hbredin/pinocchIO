@@ -18,6 +18,13 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \defgroup timeline Timeline API
+ \ingroup api
+ 
+ @{
+ */
+    
 #ifndef _PINOCCHIO_TIMELINE_H
 #define _PINOCCHIO_TIMELINE_H
 
@@ -73,3 +80,9 @@ int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines);
 PIOTimeline pioGetTimeline(PIODataset pioDataset);
 
 #endif
+
+/**
+	@}
+ */
+
+

@@ -21,36 +21,60 @@
 #ifndef _PINOCCHIO_DATATYPE_H
 #define _PINOCCHIO_DATATYPE_H
 
+/**
+ \defgroup datatype Datatype
+ \ingroup dataset
+ @{
+ */
+
+
 #include "pIOTypes.h"
 
 #define PIODatatypeIsInvalid PIOObjectIsInvalid 
 #define PIODatatypeIsValid   PIOObjectIsValid 
 
-/// Creates new pinocchIO datatype. 
-///
-/// Creates a new datatype as an dimension-D array of type type
-///
-/// \param[in] type	Datatype of array elements.
-/// \param[in] dimension	Dimension of array.
-///
-/// \returns	PIODatatype
-///		- new datatype handle when successful
-///		- negative value otherwise.
-///
+/**
+	Creates a new array datatype
+	@param type type of array elements
+	@param dimension number of elements in array
+	@returns pinocchIO array datatype
+ */
 PIODatatype pioNewDatatype( const PIOBaseType type, int dimension );
 
-/// Closes a previously created datatype. 
-///
-/// \param[in] datatype	Datatype handle
-///
-/// \returns	int
-///		- positive value when successful
-///		- negative value otherwise.
-///
+/**
+	Closes a previously created datatype
+	@param[in] datatype datatype 
+	@returns 
+        - 1 when successful
+        - 0 otherwise
+ */
 int pioCloseDatatype( PIODatatype* datatype );
 
+
+/**
+	Get dataset datatype
+	@param[in] pioDataset Dataset
+	@returns 
+        - datatype when successful
+        - invalid datatype otherwise
+ */
 PIODatatype pioGetDatatype(PIODataset pioDataset);
 
+
+/**
+	Get size of datatype
+	@param pioDatatype Datatype
+	@returns 
+        - size in bytes, when successful
+        - 0 otherwise
+ */
 size_t pioGetSize(PIODatatype pioDatatype);
 
+
 #endif
+
+/**
+	@}
+ */
+
+

@@ -18,6 +18,26 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \page pioinit pioinit
+ 
+ \a pioinit creates an empty pinocchIO file for a given medium.
+ 
+ \section usage Usage 
+\verbatim
+ $ pioinit /path/to/medium /path/to/pinocchIO/file
+\endverbatim 
+ \section example Example
+\verbatim
+ $ pioinit /my/favorite/movie.avi /data/movie.pio
+ $ piols /data/movie.pio
+ == Medium ==
+ /my/favorite/movie.avi
+ == 0 timeline(s) ==
+ == 0 dataset(s) ==
+\endverbatim
+ */
+
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>

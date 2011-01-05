@@ -18,6 +18,13 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+
+/**
+ \defgroup dataset Dataset API
+ \ingroup api
+ @{
+ */
+
 #ifndef _PINOCCHIO_DATASET_H
 #define _PINOCCHIO_DATASET_H
 
@@ -26,21 +33,63 @@
 #define PIODatasetIsValid(d)   (((d).identifier > 0) && ((d).link_identifier > 0))
 #define PIODatasetIsInvalid(d) (!PIODatasetIsValid(d))
 
-PIODataset pioNewDataset(PIOFile pioFile, 
+/**
+	Creates new dataset in file
+	@param pioFile pinocchIO file in which dataset is created
+	@param path internal path to dataset in pinocchIO file
+	@param description dataset textual description
+	@param pioTimeline dataset timeline
+	@param pioDatatype dataset datatype
+	@returns
+        - valid dataset if successful
+        - invalid dataset otherwise
+ */
+PIODataset pioNewDataset(PIOFile pioFile,
 						 const char* path, const char* description,
 						 PIOTimeline pioTimeline,
-						 PIODatatype pioDatatype); 
+						 PIODatatype pioDatatype);
 
+/**
+	Remove dataset from file
+	@param pioObject any object included in affected file
+	@param path internal path to removed dataset
+	@returns 
+        - 1 if dataset is successfully removed
+        - 0 otherwise
+ */
 int pioRemoveDataset(PIOObject pioObject, const char* path);
 
+/**
+	Open dataset 
+	@param pioObject any object included in file containing requested dataset
+	@param path internal path to dataset
+	@returns 
+        - valid dataset if successful
+        - invalid dataset otherwise
+ */
 PIODataset pioOpenDataset(PIOObject pioObject, const char* path);
 
+/**
+	Close dataset
+	@param pioDataset pointer to dataset
+	@returns
+        - 1 when successful
+        - 0 otherwise
+ */
 int pioCloseDataset(PIODataset* pioDataset);
 
-
-/// \returns int
-///		- number of timelines in file when successfull
-///		- negative value otherwise
+/**
+	Get list of datasets
+	@param pioFile pinocchIO file
+	@param pathsToDatasets pointer to list of dataset paths
+	@returns number of datasets in file
+ */
 int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets);
 
 #endif
+
+
+/**
+	@}
+ */
+

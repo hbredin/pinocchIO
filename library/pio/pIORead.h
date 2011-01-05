@@ -21,22 +21,66 @@
 #ifndef _PINOCCHIO_READ_H
 #define _PINOCCHIO_READ_H
 
+/**
+ \defgroup read Reader
+ \ingroup dataset
+ @{
+ */
+
+
 #include "pIOTypes.h"
 
-int pioReadData(PIODataset* pioDataset, 
-                int timerangeIndex, 
-                PIODatatype pioDatatype, 
+/**
+	Reads data from dataset for a given timerange
+	@param[in] pioDataset Dataset
+	@param[in] timerangeIndex Index of timerange
+	@param[in] pioDatatype Type of data 
+	@param[out] buffer Data buffer
+	@returns 
+        - number of data when successful
+        - -1 otherwise
+ */
+int pioReadData(PIODataset* pioDataset,
+                int timerangeIndex,
+                PIODatatype pioDatatype,
                 void** buffer);
+
 #define pioRead pioReadData
 
-int pioReadNumber(PIODataset pioDataset, 
+
+/**
+	Reads number of data stored in dataset for a given timerange
+	@param[in] pioDataset Dataset
+	@param[in] timerangeIndex Index of timerange
+	@returns 
+        - number of data when successful
+        - -1 otherwise
+ */
+int pioReadNumber(PIODataset pioDataset,
                   int timerangeIndex);
 
-// 2 steps usage:
-//   - already_allocated_buffer = malloc(pioDumpDataset(pioDataset, pioDatatype, NULL))
-//   - number = pioDumpDataset(pioDataset, pioDatatype, already_allocated_buffer)
-int pioDumpDataset(PIODataset* pioDataset, 
-                   PIODatatype pioDatatype, 
+/**
+	Dump whole dataset into buffer
+ 
+    Dump whole dataset into buffer.
+    Buffer has to be previously allocated with sufficient memory to contain whole dataset.
+    Buffer size can be obtained by calling this function with NULL buffer first.
+ 
+	@param[in] pioDataset Dataset
+	@param[in] pioDatatype Buffer datatype
+	@param[in, out] already_allocated_buffer Data buffer
+	@returns 
+        - -1 when something went bad
+        - when succesful,
+            -# if already_allocated_buffer == NULL, buffer size in bytes
+            -# otherwise, total number of data
+ */
+int pioDumpDataset(PIODataset* pioDataset,
+                   PIODatatype pioDatatype,
                    void* already_allocated_buffer);
 
 #endif
+/**
+	@}
+ */
+

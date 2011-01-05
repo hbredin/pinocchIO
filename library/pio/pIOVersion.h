@@ -21,6 +21,14 @@
 #ifndef _PINOCCHIO_VERSION_H
 #define _PINOCCHIO_VERSION_H
 
+/**
+	pinocchIO version
+ */
 #define PINOCCHIO_VERSION      VERSION
+
+/**
+	pinocchIO release date
+ */
 #define PINOCCHIO_RELEASE_DATE RELEASEDATE
+
 #endif

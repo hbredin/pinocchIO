@@ -18,6 +18,11 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \defgroup definitions Definitions
+ \ingroup api 
+ */
+
 #ifndef _PINOCCHIO_TYPES_H
 #define _PINOCCHIO_TYPES_H
 
@@ -27,136 +32,218 @@
 #define ERROR_SWITCH_OFF  H5Eget_auto2(H5E_DEFAULT, &old_func, &old_client_data); H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 #define ERROR_SWITCH_ON   H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
 
+/**
+ \addtogroup definitions
+ @{
+ */
+
 /// generic pinocchIO object
 typedef struct {
-	hid_t identifier;
+	hid_t identifier; 
 } PIOObject;
 
-#define PIOMakeObject( any )  ((PIOObject){ any.identifier }) 
+/**
+	Make generic pinocchIO object from pinocchIO file, timeline or dataset
+	@param any pinocchIO file, timeline or dataset
+	@returns Generic pinocchIO object
+ */
+#define PIOMakeObject( any )  ((PIOObject){ any.identifier })
+ 
+/**
+	Test validity of pinocchIO object
+	@param o pinocchIO object
+	@returns 
+        - 1 if object is valid
+        - 0 if object is invalid
+ */
 #define PIOObjectIsValid(o)   ((o).identifier > 0)
+
+/**
+	Test validity of pinocchIO object
+	@param o pinocchIO object
+	@returns
+        - 1 if object is invalid
+        - 0 if object is valid
+ */
 #define PIOObjectIsInvalid(o) (!PIOObjectIsValid(o))
 
+/**
+ @}
+ */
+
+/**
+ \addtogroup file
+ @{
+ */
+
+
+/// pinocchIO file authorisation flag
 typedef enum {
-	/// Read only
-	PINOCCHIO_READONLY,
-	/// Read and write
-	PINOCCHIO_READNWRITE	
+	PINOCCHIO_READONLY, /**< Read only */
+	PINOCCHIO_READNWRITE /**< Read and write */
 } PIOFileRights;
 
-/// pinocchIO file
+
+/**
+	pinocchIO file
+ */
 typedef struct {
-	hid_t identifier;
-	PIOFileRights rights;
-	char* medium;
+	hid_t identifier; /**< HDF5 file identifier */
+	PIOFileRights rights; /**< whether the file is open with read-only or read-and-write authorisation */
+	char* medium; /**< path to medium described by the file */
 } PIOFile;
 
+/**
+	Invalid pinocchIO file
+ */
 #define PIOFileInvalid ((PIOFile) {-1, -1, NULL})
 
-/// PIOTime structure is used to store time.
+/**
+ @}
+ */
+
+/**
+ \addtogroup timeline
+ @{
+ */
+
+/**
+    pinocchIO time storage
+ */
 typedef struct {
-	/// time in number of units
-	int64_t time;
-	/// number of units in one second
-	int32_t scale;
+	int64_t time; /**< time in number of units */
+	int32_t scale; /**< number of units in one second */
 } PIOTime;
 
+/**
+	Result of time comparison
+ */
 typedef enum {
-	PINOCCHIO_TIME_COMPARISON_ASCENDING = -1,
-	PINOCCHIO_TIME_COMPARISON_SAME,
-	PINOCCHIO_TIME_COMPARISON_DESCENDING,
+	PINOCCHIO_TIME_COMPARISON_ASCENDING = -1, /**< Ascending order */
+	PINOCCHIO_TIME_COMPARISON_SAME, /**< Simultaneity */
+	PINOCCHIO_TIME_COMPARISON_DESCENDING /**< Descending order */
 } PIOTimeComparison;
 
-/// PIOTimeRange structure is used to store time range.
+/**
+	pinocchIO time range storage
+ */
 typedef struct {
-	/// start time in number of units
-	int64_t time;
-	/// range duration in number of units
-	int64_t duration;
-	/// number of units in one second
-	int32_t scale;
+    int64_t time; /**< start time in number of units */
+    int64_t duration; /**< duration in number of units */
+    int32_t scale; /**< number of units in one second */
 } PIOTimeRange;
 
+/**
+	Result of time range comparison
+ */
 typedef enum {
-	PINOCCHIO_TIMERANGE_COMPARISON_ASCENDING = -1,
-	PINOCCHIO_TIMERANGE_COMPARISON_SAME,
-	PINOCCHIO_TIMERANGE_COMPARISON_DESCENDING,
+	PINOCCHIO_TIMERANGE_COMPARISON_ASCENDING = -1, /**< Ascending order */
+	PINOCCHIO_TIMERANGE_COMPARISON_SAME, /**< Equality */
+	PINOCCHIO_TIMERANGE_COMPARISON_DESCENDING /**< Descending order */
 } PIOTimeRangeComparison;
 
-/// pinocchIO timeline
+/**
+	pinocchIO timeline
+ */
 typedef struct {
-	hid_t identifier;
-	int ntimeranges;
-	PIOTimeRange* timeranges;
-	char* path;
-	char* description;
+	hid_t identifier;           /**< HDF5 dataset identifier */
+	int ntimeranges;            /**< number of time ranges */
+	PIOTimeRange* timeranges;   /**< time ranges sorted in chronological order */
+	char* path;                 /**< internal path to timeline in pinocchIO file */
+	char* description;          /**< timeline textual description */
 } PIOTimeline;
 
+/**
+	Invalid pinocchIO timeline
+ */
 #define PIOTimelineInvalid ((PIOTimeline) {-1, -1, NULL, NULL, NULL})
 
+/**
+ @}
+ */
+
+/**
+ \addtogroup timecomparison
+ @{
+ */
+
+
+/**
+	Result of timeline comparison
+ */
 typedef enum {
-	/// Timelines are exactly the same
-	PINOCCHIO_TIMELINE_COMPARISON_SAME,
-	/// First timeline fully contains second timeline
-	PINOCCHIO_TIMELINE_COMPARISON_SUPERSET,
-	/// First timeline is fully included into second timeline 
-	PINOCCHIO_TIMELINE_COMPARISON_SUBSET,
-	/// Any other cases
-	PINOCCHIO_TIMELINE_COMPARISON_OTHER
+    PINOCCHIO_TIMELINE_COMPARISON_SAME,     /**< Timelines are identical */
+    PINOCCHIO_TIMELINE_COMPARISON_SUPERSET, /**< First timeline fully contains second timeline */
+    PINOCCHIO_TIMELINE_COMPARISON_SUBSET,   /**< First timeline is fully included into second timeline */
+    PINOCCHIO_TIMELINE_COMPARISON_OTHER     /**< Any other cases */
 } PIOTimelineComparison;
 
+/**
+ @}
+ */
+
+/**
+ \addtogroup datatype
+ @{
+ */
+
+
+/**
+	pinocchIO base type
+ */
 typedef enum {
-	/// Integer datatype
-	PINOCCHIO_TYPE_INT,
-	/// Float datatype
-	PINOCCHIO_TYPE_FLOAT,
-	/// Double datatype
-	PINOCCHIO_TYPE_DOUBLE,
-	/// String datatype,
-	PINOCCHIO_TYPE_CHAR
+    PINOCCHIO_TYPE_INT, /**< Integer */
+    PINOCCHIO_TYPE_FLOAT, /**< Float */
+    PINOCCHIO_TYPE_DOUBLE, /**< Double */
+	PINOCCHIO_TYPE_CHAR /**< Char */
 } PIOBaseType;
 
-/// pinocchIO datatype
+/**
+	pinocchIO datatype
+ */
 typedef struct {
-	hid_t identifier;
-	PIOBaseType type;
-	int dimension;
+	hid_t identifier; /**< HDF5 datatype identifier */
+	PIOBaseType type; /**< array base type */
+	int dimension; /**< array dimension */
 } PIODatatype;
 
+/**
+	Invalid pinocchIO datatype
+ */
 #define PIODatatypeInvalid ((PIODatatype) {-1, -1, -1})
 
-/// pinocchIO dataset
+/**
+ @}
+ */
+
+/**
+ \addtogroup dataset
+ @{
+ */
+
+/**
+	pinocchIO dataset
+ */
 typedef struct {
-	hid_t identifier; // data_identifier
-	hid_t link_identifier;
-	char* path;
-	char* description;
-	int stored; // number of stored elements
-	int ntimeranges; // number of timeranges in dataset timeline ( = extent of link dataset)
-    void* buffer;
-    size_t buffer_size;
+	hid_t identifier; /**< HDF5 dataset identifier for path/data */
+	hid_t link_identifier; /**< HDF5 dataset identifier ofr path/link */
+	char* path; /**< internal path to dataset in pinocchIO file */
+	char* description; /**< dataset textual description */
+	int stored; /**< number of elements in dataset */
+	int ntimeranges; /**< number of time ranges in dataset timeline */
+	void* buffer; /**< internal buffer */
+	size_t buffer_size; /**< internal buffer size */
 } PIODataset;
 
+/**
+	Invalid pinocchIO dataset
+ */
 #define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL, -1, -1, NULL, 0})
 
-/// pinocchIO server
-typedef struct {
-    int nfiles;
-    char** files;
-    char* dataset;
-    int* ntimeranges;
-    int* stored;
-    PIODatatype datatype;
-    
-    int         current_file_index;
-    PIOFile     current_file;
-    
-    int         current_timerange_index;
-    PIODataset  current_dataset;
-    PIOTimeline current_timeline;    
-} PIOServer;
-
-#define PIOServerInvalid ((PIOServer) {-1, NULL, NULL, NULL, NULL, PIODatatypeInvalid, -1, PIOFileInvalid, -1, PIODatasetInvalid, PIOTimelineInvalid})
-
-
 #endif
+
+/**
+	@}
+ */
+
 

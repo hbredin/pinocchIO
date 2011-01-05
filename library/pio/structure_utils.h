@@ -31,6 +31,9 @@ typedef struct {
 
 hid_t linkDatatype();
 
+/**
+	\internal
+ */
 typedef struct listOfPaths_s {
     char* path;
     struct listOfPaths_s *next;

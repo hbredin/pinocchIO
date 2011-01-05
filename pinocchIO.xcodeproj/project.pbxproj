@@ -162,7 +162,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 289554A212B182F9002D0FC1 /* pioinit */;
+			remoteGlobalIDString = 289554A212B182F9002D0FC1;
 			remoteInfo = pioinit;
 		};
 		2872832C12A682E900FA13BD /* PBXContainerItemProxy */ = {

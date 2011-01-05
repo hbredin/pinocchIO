@@ -18,6 +18,14 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \page piocp piocp
+ 
+ \section usage Usage 
+ \section example Example
+ */
+
+
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
