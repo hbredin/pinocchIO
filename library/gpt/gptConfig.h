@@ -23,6 +23,8 @@
  \defgroup config Server configuration
  \ingroup gepetto
  
+ @brief Not documented yet.
+ 
  @{
  */
 

@@ -22,6 +22,8 @@
  \defgroup gepetto Gepetto
  \ingroup api
  
+ @brief Not documented yet.
+ 
  @{
  */
 

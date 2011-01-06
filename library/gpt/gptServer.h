@@ -23,6 +23,8 @@
  \defgroup server Server API
  \ingroup gepetto
  
+ @brief Not documented yet.
+ 
  @{
  */
 
