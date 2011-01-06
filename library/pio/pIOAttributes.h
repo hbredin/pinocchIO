@@ -27,7 +27,6 @@
  @{
  */
 
-
 #ifndef _PINOCCHIO_ATTRIBUTES_H
 #define _PINOCCHIO_ATTRIBUTES_H
 

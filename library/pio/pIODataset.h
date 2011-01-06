@@ -25,6 +25,22 @@
  
  @brief Functions dealing with pinocchIO datasets
 
+ A dataset is a collection of sets of D-dimensional vectors aligned with a timeline.
+ 
+ \image	html dataset.png "A dataset aligned with the first timeline"
+ \image	latex dataset.eps "A dataset aligned with the first timeline" width=\textwidth
+ 
+ Dimension D and type of values (char, integer, float or double) are set once and 
+ for all when the dataset is created.
+ However, the number of vectors can vary from one time range to another.
+ 
+ For instance, SIFT descriptors are usually stored as 128-dimensional float vectors.
+ However, their number can vary from one frame to another.
+ 
+ Dataset can also be used to store textual descriptors as string.
+ Simply create a dataset of 1-dimensional char vectors and store N vectors where
+ N is the length of the string.
+ 
  @{
  */
 

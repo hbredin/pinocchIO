@@ -24,59 +24,107 @@
 #include "pIOTypes.h"
 
 /**
-	Reads data from dataset for a given timerange
-	@param[in] pioDataset Dataset
-	@param[in] timerangeIndex Index of timerange
-	@param[in] pioDatatype Type of data 
-	@param[out] buffer Data buffer
-	@returns 
-        - number of data when successful
-        - -1 otherwise
+ @brief Read data stored in dataset for a given time range
  
-    @ingroup dataset
+ Read data stored in @a dataset into @a buffer for the time range at 
+ position @a timerangeIndex in @dataset timeline.
+ 
+ @param[in,out] dataset pinocchIO dataset
+ @param[in] timerangeIndex Index of timerange
+ @param[in] datatype Buffer datatype
+ @param[out] buffer Data buffer
+  
+ @note
+ Buffer @a datatype does not have to match @a dataset datatype exactly.\n 
+ While dimensions must be the same, @ref PIOBaseType "base types" can 
+ be different: pinocchIO automatically performs the conversion when needed. 
+
+ The content of the buffer is described by parameter @a datatype and return value @a number:
+ - the N=@a number entries are stored in the buffer the one after the other...
+ - ... as multi-dimensional arrays with the base type and dimension of @a datatype. 
+ 
+ \image	html write.png 
+ \image	latex write.eps 
+ 
+ @returns
+ - @a number of entries when successful
+ - negative value otherwise
+  
+ @ingroup dataset
  */
-int pioReadData(PIODataset* pioDataset,
+int pioReadData(PIODataset* dataset,
                 int timerangeIndex,
-                PIODatatype pioDatatype,
+                PIODatatype datatype,
                 void** buffer);
 
+/**
+	@brief Read data stored in dataset for a given time range.
+    
+    See pioReadData()
+    @ingroup dataset
+ */
 #define pioRead pioReadData
 
 
+
 /**
-	Reads number of data stored in dataset for a given timerange
-	@param[in] pioDataset Dataset
-	@param[in] timerangeIndex Index of timerange
-	@returns 
-        - number of data when successful
-        - -1 otherwise
+ @brief Get number of entries stored in dataset for a given time range
+ 
+ Get number of entries stored in @a datasetfor the time range at 
+ position @a timerangeIndex in @dataset timeline.
+ 
+ @param[in] dataset pinocchIO dataset
+ @param[in] timerangeIndex Index of timerange
+  
+ @returns
+ - @a number of entries when successful
+ - negative value otherwise
  
  @ingroup dataset
  */
-int pioReadNumber(PIODataset pioDataset,
+int pioReadNumber(PIODataset dataset,
                   int timerangeIndex);
 
 /**
-	Dump whole dataset into buffer
+ @brief Dump whole dataset into buffer
  
-    Dump whole dataset into buffer.
-    Buffer has to be previously allocated with sufficient memory to contain whole dataset.
-    Buffer size can be obtained by calling this function with NULL buffer first.
+ Dump whole @a dataset into previously allocated @a buffer.
+
+ @param[in] dataset Dataset
+ @param[in] datatype Buffer datatype
+ @param[in, out] buffer Data buffer 
  
-	@param[in] pioDataset Dataset
-	@param[in] pioDatatype Buffer datatype
-	@param[in, out] already_allocated_buffer Data buffer
-	@returns 
-        - -1 when something went bad
-        - when succesful,
-            -# if already_allocated_buffer == NULL, buffer size in bytes
-            -# otherwise, total number of data
+ Entries are stored in the buffer the one after the other,
+ sorted in time range chronological order.
+
+ @note
+ Buffer @a datatype does not have to match @a dataset datatype exactly.\n 
+ While dimensions must be the same, @ref PIOBaseType "base types" can 
+ be different: pinocchIO automatically performs the conversion when needed. 
+
+ @note
+ @a buffer has to be allocated with enough memory space to contain the whole
+ @a dataset. A first call with a NULL buffer will return the required buffer
+ size in bytes.
+  
+ @returns 
+    - required buffer size in bytes if successful if buffer!=NULL
+    - total number of entries if successful and buffer!=NULL
+    - a negative value otherwise
+  
+ \par Example
+\verbatim
+ size_t size = pioDumpDataset(dataset, datatype, NULL);
+ buffer = malloc(size);
+ number = pioDumpDataset(dataset, datatype, buffer)
+\endverbatim
+ 
  
  @ingroup dataset
  */
-int pioDumpDataset(PIODataset* pioDataset,
-                   PIODatatype pioDatatype,
-                   void* already_allocated_buffer);
+int pioDumpDataset(PIODataset* dataset,
+                   PIODatatype datatype,
+                   void* buffer);
 
 #endif
 
