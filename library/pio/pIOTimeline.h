@@ -19,9 +19,19 @@
 // 
 
 /**
- \defgroup timeline Timeline API
- \ingroup api
+ @defgroup time Time API
+ @ingroup api
  
+ @brief Functions dealing with pinocchIO timestamps and time ranges
+ 
+*/
+
+/**
+ @defgroup timeline Timeline API
+ @ingroup api
+
+ @brief Functions dealing with pinocchIO timelines
+
  @{
  */
     
@@ -35,7 +45,7 @@
  
  Check whether the pinocchIO timeline handle is invalid.
  
- @param pioTimeline pinocchIO timeline handle
+ @param[in] pioTimeline pinocchIO timeline handle
  @returns
  - TRUE if the pinocchIO timeline handle is invalid
  - FALSE otherwise
@@ -48,7 +58,7 @@
  
  Check whether the pinocchIO timeline handle is valid.
  
- @param pioTimeline pinocchIO timeline handle
+ @param[in] pioTimeline pinocchIO timeline handle
  @returns
  - TRUE if the pinocchIO timeline handle is valid
  - FALSE otherwise
@@ -70,6 +80,9 @@
  @returns 
  - a pinocchIO timeline handle when successful
  - \ref PIOTimelineInvalid otherwise
+ 
+ @note
+ Use pioCloseTimeline() to close the timeline when no longer needed. 
  */
 PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* description,
 							 int numberOfTimeRanges, PIOTimeRange* timeranges);
@@ -86,6 +99,9 @@ PIOTimeline pioNewTimeline(PIOFile pioFile, const char* path, const char* descri
  @returns
  - a pinocchIO timeline handle when successful
  - \ref PIOTimelineInvalid otherwise
+
+ @note
+ Use pioCloseTimeline() to close the timeline when no longer needed. 
  */
 PIOTimeline pioOpenTimeline(PIOObject pioObjectInFile, const char* path);
 
@@ -103,6 +119,27 @@ PIOTimeline pioOpenTimeline(PIOObject pioObjectInFile, const char* path);
 int pioCloseTimeline( PIOTimeline* pioTimeline );
 
 /**
+ @}
+ */
+
+/**
+ @brief Get pinocchIO timeline from pinocchIO dataset
+ 
+ Get the pinocchIO timeline to which the provided pinocchIO dataset is attached.
+ 
+ @param[in] pioDataset  pinocchIO dataset handle
+ @returns
+    - a pinocchIO timeline handle when successful
+    - \ref PIOTimelineInvalid otherwise
+ 
+ @note
+ Use pioCloseTimeline() to close the timeline when no longer needed. 
+ 
+ @ingroup dataset
+ */
+PIOTimeline pioGetTimeline(PIODataset pioDataset);
+
+/**
  @brief Get list of pinocchIO timelines
  
  Get the list of internal paths to all pinocchIO timelines stored in \a pioFile.
@@ -114,38 +151,24 @@ int pioCloseTimeline( PIOTimeline* pioTimeline );
  \note
  \a pathsToTimelines is allocated by \ref pioGetListOfTimelines. It must be freed
  when no longer useful to avoid memory leaks:
-\verbatim
-    char** pathsToTimelines = NULL;
-    int numberOfTimelines;
-    
-    // obtain list of path to timelines
-    numberOfTimelines = pioGetListOfTimelines(pioFile, &pathsToTimelines);
-    // pathsToTimelines[i] contains paths to ith timeline
-    // ... do what needs to be done ...
+ \verbatim
+ char** pathsToTimelines = NULL;
+ int numberOfTimelines;
  
-    // free memory
-    for( int i=0; i<numberOfTimelines; i++) free(pathsToTimelines[i]);
-    free(pathsToTimelines); 
-\endverbatim
+ // obtain list of path to timelines
+ numberOfTimelines = pioGetListOfTimelines(pioFile, &pathsToTimelines);
+ // pathsToTimelines[i] contains paths to ith timeline
+ // ... do what needs to be done ...
+ 
+ // free memory
+ for( int i=0; i<numberOfTimelines; i++) free(pathsToTimelines[i]);
+ free(pathsToTimelines); 
+ \endverbatim
+ 
+ @ingroup file
  */
 int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines);
 
-/**
- @brief Get pinocchIO timeline from pinocchIO dataset
- 
- Get the pinocchIO timeline to which the provided pinocchIO dataset is attached.
- 
- @param[in] pioDataset  pinocchIO dataset handle
- @returns
-    - a pinocchIO timeline handle when successful
-    - \ref PIOTimelineInvalid otherwise
- */
-PIOTimeline pioGetTimeline(PIODataset pioDataset);
 
 #endif
-
-/**
-	@}
- */
-
 

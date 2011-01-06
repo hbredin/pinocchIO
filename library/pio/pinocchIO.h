@@ -90,7 +90,7 @@
  library is a mandatory requirement in order to compile and use pinocchIO.\n
  Source code can be downloaded from the HDFgroup website. 
  pinocchIO has been tested with version 1.8.5-patch1 and the corresponding tar
- archive should be available in \e dependencies/hdf5-1.8.5-patch1.tar.gz\n
+ archive should be available in \e dependencies/hdf5-1.8.5-patch1.tar.gz
  
  \par libconfig
  A pinocchIO data server called gepetto is also part of the pinochIO suite.
@@ -98,7 +98,7 @@
  libconfig library. Source code can be downloaded from 
  the libconfig website. geppeto has been tested with version 1.4.6 and the 
  corresponding tar archive should be available in 
- \e dependencies/libconfig-1.4.6.tar.gz\n
+ \e dependencies/libconfig-1.4.6.tar.gz
   
  \par cmake
  pinocchIO uses \b cmake as its primary compilation system.

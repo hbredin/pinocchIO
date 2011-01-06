@@ -22,59 +22,108 @@
 #define _PINOCCHIO_DATATYPE_H
 
 /**
- \defgroup datatype Datatype
- \ingroup dataset
+ \defgroup datatype Datatype API
+ \ingroup api
+ 
+ @brief Functions dealing with pinocchIO datatypes
+
  @{
  */
 
-
 #include "pIOTypes.h"
 
+/**
+ @brief Check datatype invalidity
+ 
+ Check whether the pinocchIO datatype handle is invalid.
+ 
+ @param[in] pioDatatype pinocchIO datatype handle
+ @returns
+ - TRUE if the pinocchIO datatype handle is invalid
+ - FALSE otherwise
+ */
 #define PIODatatypeIsInvalid PIOObjectIsInvalid 
+
+/**
+ @brief Check datatype validity
+ 
+ Check whether the pinocchIO datatype handle is valid.
+ 
+ @param[in] pioDatatype pinocchIO datatype handle
+ @returns
+ - TRUE if the pinocchIO datatype handle is valid
+ - FALSE otherwise
+ */
 #define PIODatatypeIsValid   PIOObjectIsValid 
 
 /**
-	Creates a new array datatype
-	@param type type of array elements
-	@param dimension number of elements in array
-	@returns pinocchIO array datatype
+ @brief Create new pinocchIO datatype
+ 
+ Create a new pinocchIO array datatype of dimension \a dimension and type \a type.
+  
+ @param[in] type Type of array elements (see \ref PIOBaseType for more information)
+ @param[in] dimension Number of elements in array.
+ @returns 
+ - a pinocchIO datatype handle when successful
+ - \ref PIODatatypeInvalid otherwise
+ 
+ @note
+ Use pioCloseDatatype() to close the datatype when no longer needed. 
  */
 PIODatatype pioNewDatatype( const PIOBaseType type, int dimension );
 
 /**
-	Closes a previously created datatype
-	@param[in] datatype datatype 
-	@returns 
-        - 1 when successful
-        - 0 otherwise
+ @brief Close pinocchIO datatype
+ 
+ Close a previously opened pinocchIO datatype.
+ Upon success, the pinocchIO datatype handle will be set to \ref PIODatatypeInvalid.
+ 
+ @param[in,out] pioDatatype pinocchIO datatype handle
+ @returns
+ - 1 when file is successfully closed
+ - 0 otherwise
  */
-int pioCloseDatatype( PIODatatype* datatype );
-
+int pioCloseDatatype( PIODatatype* pioDatatype );
 
 /**
-	Get dataset datatype
-	@param[in] pioDataset Dataset
-	@returns 
-        - datatype when successful
-        - invalid datatype otherwise
- */
-PIODatatype pioGetDatatype(PIODataset pioDataset);
-
-
-/**
-	Get size of datatype
-	@param pioDatatype Datatype
-	@returns 
-        - size in bytes, when successful
-        - 0 otherwise
+ @brief Get size of datatype
+    
+ Get the size in bytes of a pinocchIO datatype.
+ This is basically the size in bytes of one element with base type, multiplied
+ by the dimension of the array.
+ 
+ For instance, the size of pioNewDatatype( PINOCCHIO_TYPE_FLOAT, 3) equals
+ 3*sizeof(float).
+ 
+ @param[in] pioDatatype pinocchIO datatype
+ @returns 
+    - datatype size in bytes, when successful
+    - 0 otherwise
  */
 size_t pioGetSize(PIODatatype pioDatatype);
 
 
-#endif
+/**
+ @}
+ */
 
 /**
-	@}
+ @brief Get pinocchIO datatype of pinocchIO dataset
+ 
+ Get the pinocchIO datatype of the pinocchIO dataset.
+ 
+ @param[in] pioDataset  pinocchIO dataset handle
+ @returns
+ - a pinocchIO datatype handle when successful
+ - \ref PIODatatypeInvalid otherwise
+ 
+ @note
+ Use pioCloseDatatype() to close the datatype when no longer needed. 
+ 
+ @ingroup dataset
  */
+PIODatatype pioGetDatatype(PIODataset pioDataset);
+
+#endif
 
 

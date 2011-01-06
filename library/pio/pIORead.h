@@ -21,13 +21,6 @@
 #ifndef _PINOCCHIO_READ_H
 #define _PINOCCHIO_READ_H
 
-/**
- \defgroup read Reader
- \ingroup dataset
- @{
- */
-
-
 #include "pIOTypes.h"
 
 /**
@@ -39,6 +32,8 @@
 	@returns 
         - number of data when successful
         - -1 otherwise
+ 
+    @ingroup dataset
  */
 int pioReadData(PIODataset* pioDataset,
                 int timerangeIndex,
@@ -55,6 +50,8 @@ int pioReadData(PIODataset* pioDataset,
 	@returns 
         - number of data when successful
         - -1 otherwise
+ 
+ @ingroup dataset
  */
 int pioReadNumber(PIODataset pioDataset,
                   int timerangeIndex);
@@ -74,13 +71,12 @@ int pioReadNumber(PIODataset pioDataset,
         - when succesful,
             -# if already_allocated_buffer == NULL, buffer size in bytes
             -# otherwise, total number of data
+ 
+ @ingroup dataset
  */
 int pioDumpDataset(PIODataset* pioDataset,
                    PIODatatype pioDatatype,
                    void* already_allocated_buffer);
 
 #endif
-/**
-	@}
- */
 

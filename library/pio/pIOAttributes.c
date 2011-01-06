@@ -24,7 +24,16 @@
 #include <string.h>
 #include <stdlib.h>
 
-char* PIOAttribute_ListProtected[PIOAttribute_NumberProtected] = { 
+/**
+ @brief List of protected attributes
+ 
+ Some attributes are used by pinocchIO internally and are therefore protected:
+ pinocchIO users cannot use their names.\n
+ The list of protected attributes is defined here.
+
+ @ingroup attribute
+ */
+char* PIOAttribute_ListProtected[PIOAttribute_NumberProtected] = {
 	PIOAttribute_Version,
 	PIOAttribute_File_Medium,
 	PIOAttribute_Description,

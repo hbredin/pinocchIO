@@ -29,42 +29,53 @@
 #define ERROR_SWITCH_ON   H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
 
 /**
- \defgroup objects Generic object
+ \defgroup objects Object API
  \ingroup api
  
- @brief Some pinocchIO functions ask for PIOObject input arguments. 
- 
+ @brief Functions dealing with pinocchIO generic object
  
  @{
  */
 
-/// generic pinocchIO object
+/**
+	@brief pinocchIO generic object
+ */
 typedef struct {
+    /**	HDF5 identifier */
 	hid_t identifier; 
 } PIOObject;
 
 /**
-	@brief Make generic pinocchIO object from pinocchIO file, timeline or dataset
-	@param any pinocchIO file, timeline or dataset
-	@returns Generic pinocchIO object
+ @brief Make pinocchIO object
+
+ Make pinocchIO object from pinocchIO file, timeline or dataset
+ 
+ @param[in] any pinocchIO file, timeline or dataset
+ @returns pinocchIO generic object
  */
 #define PIOMakeObject( any )  ((PIOObject){ any.identifier })
  
 /**
-	@brief Test validity of pinocchIO object
-	@param o pinocchIO object
-	@returns 
-        - 1 if object is valid
-        - 0 if object is invalid
+ @brief Check object validity
+ 
+ Check whether the pinocchIO object handle is valid.
+ 
+ @param[in] o pinocchIO object
+ @returns 
+    - TRUE if object is valid
+    - FALSE otherwise
  */
 #define PIOObjectIsValid(o)   ((o).identifier > 0)
 
 /**
-	@brief Test validity of pinocchIO object
-	@param o pinocchIO object
-	@returns
-        - 1 if object is invalid
-        - 0 if object is valid
+ @brief Check object invalidity
+
+ Check whether the pinocchIO object handle is invalid.
+ 
+ @param[in] o pinocchIO object
+ @returns
+    - TRUE if object is invalid
+    - FALSE otherwise
  */
 #define PIOObjectIsInvalid(o) (!PIOObjectIsValid(o))
 
@@ -73,17 +84,13 @@ typedef struct {
  */
 
 /**
- \addtogroup file
- @{
- */
-
-
-/**
  @brief File access rights
 
  pinocchIO provides a way for opening pinocchIO files in read-only mode
- or read-and-write mode (see \ref pioOpenFile).\n
- Note that \ref pioNewFile returns a pinocchIO file handle in read-and-write mode.
+ or read-and-write mode (see pioOpenFile()).\n
+ Note that pioNewFile() returns a pinocchIO file handle in read-and-write mode.
+
+ @ingroup file
  */
 typedef enum {
     /** Read-only mode */
@@ -103,6 +110,8 @@ typedef enum {
     Their structure is strictly constrained by the pinocchIO library.
     However, we provide here a short description of the entrails of
     pinocchIO file handles.
+ 
+    @ingroup file
  */
 typedef struct {
     /**	HDF5 file identifier */
@@ -118,144 +127,258 @@ typedef struct {
  
     Invalid pinocchIO file handle returned by pioNewFile() and pioOpenFile()
     in case of failure.
+ 
+    @ingroup file
  */
 #define PIOFileInvalid ((PIOFile) {-1, -1, NULL})
 
 /**
- @}
- */
-
-/**
- @brief pinocchIO time storage
- \ingroup timeline
+ @brief pinocchIO timestamp
+ 
+ pinocchIO stores timestamps internally using two integer values: \a time and \a scale.
+ 
+ To obtain the actual value in second of the timestamp, simply divide \a time by \a scale.
+ For instance, (340, 1000) corresponds to 340ms.
+ 
+ The \a scale can be adapted to the medium being processed:
+ - when processing every frame of a video with a 25 fps frame rate,
+ one can simply set the timestamp \a scale to 25 and \a time to the frame index.
+ - for MFCC extracted using a sliding window with a 20ms step, one can use a 
+ \a scale of 50 (=1/0.020) and increment \a time by 1 when the window goes to the
+ next position
+  
+ @ingroup time
  */
 typedef struct {
-	int64_t time; /**< time in number of units */
-	int32_t scale; /**< number of units in one second */
+    /** Time in number of units */
+	int64_t time;
+    /** Units per second */
+	int32_t scale;
 } PIOTime;
 
 /**
- @brief Result of time comparison
- \ingroup timecomparison
+ @brief Timestamps comparison result
+ @ingroup time
  */
 typedef enum {
-	PINOCCHIO_TIME_COMPARISON_ASCENDING = -1, /**< Ascending order */
-	PINOCCHIO_TIME_COMPARISON_SAME, /**< Simultaneity */
-	PINOCCHIO_TIME_COMPARISON_DESCENDING /**< Descending order */
+    /** Ascending order */
+	PINOCCHIO_TIME_COMPARISON_ASCENDING = -1,
+    /** Equality */
+	PINOCCHIO_TIME_COMPARISON_SAME, 
+    /** Descending order */
+	PINOCCHIO_TIME_COMPARISON_DESCENDING
 } PIOTimeComparison;
 
 
 /**
- @brief pinocchIO time range storage
- \ingroup timeline
+ @brief pinocchIO time range
+ 
+ A time range can be seen as a time segment, with a start \a time and a \a duration.
+ 
+ pinocchIO stores time ranges internally using three integer values: \a time, \a duration and \a scale.
+
+ See \ref PIOTime for more detail on how to efficiently choose the \a scale.
+  
+ @ingroup time
  */
 typedef struct {
-    int64_t time; /**< start time in number of units */
-    int64_t duration; /**< duration in number of units */
-    int32_t scale; /**< number of units in one second */
+    /** Start time in number of units */
+    int64_t time;
+    /** Duration in number of units */
+    int64_t duration;
+    /** Units per second */
+    int32_t scale;
 } PIOTimeRange;
 
 /**
- @brief Result of time range comparison
- \ingroup timecomparison
+ @brief Time ranges comparison result
+ @ingroup time
  */
 typedef enum {
-	PINOCCHIO_TIMERANGE_COMPARISON_ASCENDING = -1, /**< Ascending order */
-	PINOCCHIO_TIMERANGE_COMPARISON_SAME, /**< Equality */
-	PINOCCHIO_TIMERANGE_COMPARISON_DESCENDING /**< Descending order */
+    /** Ascending order */
+	PINOCCHIO_TIMERANGE_COMPARISON_ASCENDING = -1,
+    /** Equality */
+	PINOCCHIO_TIMERANGE_COMPARISON_SAME,
+    /** Descending order */
+	PINOCCHIO_TIMERANGE_COMPARISON_DESCENDING
 } PIOTimeRangeComparison;
 
+
 /**
- @brief pinocchIO timeline
- \ingroup timeline
+ @brief pinocchIO timeline handle
+ 
+ \ref PIOTimeline provides some kind of timeline object interface that can be manipulated
+ by high-level pinocchIO functions.
+ 
+ pinocchIO timelines are stored internally as HDF5 datasets.
+ Developpers should not have to worry about \ref PIOTimeline internals.
+ Their structure is strictly constrained by the pinocchIO library.
+ However, we provide here a short description of the entrails of
+ pinocchIO timeline handles.
+ 
+ @ingroup timeline
  */
 typedef struct {
-	hid_t identifier;           /**< HDF5 dataset identifier */
-	int ntimeranges;            /**< number of time ranges */
-	PIOTimeRange* timeranges;   /**< time ranges sorted in chronological order */
-	char* path;                 /**< internal path to timeline in pinocchIO file */
-	char* description;          /**< timeline textual description */
+    /** HDF5 dataset identifier */
+	hid_t identifier;
+    /** number of time ranges in timeline */
+	int ntimeranges;
+    /** time ranges sorted in chronological order */
+	PIOTimeRange* timeranges;
+    /** internal path to timeline in pinocchIO file */
+	char* path;
+    /** timeline textual description */
+	char* description;
 } PIOTimeline;
 
 /**
  @brief Invalid pinocchIO timeline
- \ingroup timeline
+ 
+ Invalid pinocchIO timeline handle returned by pioNewTimeline() and pioOpenTimeline()
+ in case of failure.
+ 
+ @ingroup timeline
  */
 #define PIOTimelineInvalid ((PIOTimeline) {-1, -1, NULL, NULL, NULL})
 
-
 /**
- @brief Result of timeline comparison
- \ingroup timecomparison
+ @brief Timelines comparison result
+ @ingroup timeline
  */
 typedef enum {
-    PINOCCHIO_TIMELINE_COMPARISON_SAME,     /**< Timelines are identical */
-    PINOCCHIO_TIMELINE_COMPARISON_SUPERSET, /**< First timeline fully contains second timeline */
-    PINOCCHIO_TIMELINE_COMPARISON_SUBSET,   /**< First timeline is fully included into second timeline */
-    PINOCCHIO_TIMELINE_COMPARISON_OTHER     /**< Any other cases */
+    /** Equality */
+    PINOCCHIO_TIMELINE_COMPARISON_SAME,
+    /** Superset */
+    PINOCCHIO_TIMELINE_COMPARISON_SUPERSET,
+    /** Subset */
+    PINOCCHIO_TIMELINE_COMPARISON_SUBSET,
+    /** Any other case */
+    PINOCCHIO_TIMELINE_COMPARISON_OTHER
 } PIOTimelineComparison;
 
 /**
- \addtogroup datatype
- @{
- */
-
-/**
-	pinocchIO base type
+	@brief pinocchIO base type
+ 
+    pinocchIO handles a limited number of data type, the list of which is given
+    below.
+ 
+    @ingroup datatype
  */
 typedef enum {
-    PINOCCHIO_TYPE_INT, /**< Integer */
-    PINOCCHIO_TYPE_FLOAT, /**< Float */
-    PINOCCHIO_TYPE_DOUBLE, /**< Double */
-	PINOCCHIO_TYPE_CHAR /**< Char */
+    /** Integer */
+    PINOCCHIO_TYPE_INT,
+    /** Float */
+    PINOCCHIO_TYPE_FLOAT,
+    /** Double */
+    PINOCCHIO_TYPE_DOUBLE,
+    /** Char */
+	PINOCCHIO_TYPE_CHAR
 } PIOBaseType;
 
 /**
-	pinocchIO datatype
+ @brief pinocchIO datatype handle
+ 
+ pinocchIO datasets can be used to store various type of data as long as they 
+ can be interpreted as multi-dimensional arrays.
+ 
+ However, each pinocchIO dataset can store only one kind of data at a time --
+ which is defined when the dataset is created using a pinocchIO datatype.
+ 
+ @a dimension and @a type of values (see @ref PIOBaseType) are set once 
+ and for all when the dataset is created. 
+ 
+ However, the number of vectors can vary from one time range to another.
+ For instance, SIFT descriptors are usually stored as 128-dimensional float vectors.
+ However, there might 250 of them for the first frame of the video, and twice as 
+ much in the next one.
+ 
+ Dataset can also be used to store textual descriptors as string. 
+ Simply create a dataset of 1-dimensional char vectors and store N vectors where N is the length of the string.
+\verbatim
+    char* text = ...
+    ...
+    PIODatatype textDatatype = pioNewDatatype(PINOCCHIO_TYPE_CHAR, 1);
+    ...
+    PIODataset textDataset = pioNewDataset(..., textDatatype);
+    pioWrite(textDataset, ..., text, strlen(text), textDatatype);
+    ...
+    pioCloseDatatype(&textDatatype);
+    pioCloseDataset(&textDataset);
+    ...
+\endverbatim
+ 
+ \ref PIODatatype provides some kind of datatype object interface that can be manipulated
+ by high-level pinocchIO functions.
+ 
+ pinocchIO datatypes are stored internally as HDF5 datatypes.
+ Developpers should not have to worry about \ref PIODatatype internals.
+ Their structure is strictly constrained by the pinocchIO library.
+ However, we provide here a short description of the entrails of
+ pinocchIO datatype handles.
+ 
+ @ingroup datatype
  */
 typedef struct {
-	hid_t identifier; /**< @brief HDF5 datatype identifier */
-	PIOBaseType type; /**< array base type */
-	int dimension; /**< array dimension */
+    /** HDF5 datatype identifier */
+	hid_t identifier;
+    /** base type */
+	PIOBaseType type;
+    /** array dimension */
+	int dimension;
 } PIODatatype;
 
 /**
-	Invalid pinocchIO datatype
+ @brief Invalid pinocchIO datatype
+ 
+ Invalid pinocchIO datatype handle returned by pioNewDatatype()
+ in case of failure.
+
+ @ingroup datatype
  */
 #define PIODatatypeInvalid ((PIODatatype) {-1, -1, -1})
 
-/**
- @}
- */
 
 /**
- \addtogroup dataset
- @{
- */
-
-/**
-	pinocchIO dataset
+ @brief pinocchIO dataset handle
+ 
+ \ref PIODataset provides some kind of dataset object interface that can be manipulated
+ by high-level pinocchIO functions.
+ 
+ pinocchIO datasets are stored internally as a pair of HDF5 datasets.
+ Developpers should not have to worry about \ref PIODataset internals.
+ Their structure is strictly constrained by the pinocchIO library.
+ However, we provide here a short description of the entrails of
+ pinocchIO dataset handles.
+ 
+ @ingroup dataset
  */
 typedef struct {
-	hid_t identifier; /**< HDF5 dataset identifier for path/data */
-	hid_t link_identifier; /**< HDF5 dataset identifier ofr path/link */
-	char* path; /**< internal path to dataset in pinocchIO file */
-	char* description; /**< dataset textual description */
-	int stored; /**< number of elements in dataset */
-	int ntimeranges; /**< number of time ranges in dataset timeline */
-	void* buffer; /**< internal buffer */
-	size_t buffer_size; /**< internal buffer size */
+    /** HDF5 dataset identifier for actual data */
+	hid_t identifier; 
+    /** HDF5 dataset identifier for number of entries per time range */
+	hid_t link_identifier;
+	/** internal path to dataset in pinocchIO file */
+    char* path;
+    /** dataset textual description */
+	char* description;
+    /** total number of entries stored in dataset */
+	int stored;
+    /** number of time ranges in dataset timeline */
+	int ntimeranges; 
+    /** internal buffer - mostly used by pioWrite() */
+	void* buffer;
+    /** size of internal buffer, in bytes */
+	size_t buffer_size;
 } PIODataset;
 
 /**
-	Invalid pinocchIO dataset
+ @brief Invalid pinocchIO dataset
+ 
+ Invalid pinocchIO dataset handle returned by pioNewDataset() and pioOpenDataset()
+ in case of failure.
+
+ @ingroup dataset
  */
 #define PIODatasetInvalid ((PIODataset) {-1, -1, NULL, NULL, -1, -1, NULL, 0})
 
 #endif
-
-/**
-	@}
- */
-
-

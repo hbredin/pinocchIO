@@ -30,8 +30,8 @@
 #define _GEPETTO_CONFIG_H
 
 /**
-	Creates new gepetto server from configuration file
-	@param filename path to configuration file
+	@brief Creates new gepetto server from configuration file
+	@param[in] filename path to configuration file
 	@returns
         - gepetto server if successful
         - invalid gepetto server otherwise 

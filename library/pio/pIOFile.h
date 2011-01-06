@@ -139,7 +139,7 @@
  See \ref ascii2pio and \ref timeline for more information on how to create a timeline.
  
  \par Definition:
- A dataset is a collection of sets of D-dimensional vectors aligned with a timeline.</b></center>
+ A dataset is a collection of sets of D-dimensional vectors aligned with a timeline.
  
  \image	html dataset.png "A dataset aligned with the first timeline"
  \image	latex dataset.eps "A dataset aligned with the first timeline" width=\textwidth
@@ -157,8 +157,7 @@
  
  - See \ref datatype "datatype API" for more information on datatype.
  - See \ref ascii2pio and \ref dataset "dataset API" for more information on how to create a dataset.
- - See \ref write "writing API" for more information on how to write data into a dataset.
- - See \ref piodump and \ref read "reading API" for more information on how to read data from a dataset.
+ - See \ref dataset "dataset API" for more information on how to read from and write data into a dataset.
 
  \section attributes Attributes
  
@@ -176,8 +175,7 @@
  \defgroup file File API
  \ingroup api
  
- @brief This section describes the pinocchIO file structure and the functions
- performing basic operations on pinocchIO files.
+ @brief Functions dealing with pinocchIO files
  
  @{
  */
@@ -193,7 +191,7 @@
  
  Check whether the pinocchIO file handle is invalid.
  
- @param pioFile pinocchIO file handle
+ @param[in] pioFile pinocchIO file handle
  @returns
     - TRUE if the pinocchIO file handle is invalid
     - FALSE otherwise
@@ -205,7 +203,7 @@
  
  Check whether the pinocchIO file handle is valid.
  
- @param pioFile pinocchIO file handle
+ @param[in] pioFile pinocchIO file handle
  @returns
     - TRUE if the pinocchIO file handle is valid
     - FALSE otherwise
@@ -263,6 +261,9 @@
 	@returns 
         - a writable pinocchIO file handle when successful
         - \ref PIOFileInvalid otherwise
+    
+    @note
+        Use pioCloseFile() to close the file when no longer needed. 
  */
 PIOFile pioNewFile  ( const char* path, const char* medium );
 
@@ -281,6 +282,10 @@ PIOFile pioNewFile  ( const char* path, const char* medium );
         - a readable pinocchIO file handle when successful and \a rights is \ref PINOCCHIO_READONLY
         - a readable and writable pinocchIO file handle when successful \a rights is \ref PINOCCHIO_READNWRITE
         - \ref PIOFileInvalid otherwise
+    
+    @note
+        Use pioCloseFile() to close the file when no longer needed.
+ 
  */
 PIOFile pioOpenFile( const char* path, PIOFileRights rights );
 
