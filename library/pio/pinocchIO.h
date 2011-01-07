@@ -53,9 +53,9 @@
  \section documentation Documentation
 
  -# \subpage gettingstarted "Getting started with pinocchIO"
- -# \subpage fileformat "An overview of pinocchIO file format"
- -# \subpage cli "pinocchIO made easy with command line tools" 
- -# \subpage api "pinocchIO for developers"
+ -# \subpage fileformat "pinocchIO file format"
+ -# @ref api "pinocchIO API"
+ -# \subpage cli "pinocchIO tools"
  -# \subpage gepetto "Gepetto, a pinocchIO server"
  
  
@@ -127,17 +127,6 @@
  - Install
  \verbatim
     $ sudo make install \endverbatim
- */
-
-/** 
- \page api Application Programming Interface
- 
- - \ref file
- - \ref timeline
- - \ref dataset
- - \ref attribute
- - \ref gepetto
- 
  */
 
 /**

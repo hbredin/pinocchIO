@@ -19,7 +19,7 @@
 // 
 
 /**
- \page fileformat An overview of pinocchIO file format
+ \page fileformat pinocchIO file format
 
  \section Outline
  -# \ref oneone
@@ -36,19 +36,19 @@
  The idea behind pinocchIO is to be able to store and organize all the information
  related to a given medium into one single file.
  
- \section oneone One medium <--> One pinocchIO file
+ \section oneone One medium per pinocchIO file
  
  Each pinocchIO file must only contain descriptions related to one medium.
  Therefore, any pinocchIO file contains a <b>specific area</b> where <b>the path 
  to the medium is stored</b> as soon as the pinocchIO file is created.
  
- For instance, one can used the \link pioinit \endlink command line tool to
+ For instance, one can used the @ref pioinit command line tool to
  create a new pinocchIO file <i>MyVideo.pio</i> corresponding to the video <i>MyVideo.avi</i>
 \verbatim
  $ pioinit /path/to/MyVideo.avi /another/path/to/MyVideo.pio
 \endverbatim
  
- \section onemultiple One pinocchIO file <--> Multiple descriptions
+ \section onemultiple Multiple descriptions per pinocchIO file
  
  Traditionnally, one would store one kind of descriptors into one file and another
  one into another file -- thus leading to a complex and cluttered collection of files.
