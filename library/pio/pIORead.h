@@ -27,7 +27,7 @@
  @brief Read data stored in dataset for a given time range
  
  Read data stored in @a dataset into @a buffer for the time range at 
- position @a timerangeIndex in @dataset timeline.
+ position @a timerangeIndex in @a dataset timeline.
  
  @param[in,out] dataset pinocchIO dataset
  @param[in] timerangeIndex Index of timerange
@@ -65,13 +65,11 @@ int pioReadData(PIODataset* dataset,
  */
 #define pioRead pioReadData
 
-
-
 /**
  @brief Get number of entries stored in dataset for a given time range
  
  Get number of entries stored in @a datasetfor the time range at 
- position @a timerangeIndex in @dataset timeline.
+ position @a timerangeIndex in @a dataset timeline.
  
  @param[in] dataset pinocchIO dataset
  @param[in] timerangeIndex Index of timerange
