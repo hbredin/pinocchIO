@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (pinocchIO)
-set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake-modules")
 
 # The version number.
 set (PINOCCHIO_VERSION_MAJOR 0)
@@ -20,7 +20,7 @@ set(CMAKE_C_FLAGS_DEBUG "-DDEBUG -DBZ_DEBUG -g2" CACHE STRING "C DEBUG FLAGS" FO
 add_definitions(-Wno-write-strings)
 
 find_package(HDF5 REQUIRED)
-find_package(LIBCONFIG REQUIRED)
+find_package(LIBCONFIG)
 
 # install paths
 set(CMAKE_INSTALL_BINDIR bin CACHE PATH "Output directory for programs")

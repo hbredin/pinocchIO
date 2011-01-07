@@ -2,7 +2,7 @@ file(GLOB gepetto_SOURCES *.c ../../tools/fgetln.c)
 file(GLOB gepetto_HEADERS *.h)
 set(gepetto_PUBLICHEADERS gepetto.h gptTypes.h gptServer.h gptConfig.h)
 
-set(gepetto_INCLUDE_DIRS ${LIBCONFIG_INCLUDE_DIR})
+set(gepetto_INCLUDE_DIRS ${LIBCONFIG_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/library/pio/)
 set(gepetto_LIBS ${LIBCONFIG_LIBRARY} pinocchIO)
 include_directories(${gepetto_INCLUDE_DIRS})
 

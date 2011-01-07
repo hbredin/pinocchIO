@@ -1,3 +1,6 @@
 
 add_subdirectory (pio)
-add_subdirectory (gpt)
+
+if (LIBCONFIG_FOUND)
+   add_subdirectory (gpt)
+endif (LIBCONFIG_FOUND)
