@@ -2,6 +2,11 @@
 include_directories(${pinocchIO_SOURCE_DIR}/library/pio ${pinocchIO_SOURCE_DIR}/library/gpt ${HDF5_INCLUDE_DIR})
 link_directories(${CMAKE_BINARY_DIR}/library/pinocchIO})
 
+add_executable(pioinit pioinit.c)
+set(pioinit_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
+target_link_libraries(pioinit pinocchIO)
+install(TARGETS pioinit RUNTIME DESTINATION bin)
+
 add_executable(piols piols.c)
 set(piols_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/library)
 target_link_libraries(piols pinocchIO)

@@ -1,17 +1,71 @@
-/*
- *  piols.c
- *  pinocchIO
- *
- *  Created by Hervé BREDIN on 21/10/10.
- *  Copyright 2010 CNRS-LIMSI. All rights reserved.
- *
+// 
+// Copyright 2010 Herve BREDIN (bredin@limsi.fr)
+// Contact: http://pinocchio.niderb.fr/
+// 
+// This file is part of pinocchIO.
+//  
+//      pinocchIO is free software: you can redistribute it and/or modify
+//      it under the terms of the GNU General Public License as published by
+//      the Free Software Foundation, either version 3 of the License, or
+//      (at your option) any later version.
+//  
+//      pinocchIO is distributed in the hope that it will be useful,
+//      but WITHOUT ANY WARRANTY; without even the implied warranty of
+//      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//      GNU General Public License for more details.
+//  
+//      You should have received a copy of the GNU General Public License
+//      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
+// 
+
+/**
+ \page piols piols
+ 
+ \a piols displays information about a pinocchIO file and its content to the
+ standard output.
+ 
+ \section usage Usage
+\verbatim
+ $ piols /path/to/pioncchIO/file [options]
+ 
+         --no-timeline      Do not list timelines
+         --no-dataset       Do not list datasets
+ 
+     -t, --timeline=PATH    Show more detail about timeline at PATH
+ 
+     -d, --dataset=PATH     Show more detail about dataset at PATH
+                --show-timeline-path
+                            Show path to dataset timeline 
+                --show-timeline-description
+                            Show description of dataset timeline
+                --show-dataset-path
+                            Show path to dataset
+                --show-dataset-description
+                            Show dataset description
+\endverbatim
+ \section example Example
+ - Display path to medium and list of timelines and datasets
+\verbatim
+ $ piols /path/to/pinocchIO/file
+\endverbatim
+ - Display path to medium and list of datasets only
+\verbatim
+ $ piols /path/to/pinocchIO/file --no-timeline
+\endverbatim
+ - Display path to medium and list of timelines only
+\verbatim
+ $ piols /path/to/pinocchIO/file --no-dataset
+\endverbatim
+ - Display information about a given dataset
+\verbatim
+ $ piols /path/to/pinocchIO/file --dataset=/internal/path/to/dataset
+\endverbatim
+ - Display information about a given timeline
+\verbatim
+ $ piols /path/to/pinocchIO/file --timeline=/internal/path/to/timeline
+\endverbatim
  */
 
-/*!
- @header pinocchIO ls
- @abstract   
- @discussion 
- */
 
 #include <getopt.h>
 #include <stdlib.h>
@@ -35,20 +89,23 @@ static int show_dataset_description_flag = 0;
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
-			"USAGE: %s [options] FILE\n", path2tool);
+			"USAGE: %s /path/to/pinocchIO/file [options]\n", path2tool);
 	fprintf(stdout, 
-			"       --no-timeline\n"
-			"           Do not list timelines\n"
-			"       --no-dataset\n"
-			"           Do not list datasets\n"
-            "   -t, --timeline=PATH\n"
-            "           Show more detail about timeline at PATH\n"
-            "   -d, --dataset=PATH\n"
-            "           Show more detail about dataset at PATH\n"
-            "       --show-timeline-path\n"
-            "       --show-timeline-description\n"
-            "       --show-dataset-path\n"
-            "       --show-dataset-description\n"
+            "\n"
+            "    --no-timeline      Do not list timelines\n"
+            "    --no-dataset       Do not list datasets\n"
+            "\n"
+            "-t, --timeline=PATH    Show more detail about timeline at PATH\n"
+            "\n"
+            "-d, --dataset=PATH     Show more detail about dataset at PATH\n"
+            "          --show-timeline-path\n"
+            "                       Show path to dataset timeline\n" 
+            "          --show-timeline-description\n"
+            "                       Show description of dataset timeline\n"
+            "          --show-dataset-path\n"
+            "                       Show path to dataset\n"
+            "          --show-dataset-description\n"
+            "                       Show dataset description\n"
             );
 	fflush(stdout);
 }
