@@ -272,7 +272,9 @@ int pioCloseTimeline( PIOTimeline* pioTimeline )
 	
 	pioTimeline->ntimeranges = -1;
 
-	if (H5Dclose(pioTimeline->identifier) < 0) return 0;
+    if (pioTimeline->identifier > -1)
+        if (H5Dclose(pioTimeline->identifier) < 0) 
+            return 0;
 	pioTimeline->identifier = -1;
 	
 	return 1;

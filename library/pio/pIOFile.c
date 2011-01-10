@@ -139,8 +139,10 @@ int pioCloseFile( PIOFile* pioFile )
 {
 	if (pioFile->medium) free(pioFile->medium);
 	pioFile->medium = NULL;
-	
-	if (H5Fclose(pioFile->identifier) < 0) return 0;
+
+    if (pioFile->identifier > -1)
+        if (H5Fclose(pioFile->identifier) < 0) 
+            return 0;
 	pioFile->identifier = -1;
 	
 	return 1;	

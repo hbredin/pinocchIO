@@ -21,8 +21,7 @@
 #ifndef _GEPETTO_TYPES_H
 #define _GEPETTO_TYPES_H
 
-#include "pinocchIO/pinocchIO.h"
-
+#include "pinocchIO.h"
 
 typedef enum {
     GEPETTO_LABEL_FILTER_TYPE_UNDEFINED = -1,

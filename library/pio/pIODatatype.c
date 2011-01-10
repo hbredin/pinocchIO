@@ -65,7 +65,9 @@ int pioCloseDatatype( PIODatatype* pioDatatype )
 	pioDatatype->dimension = -1;
 	pioDatatype->type = -1;
 	
-	if (H5Tclose(pioDatatype->identifier) < 0) return 0;
+    if (pioDatatype->identifier > -1)
+        if (H5Tclose(pioDatatype->identifier) < 0) 
+            return 0;
 	pioDatatype->identifier = -1;
 	
 	return 1;

@@ -309,10 +309,14 @@ int pioCloseDataset(PIODataset* pioDataset)
     
     pioDataset->buffer_size = 0;
     
-	if (H5Dclose(pioDataset->identifier) < 0) return 0;
+    if (pioDataset->identifier > -1)
+        if (H5Dclose(pioDataset->identifier) < 0) 
+            return 0;
 	pioDataset->identifier = -1;
 	
-	if (H5Dclose(pioDataset->link_identifier) < 0) return 0;
+    if (pioDataset->link_identifier > -1)
+        if (H5Dclose(pioDataset->link_identifier) < 0) 
+            return 0;
 	pioDataset->link_identifier = -1;
     
 	return 1;
