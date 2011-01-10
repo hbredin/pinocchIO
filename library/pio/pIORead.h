@@ -26,8 +26,14 @@
 /**
  @brief Read data stored in dataset for a given time range
  
- Read data stored in @a dataset into @a buffer for the time range at 
+ Update @a buffer so that it points to data stored in @a dataset for the time range at 
  position @a timerangeIndex in @a dataset timeline.
+
+ @note
+ pinocchIO uses an internal buffer to store the requested data. <b>Do not free it!</b>\n
+ This buffer is modified (and possibly moved) by each call to pioReadData().\n
+ Typically, one would call pioReadData() and then copy the buffer content 
+ into another variable before calling pioReadData() again.
  
  @param[in,out] dataset pinocchIO dataset
  @param[in] timerangeIndex Index of timerange
@@ -49,7 +55,7 @@
  @returns
  - @a number of entries when successful
  - negative value otherwise
-  
+ 
  @ingroup dataset
  */
 int pioReadData(PIODataset* dataset,
