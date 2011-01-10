@@ -136,6 +136,10 @@
 #ifndef _PINOCCHIO_H
 #define _PINOCCHIO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #include "pIOTypes.h"
 #include "pIOFile.h"
 #include "pIOAttributes.h"
@@ -145,5 +149,9 @@
 #include "pIODataset.h"
 #include "pIOWrite.h"
 #include "pIORead.h"
+    
+#ifdef __cplusplus    
+}
+#endif
 
 #endif

@@ -30,10 +30,18 @@
 #ifndef _GEPETTO_H
 #define _GEPETTO_H
 
+#ifdef __cplusplus
+    extern "C" {
+#endif
+
 #include "gptTypes.h"
 #include "gptServer.h"
 #include "gptConfig.h"
 
+#ifdef __cplusplus
+    }
+#endif
+        
 #endif
 
 /**
