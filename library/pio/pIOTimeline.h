@@ -170,5 +170,28 @@ PIOTimeline pioGetTimeline(PIODataset pioDataset);
 int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines);
 
 
+
+/**
+ @brief Copy a timeline from one file to another one
+ 
+ Copy timeline at location @a path from @a input file into @a output file.  
+ 
+ @param path[in] Path to timeline
+ @param input[in] Input file
+ @param output[in] Output file
+ @returns 
+    - TRUE when successful
+    - FALSE otherwise
+ 
+ @note
+ In case a timeline already exists at the same @a path in the @a output file,
+ pioCopyTimeline() will check whether it is identical to the input timeline.
+ If so, it will do nothing and return TRUE. Otherwise, it will return FALSE.
+ 
+ @ingroup file
+ */
+int pioCopyTimeline(const char* path, PIOFile input, PIOFile output);
+
+
 #endif
 

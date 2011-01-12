@@ -179,6 +179,29 @@ int pioRemoveDataset(PIOObject pioObject, const char* path);
  */
 int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets);
 
+/**
+ @brief Copy a dataset from one file to another one
+ 
+ Copy dataset at location @a path from @a input file into @a output file.
+ If it is missing in the output file, the input dataset timeline is also copied.
+ 
+ @param path[in] Path to dataset
+ @param input[in] Input file
+ @param output[in] Output file
+ @returns 
+ - TRUE when successful
+ - FALSE otherwise
+ 
+ @note
+ In case a dataset already exists at the same @a path in the @a output file,
+ pioCopyDataset() will return FALSE, even if input and output datasets are
+ identical.
+ 
+ @ingroup file
+ */
+int pioCopyDataset(const char* path, PIOFile input, PIOFile output);
+
+
 #endif
 
 

@@ -25,6 +25,9 @@
 #include "pIOVersion.h"
 #include "structure_utils.h"
 #include "pIOTimeline.h"
+#include "pIODatatype.h"
+#include "pIORead.h"
+#include "pIOWrite.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -367,3 +370,114 @@ int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets)
 	destroyList(rawPaths); rawPaths = NULL;
 	return numberOfDatasets;
 }
+
+
+int pioCopyDataset(const char* dataset_path, PIOFile pioInputFile, PIOFile pioOutputFile)
+{
+    PIODataset pioInputDataset = PIODatasetInvalid;
+    PIODataset pioOutputDataset = PIODatasetInvalid;
+    PIOTimeline pioInputTimeline = PIOTimelineInvalid;
+    PIOTimeline pioOutputTimeline = PIOTimelineInvalid;
+    char* timeline_path = NULL;
+    PIODatatype pioDatatype = PIODatatypeInvalid;
+    int t;
+    int number;
+    void* buffer = NULL;
+    
+    // make sure input dataset timeline is copied before input dataset is copied 
+    
+    pioInputDataset = pioOpenDataset(PIOMakeObject(pioInputFile), dataset_path);
+    if (PIODatasetIsInvalid(pioInputDataset))
+    {
+        // Cannot open input dataset
+        return 0;
+    }
+    
+    pioInputTimeline = pioGetTimeline(pioInputDataset);
+    if (PIOTimelineIsInvalid(pioInputTimeline))
+    {
+        // Cannot get input dataset timeline
+        pioCloseDataset(&pioInputDataset);
+        return 0;
+    }
+    
+    timeline_path = (char*) malloc((strlen(pioInputTimeline.path)+1)*sizeof(char));
+    sprintf(timeline_path, "%s", pioInputTimeline.path);
+    
+    pioCloseTimeline(&pioInputTimeline);
+    pioCloseDataset(&pioInputDataset);
+    
+    if (!pioCopyTimeline(timeline_path, pioInputFile, pioOutputFile))
+    {
+        // Cannot copy dataset timeline
+        free(timeline_path);
+        return 0;
+    }
+    
+    // now that output timeline is available,
+    // copy the dataset
+    
+    // open input dataset
+    pioInputDataset = pioOpenDataset(PIOMakeObject(pioInputFile), dataset_path);
+    if (PIODatasetIsInvalid(pioInputDataset))
+    {
+        // Cannot open input dataset
+        free(timeline_path);
+        return 0;
+    }
+    
+    // open output timeline
+    pioOutputTimeline = pioOpenTimeline(PIOMakeObject(pioOutputFile), timeline_path);
+    
+    // free no longer needed path to timeline
+    free(timeline_path);
+
+    if (PIOTimelineIsInvalid(pioOutputTimeline))
+    {
+        // Cannot open output timeline
+        pioCloseDataset(&pioInputDataset);
+        return 0;
+    }
+    
+    // open input datatype
+    pioDatatype = pioGetDatatype(pioInputDataset);
+    if (PIODatatypeIsInvalid(pioDatatype))
+    {
+        // Cannot get input datatype
+        pioCloseTimeline(&pioOutputTimeline);
+        pioCloseDataset(&pioInputDataset);
+        return 0;
+    }
+    
+    // create output dataset
+    pioOutputDataset = pioNewDataset(pioOutputFile, 
+                                     pioInputDataset.path, pioInputDataset.description, 
+                                     pioOutputTimeline,
+                                     pioDatatype);
+    if (PIODatasetIsInvalid(pioOutputDataset))
+    {
+        // Cannot create output dataset
+        pioCloseDatatype(&pioDatatype);
+        pioCloseTimeline(&pioOutputTimeline);
+        pioCloseDataset(&pioInputDataset);
+        return 0;
+    }
+    
+    // read input dataset and write it to output dataset
+    
+    for (t=0; t<pioOutputTimeline.ntimeranges; t++) 
+    {
+        number = pioReadData(&pioInputDataset, t, pioDatatype, &buffer);
+        pioWrite(&pioOutputDataset, t, buffer, number, pioDatatype);
+    }
+    
+    pioCloseDatatype(&pioDatatype);
+    pioCloseTimeline(&pioOutputTimeline);    
+    pioCloseDataset(&pioOutputDataset);
+    pioCloseDataset(&pioInputDataset);
+    
+    return 1;
+}
+
+
+

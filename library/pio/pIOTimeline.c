@@ -325,3 +325,50 @@ PIOTimeline pioGetTimeline(PIODataset pioDataset)
 	return pioTimeline;
 }
 
+int pioCopyTimeline(const char* timeline_path, PIOFile pioInputFile, PIOFile pioOutputFile)
+{
+    PIOTimeline pioInputTimeline = PIOTimelineInvalid;
+    PIOTimeline pioOutputTimeline = PIOTimelineInvalid;
+    
+    // open input timeline
+    pioInputTimeline = pioOpenTimeline(PIOMakeObject(pioInputFile), timeline_path);
+    if (PIOTimelineIsInvalid(pioInputTimeline))
+    {
+        // Cannot open input timeline
+        return 0;
+    }
+    
+    // check if a timeline with same path already exists
+    pioOutputTimeline = pioOpenTimeline(PIOMakeObject(pioOutputFile), pioInputTimeline.path);
+    if (PIOTimelineIsValid(pioOutputTimeline))
+    {
+        // if so, compare existing timeline with to-be-copied timeline
+        if (pioCompareTimeLines(pioInputTimeline.timeranges, pioInputTimeline.ntimeranges,
+                                pioOutputTimeline.timeranges, pioOutputTimeline.ntimeranges) != PINOCCHIO_TIMELINE_COMPARISON_SAME)
+        {
+            // Timeline exists at same path
+            // but is different
+            pioCloseTimeline(&pioOutputTimeline);
+            pioCloseTimeline(&pioInputTimeline);
+            return 0;            
+        }
+    }
+    else 
+    {
+        // otherwise, try and create new timeline
+        pioOutputTimeline = pioNewTimeline(pioOutputFile, pioInputTimeline.path, pioInputTimeline.description,
+                                           pioInputTimeline.ntimeranges, pioInputTimeline.timeranges);
+        if (PIOTimelineIsInvalid(pioOutputTimeline))
+        {
+            // Cannot create timeline in output file
+            pioCloseTimeline(&pioInputTimeline);
+            return 0;
+        }            
+    }
+    
+    pioCloseTimeline(&pioOutputTimeline);
+    pioCloseTimeline(&pioInputTimeline);
+    
+    return 1;
+}
+
