@@ -33,12 +33,15 @@
 #include "pinocchIO.h"
 
 static int verbose_flag = 0;
+static int all_flag = 0;
 
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
 			"USAGE: %s [options] INPUT OUTPUT\n", path2tool);
 	fprintf(stdout, 
+            "                --all\n"
+            "                Copy everything -- BEWARE: fails quietly...\n"
 			"       -t PATH, --timeline=PATH\n"
 			"                Copy timeline at PATH\n"
 			"       -d PATH, --dataset=PATH\n"
@@ -55,18 +58,13 @@ int main (int argc, char *const  argv[])
     
     PIOFile pioInputFile = PIOFileInvalid;
     PIOFile pioOutputFile = PIOFileInvalid;
+        
+    char** pathsToTimelines = NULL;
+    int numberOfTimelines = 0;
+    int i;
     
-    PIODataset pioInputDataset = PIODatasetInvalid;
-    PIODataset pioOutputDataset = PIODatasetInvalid;
-    
-    PIOTimeline pioInputTimeline = PIOTimelineInvalid;
-    PIOTimeline pioOutputTimeline = PIOTimelineInvalid;
-    
-    PIODatatype pioDatatype = PIODatatypeInvalid;
-    
-    int t; // timerange counter
-    void* buffer = NULL; // data buffer
-    int number; // data number
+    char** pathsToDatasets = NULL;
+    int numberOfDatasets = 0;
     
 	int c;
 	while (1)
@@ -78,6 +76,7 @@ int main (int argc, char *const  argv[])
 			{"brief",   no_argument, &verbose_flag, 0},
 			/* These options don't set a flag.
 			 We distinguish them by their indices. */
+            {"all",      no_argument, &all_flag, 1},
 			{"timeline", required_argument, 0, 't'},
 			{"dataset",  required_argument, 0, 'd'},
 			{0, 0, 0, 0}
@@ -133,9 +132,9 @@ int main (int argc, char *const  argv[])
 		exit(-1);		
 	}
     
-    if (timeline_path && dataset_path)
+    if (all_flag && timeline_path && dataset_path)
     {
-        fprintf(stderr, "--timeline and --dataset options are mutually exclusive.\n");
+        fprintf(stderr, "--all, --timeline and --dataset options are mutually exclusive.\n");
         fflush(stderr);
         exit(-1);
     }
@@ -161,164 +160,48 @@ int main (int argc, char *const  argv[])
         exit(-1);
     }
     
-    // make sure input dataset timeline is copied before input dataset is copied 
-    if (dataset_path)
-    {
-        pioInputDataset = pioOpenDataset(PIOMakeObject(pioInputFile), dataset_path);
-        if (PIODatasetIsInvalid(pioInputDataset))
-        {
-            fprintf(stderr, "Cannot open input dataset %s.\n", dataset_path);
-            fflush(stderr);
-            pioCloseFile(&pioInputFile);
-            pioCloseFile(&pioOutputFile);
-            exit(-1);                
-        }
-        
-        pioInputTimeline = pioGetTimeline(pioInputDataset);
-        if (PIOTimelineIsInvalid(pioInputTimeline))
-        {
-            fprintf(stderr, "Cannot get timeline of input dataset %s.\n", dataset_path);
-            fflush(stderr);
-            pioCloseDataset(&pioInputDataset);
-            pioCloseFile(&pioInputFile);
-            pioCloseFile(&pioOutputFile);
-            exit(-1);
-        }
-        
-        timeline_path = (char*) malloc((strlen(pioInputTimeline.path)+1)*sizeof(char));
-        sprintf(timeline_path, "%s", pioInputTimeline.path);
-        
-        pioCloseTimeline(&pioInputTimeline);
-        pioCloseDataset(&pioInputDataset);
-    }
-      
-    // copy input timeline
+    // copy timeline
     if (timeline_path)
     {
-        // open input timeline
-        pioInputTimeline = pioOpenTimeline(PIOMakeObject(pioInputFile), timeline_path);
-        if (PIOTimelineIsInvalid(pioInputTimeline))
+        if (!pioCopyTimeline(timeline_path, pioInputFile, pioOutputFile))
         {
-            fprintf(stderr, "Cannot open input timeline %s.\n", timeline_path);
+            fprintf(stderr, "Cannot copy timeline %s.\n", timeline_path);
             fflush(stderr);
             pioCloseFile(&pioInputFile);
             pioCloseFile(&pioOutputFile);
             exit(-1);
-        }
-        
-        // check if a timeline with same path already exists
-        pioOutputTimeline = pioOpenTimeline(PIOMakeObject(pioOutputFile), pioInputTimeline.path);
-        if (PIOTimelineIsValid(pioOutputTimeline))
-        {
-            // if so, compare existing timeline with to-be-copied timeline
-            if (pioCompareTimeLines(pioInputTimeline.timeranges, pioInputTimeline.ntimeranges,
-                                pioOutputTimeline.timeranges, pioOutputTimeline.ntimeranges) != PINOCCHIO_TIMELINE_COMPARISON_SAME)
-            {
-                fprintf(stderr, 
-                        "Different timeline already exists at path %s.\n",
-                        pioInputTimeline.path);
-                fflush(stderr);
-                pioCloseTimeline(&pioOutputTimeline);
-                pioCloseTimeline(&pioInputTimeline);
-                pioCloseFile(&pioInputFile);
-                pioCloseFile(&pioOutputFile);
-                exit(-1);            
-            }
-        }
-        else 
-        {
-            // otherwise, try and create new timeline
-            pioOutputTimeline = pioNewTimeline(pioOutputFile, pioInputTimeline.path, pioInputTimeline.description,
-                                               pioInputTimeline.ntimeranges, pioInputTimeline.timeranges);
-            if (PIOTimelineIsInvalid(pioOutputTimeline))
-            {
-                fprintf(stderr, "Cannot create output timeline %s.\n", pioInputTimeline.path);
-                fflush(stderr);
-                pioCloseTimeline(&pioInputTimeline);
-                pioCloseFile(&pioInputFile);
-                pioCloseFile(&pioOutputFile);
-                exit(-1);            
-            }            
-        }
-        
-        pioCloseTimeline(&pioOutputTimeline);
-        pioCloseTimeline(&pioInputTimeline);
+        }        
     }
         
-    
+    // copy dataset
     if (dataset_path)
     {
-        // open input dataset
-        pioInputDataset = pioOpenDataset(PIOMakeObject(pioInputFile), dataset_path);
-        if (PIODatasetIsInvalid(pioInputDataset))
+        if (!pioCopyDataset(dataset_path, pioInputFile, pioOutputFile))
         {
-            fprintf(stderr, "Cannot open input dataset %s.\n", dataset_path);
+            fprintf(stderr, "Cannot copy dataset %s.\n", dataset_path);
             fflush(stderr);
             pioCloseFile(&pioInputFile);
             pioCloseFile(&pioOutputFile);
-            exit(-1);                
-        }
-        
-        // open output timeline
-        pioOutputTimeline = pioOpenTimeline(PIOMakeObject(pioOutputFile), timeline_path);
-        if (PIOTimelineIsInvalid(pioOutputTimeline))
-        {
-            fprintf(stderr, "Cannot open output timeline %s.\n", timeline_path);
-            fflush(stderr);
-            pioCloseDataset(&pioInputDataset);
-            pioCloseFile(&pioInputFile);
-            pioCloseFile(&pioOutputFile);
-            exit(-1);
-        }
-        
-        // open input datatype
-        pioDatatype = pioGetDatatype(pioInputDataset);
-        if (PIODatatypeIsInvalid(pioDatatype))
-        {
-            fprintf(stderr, "Cannot get input datatype.\n");
-            fflush(stderr);
-            pioCloseTimeline(&pioOutputTimeline);
-            pioCloseDataset(&pioInputDataset);
-            pioCloseFile(&pioInputFile);
-            pioCloseFile(&pioOutputFile);
-            exit(-1);
-        }
-
-        // create output dataset
-        pioOutputDataset = pioNewDataset(pioOutputFile, 
-                                         pioInputDataset.path, pioInputDataset.description, 
-                                         pioOutputTimeline,
-                                         pioDatatype);
-        if (PIODatasetIsInvalid(pioOutputDataset))
-        {
-            fprintf(stderr, "Cannot create output dataset %s.\n", pioInputDataset.path);
-            fflush(stderr);
-            pioCloseDatatype(&pioDatatype);
-            pioCloseTimeline(&pioOutputTimeline);
-            pioCloseDataset(&pioInputDataset);
-            pioCloseFile(&pioInputFile);
-            pioCloseFile(&pioOutputFile);
-            exit(-1);
-        }
-        
-        // read input dataset and write it to output dataset
-        
-        for (t=0; t<pioOutputTimeline.ntimeranges; t++) 
-        {
-            number = pioReadData(&pioInputDataset, t, pioDatatype, &buffer);
-            pioWrite(&pioOutputDataset, t, buffer, number, pioDatatype);
-        }
-
-        pioCloseDatatype(&pioDatatype);
-
-        pioCloseTimeline(&pioOutputTimeline);
-        
-        pioCloseDataset(&pioOutputDataset);
-        pioCloseDataset(&pioInputDataset);
-        
-        
+            exit(-1);            
+        }    
     }
     
+    if (all_flag)
+    {
+        numberOfTimelines = pioGetListOfTimelines(pioInputFile, &pathsToTimelines);
+        for (i=0; i<numberOfTimelines; i++)
+            pioCopyTimeline(pathsToTimelines[i], pioInputFile, pioOutputFile);
+        for (i=0; i<numberOfTimelines; i++)
+            free(pathsToTimelines[i]);
+        free(pathsToTimelines);
+
+        numberOfDatasets = pioGetListOfDatasets(pioInputFile, &pathsToDatasets);
+        for (i=0; i<numberOfDatasets; i++)
+            pioCopyDataset(pathsToDatasets[i], pioInputFile, pioOutputFile);
+        for (i=0; i<numberOfDatasets; i++)
+            free(pathsToDatasets[i]);
+        free(pathsToDatasets);
+    }
     
     pioCloseFile(&pioOutputFile);
     pioCloseFile(&pioInputFile);
