@@ -21,8 +21,29 @@
 /**
  \page piorm piorm
  
+ \a piorm deletes a timeline and/or a dataset from a pinocchIO file.
+ 
+ @note
+ In order to delete a timeline, it must not be used by any dataset in the
+ pinocchIO file.
+
  \section usage Usage 
+\verbatim
+$ piorm [options] /path/to/pinocchIO/file
+         -t PATH, --timeline=PATH
+                  Remove timeline at PATH
+         -d PATH, --dataset=PATH
+                  Remove dataset at PATH
+\endverbatim
  \section example Example
+ - Remove timeline /path/to/timeline
+\verbatim
+$ piorm -t /path/to/timeline file.pio
+\endverbatim
+ - Remove dataset /path/to/dataset
+\verbatim
+$ piorm -d /path/to/dataset file.pio
+\endverbatim
  */
 
 
@@ -128,7 +149,17 @@ int main (int argc, char *const  argv[])
 		fflush(stderr);
 		exit(-1);
 	}
-	
+
+    if (timeline_path)
+    {
+        int success = pioRemoveTimeline(PIOMakeObject(pioFile), timeline_path);
+        if (!success)
+        {
+            fprintf(stderr, "Cannot remove timeline %s from file %s.\n", timeline_path, pinocchio_file);
+            fflush(stderr);
+        }
+    }    
+    
 	if (dataset_path)
 	{
         int success = pioRemoveDataset(PIOMakeObject(pioFile), dataset_path);
@@ -139,15 +170,6 @@ int main (int argc, char *const  argv[])
         }
     }
      
-    if (timeline_path)
-    {
-        int success = pioRemoveTimeline(PIOMakeObject(pioFile), timeline_path);
-        if (!success)
-        {
-            fprintf(stderr, "Cannot remove timeline %s from file %s.\n", timeline_path, pinocchio_file);
-            fflush(stderr);
-        }
-    }
     
     pioCloseFile(&pioFile);
     
