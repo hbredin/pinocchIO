@@ -1,5 +1,5 @@
 // 
-// Copyright 2010 Herve BREDIN (bredin@limsi.fr)
+// Copyright 2010-2011 Herve BREDIN (bredin@limsi.fr)
 // Contact: http://pinocchio.niderb.fr/
 // 
 // This file is part of pinocchIO.
@@ -42,7 +42,7 @@ void usage(const char * path2tool)
 			"       -t PATH, --timeline=PATH\n"
 			"           Remove timeline at PATH\n"
 			"       -d PATH, --dataset=PATH\n"
-			"           Dump dataset at PATH\n");
+			"           Remove dataset at PATH\n");
 	fflush(stdout);
 }
 
@@ -141,14 +141,12 @@ int main (int argc, char *const  argv[])
      
     if (timeline_path)
     {
-//        int success = pioRemoveTimeline(PIOMakeObject(pioFile), timeline_path);
-//        if (!success)
-//        {
-//            fprintf(stderr, "Cannot remove timeline %s from file %s.\n", timeline_path, pinocchio_file);
-//            fflush(stderr);
-//        }
-        fprintf(stderr, "Removing timelines is not yet implemented.\n");
-        fflush(stderr);
+        int success = pioRemoveTimeline(PIOMakeObject(pioFile), timeline_path);
+        if (!success)
+        {
+            fprintf(stderr, "Cannot remove timeline %s from file %s.\n", timeline_path, pinocchio_file);
+            fflush(stderr);
+        }
     }
     
     pioCloseFile(&pioFile);
