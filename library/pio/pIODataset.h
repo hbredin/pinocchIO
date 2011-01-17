@@ -185,9 +185,9 @@ int pioGetListOfDatasets(PIOFile pioFile, char*** pathsToDatasets);
  Copy dataset at location @a path from @a input file into @a output file.
  If it is missing in the output file, the input dataset timeline is also copied.
  
- @param path[in] Path to dataset
- @param input[in] Input file
- @param output[in] Output file
+ @param[in] path Path to dataset
+ @param[in] input Input file
+ @param[in] output Output file
  @returns 
  - TRUE when successful
  - FALSE otherwise

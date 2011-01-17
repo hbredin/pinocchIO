@@ -199,9 +199,9 @@ int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines);
  
  Copy timeline at location @a path from @a input file into @a output file.  
  
- @param path[in] Path to timeline
- @param input[in] Input file
- @param output[in] Output file
+ @param[in] path Path to timeline
+ @param[in] input Input file
+ @param[in] output Output file
  @returns 
     - TRUE when successful
     - FALSE otherwise
