@@ -139,7 +139,7 @@ int pioCloseDataset(PIODataset* pioDataset);
  \a pioObject can be the file itself, another dataset stored in the same file, or a
  timeline stored in the same file. Just use \ref PIOMakeObject beforehand to convert it to a PIOObject.
  
- @param[in] pioObject PIOObject stored in the same file as requested timeline 
+ @param[in] pioObject PIOObject stored in the same file as requested dataset 
  @param[in] path Path to the pinocchIO dataset to be removed
  @returns
  - 1 if dataset was successfully removed
