@@ -59,11 +59,13 @@
                                                                    
                                                                    
   Timeline format - one segment per line: TIMERANGE                
-  Data format - one descriptor per line: TIMERANGE DATA            
+  Data format - multiple descriptors per line: TIMERANGE DATA
+ 
   TIMERANGE equals 'start stop'           
-  DATA equals 'x1 x2 ... xD' (with option --char/int/float/double) 
+  DATA equals 'x11 x12 ... x1D x21 x22 ... x2D x31 x32 ... x3D' (with option --char/int/float/double) 
        equals 'string'       (with option --string)                 
-\endverbatim 
+
+ \endverbatim 
  \section example Example
  - Add 3-dimensional integer dataset to file.pio 
 \verbatim
@@ -158,32 +160,119 @@ int readTimeline( const char* ascii_file, int nLines, PIOTimeRange* timeline, in
 	return lineId;
 }
 
-int readArrayDataset(const char* ascii_file, int nLines, int dimension, double* buffer)
+//int readArrayDataset(const char* ascii_file, int nLines, int dimension, double* buffer)
+//{
+//	char* line = NULL;
+//	FILE* file = NULL;
+//	int lineId = -1;
+//	size_t length = -1;
+//	char* separator = " \t\r\n";
+//	int d = -1;
+//	double start_sec, stop_sec;
+//	
+//	file = fopen(ascii_file, "r");
+//	if (!file) return -1;
+//	
+//	for (lineId = 0; lineId < nLines; lineId++) 
+//	{
+//		line = fgetln(file, &length);
+//		
+//		start_sec = atof(strtok(line, separator));
+//		stop_sec = atof(strtok(NULL, separator));
+//		
+//		for (d=0; d<dimension; d++) 
+//			buffer[dimension*lineId+d] = atof(strtok(NULL, separator));
+//	}
+//	fclose(file);
+//	return lineId;
+//}
+
+
+int readArrayDataset(const char* ascii_file, int nLines, int dimension, int* number, double** buffer)
 {
 	char* line = NULL;
 	FILE* file = NULL;
 	int lineId = -1;
-	size_t length = -1;
-	char* separator = " \t\r\n";
+	size_t length;
+    char* separator = " \t";
+
 	int d = -1;
+    int cumNumber = 0;
+
 	double start_sec, stop_sec;
+    char* vp = NULL;
+    double* onebuffer = NULL;
 	
 	file = fopen(ascii_file, "r");
 	if (!file) return -1;
+    
+    onebuffer = (double*) malloc(dimension*sizeof(double));
 	
 	for (lineId = 0; lineId < nLines; lineId++) 
 	{
+        number[lineId] = 0;
 		line = fgetln(file, &length);
+        if (line[length-1] == '\n')
+            line[length-1] = '\0';
 		
-		start_sec = atof(strtok(line, separator));
-		stop_sec = atof(strtok(NULL, separator));
-		
-		for (d=0; d<dimension; d++) 
-			buffer[dimension*lineId+d] = atof(strtok(NULL, separator));
+        vp = strsep(&line, separator);
+        start_sec = atof(vp);
+        
+        vp = strsep(&line, separator);
+        stop_sec = atof(vp);
+        
+#ifdef DEBUG
+        fprintf(stdout, "%.2f --> %.2f ", start_sec, stop_sec);
+#endif
+        
+        d = 0;
+        // read whole line
+        while (line != NULL)
+        {   
+            vp = strsep(&line, separator);
+            // if new token is found
+            if (*vp != '\0')
+            {
+                // put it in buffer
+                onebuffer[d] = atof(vp);
+                // next dimension
+                d++;
+                // if vector is full
+                // add buffer to multi-entry buffer
+                if (d == dimension)
+                {
+                    // realloc output buffer
+                    *buffer = realloc(*buffer, dimension*(cumNumber+1)*sizeof(double));
+                    // copy buffer content
+#ifdef DEBUG
+                    fprintf(stdout, "[ ");
+#endif                    
+                    for (d=0; d<dimension; d++)
+                    {
+#ifdef DEBUG
+                        fprintf(stdout, "%.2f ", onebuffer[d]);
+#endif                                            
+                        (*buffer)[dimension*cumNumber+d] = onebuffer[d];
+                    }
+#ifdef DEBUG
+                    fprintf(stdout, "] ");
+#endif                    
+                    // increment number of entries
+                    number[lineId]++;
+                    cumNumber++;
+                    d = 0;
+                }
+            }
+        }   
+#ifdef DEBUG
+        fprintf(stdout, "\n");
+        fflush(stdout);
+#endif                            
 	}
 	fclose(file);
 	return lineId;
 }
+
 
 int readStringDataset(const char* ascii_file, int nLines, char** *strings)
 {
@@ -254,12 +343,16 @@ int usage(int argc, char *const argv[])
 			"   -D, --description=\"DESCRIPTION\"                               \n" \
 			"                   Dataset/timeline description                    \n" \
 			"                                                                   \n" \
-			"                                                                   \n" \
-			" Timeline format - one segment per line: TIMERANGE                 \n" \
-			" Data format - one descriptor per line: TIMERANGE DATA             \n" \
-			" TIMERANGE equals 'start stop'                                     \n" \
-			" DATA equals 'x1 x2 ... xD' (with option --char/int/float/double)  \n" \
-			"      equals 'string'       (with option --string)                 \n",
+            " Timeline format - one segment per line: TIMERANGE                 \n" \ 
+            "                                                                   \n" \
+            " Data format - zero, one or multiple descriptors per line          \n" \
+            "             ~ TIMERANGE DATA                                      \n" \
+            "                                                                   \n" \
+            "   - TIMERANGE ~ 'start stop'                                      \n" \
+            "   - DATA      ~ 'x11 x12 ... x1D x21 ... x2D x31 ... x3D ...'     \n" \
+            "                 when used with options char, int, float or double \n" \
+            "               ~ 'string that might contain spaces'                \n" \
+            "                 when used with option --string                    \n",
 			argv[0]);
 	return 1;	
 }
@@ -293,6 +386,8 @@ int main (int argc, char *const  argv[])
 	PIODataset pioDataset = PIODatasetInvalid;
 	
 	double* arrayBuffer = NULL;
+    int* number = NULL;
+    int cumNumber = -1;
 	char** strings = NULL;
     
 	while (1)
@@ -487,8 +582,15 @@ int main (int argc, char *const  argv[])
 		}
 		else
 		{
-			arrayBuffer = (double*) malloc(dimension*ntimeranges*sizeof(double));
-			readArrayDataset(in_ascii, ntimeranges, dimension, arrayBuffer);
+//			arrayBuffer = (double*) malloc(dimension*ntimeranges*sizeof(double));
+//			readArrayDataset(in_ascii, ntimeranges, dimension, arrayBuffer);
+            
+#ifdef DEBUG
+            fprintf(stdout, "readArrayDataset...\n");
+#endif                    
+            
+            number = (int*) malloc(ntimeranges*sizeof(int));
+			readArrayDataset(in_ascii, ntimeranges, dimension, number, &arrayBuffer);
 		}
 		
 		if (string_flag)
@@ -499,18 +601,29 @@ int main (int argc, char *const  argv[])
 		if (string_flag)
 			for (lineId=0; lineId<ntimeranges; lineId++)
 				pioWrite(&pioDataset, lineId, strings[lineId], strlen(strings[lineId]), pioDatatype);
-		else 
-			for (lineId=0; lineId<ntimeranges; lineId++)
-				pioWrite(&pioDataset, lineId, arrayBuffer+dimension*lineId, 1, pioDatatype);
+		else
+        {   
+//			for (lineId=0; lineId<ntimeranges; lineId++)
+//                pioWrite(&pioDataset, lineId, arrayBuffer+dimension*lineId, 1, pioDatatype);
 
+            cumNumber = 0;
+			for (lineId=0; lineId<ntimeranges; lineId++)
+            {
+                pioWrite(&pioDataset, lineId, arrayBuffer+dimension*cumNumber, number[lineId], pioDatatype);
+                cumNumber = cumNumber + number[lineId];
+            }
+        }
+        
 		if (string_flag)
 		{
 			for (lineId=0; lineId<ntimeranges; lineId++) { free(strings[lineId]); strings[lineId] = NULL; }
 			free(strings); strings = NULL;
 		}
 		else
+        {
 			free(arrayBuffer); arrayBuffer = NULL;
-
+            free(number); number = NULL;
+        }
 		pioCloseDatatype(&pioDatatype);
 		pioCloseDataset(&pioDataset);
 				
