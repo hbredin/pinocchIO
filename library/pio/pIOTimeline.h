@@ -123,6 +123,29 @@ int pioCloseTimeline( PIOTimeline* pioTimeline );
  */
 
 /**
+ @brief Remove pinocchIO timeline
+ 
+ Remove the pinocchIO timeline at internal location \a path from file containing \a pioObject.\n
+ \a pioObject can be the file itself, another timeline stored in the same file, or a
+ dataset stored in the same file. Just use \ref PIOMakeObject beforehand to convert it to a PIOObject.
+ 
+ @param[in] pioObject PIOObject stored in the same file as requested timeline 
+ @param[in] path Path to the pinocchIO timeline to be removed
+ @returns
+ - 1 if dataset was successfully removed
+ - 0 otherwise
+ 
+ @note
+ In case the timeline is used by at least one dataset, it cannot be removed
+ and pioRemoveTimeline() will return 0. Use pioRemoveDataset() to remove 
+ dataset if needed.
+ 
+ @ingroup file
+ */    
+int pioRemoveTimeline(PIOObject pioObject, const char* path);
+
+
+/**
  @brief Get pinocchIO timeline from pinocchIO dataset
  
  Get the pinocchIO timeline to which the provided pinocchIO dataset is attached.

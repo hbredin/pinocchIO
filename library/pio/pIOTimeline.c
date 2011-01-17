@@ -280,6 +280,39 @@ int pioCloseTimeline( PIOTimeline* pioTimeline )
 	return 1;
 }
 
+int pioRemoveTimeline(PIOObject pioObject, const char* path)
+{
+    PIOTimeline pioTimeline = PIOTimelineInvalid;
+    int timesUsed = 0;
+    int deleted = -1;
+    char* internalPath = NULL;    
+
+    pioTimeline = pioOpenTimeline(pioObject, path);
+    if (PIOTimelineIsInvalid(pioTimeline)) return 0;
+    
+    // cannot remove timeline if it is used by a dataset
+    timesUsed = getTimesUsed(pioTimeline);
+    if (timesUsed > 0)
+    {
+        pioCloseTimeline(&pioTimeline);
+        return 0;
+    }
+    
+    // get HDF5 internal path to timeline
+    internalPathToTimeline(pioTimeline.path, &internalPath);
+    
+    // close timeline
+    pioCloseTimeline(&pioTimeline);
+    
+    // actually remove timeline
+    deleted = (H5Ldelete(pioObject.identifier, internalPath, H5P_DEFAULT) >= 0);       
+        
+    // free what was allocated
+    free(internalPath);
+    
+    return deleted;
+}
+
 int pioGetListOfTimelines(PIOFile pioFile, char*** pathsToTimelines)
 {
 	int tl = -1;
