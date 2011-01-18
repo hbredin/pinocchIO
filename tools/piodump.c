@@ -33,24 +33,72 @@
 #include "pinocchIO.h"
 
 static int verbose_flag = 0;
+static int timestamp_flag = 0;
 static int string_flag = 0;
+static int multiple_flag = 0;
 static int svmlight_flag = 0;
+
+int checkArguments(const char* timeline_path, const char* dataset_path)
+{
+    if (dataset_path && timeline_path)
+    {
+        fprintf(stderr, 
+                "Cannot dumped both a dataset and a timeline.\n"); fflush(stderr);
+        return 0;
+    }
+    
+    if (!dataset_path && !timeline_path)
+    {
+        fprintf(stderr, 
+                "No dataset or timeline to dump.\n"); fflush(stderr);
+        return 0;
+    }
+    
+    if (svmlight_flag && string_flag)
+    {
+        fprintf(stderr, 
+                "SVMlight format does not support text data.\n"); fflush(stderr);
+        return 0;
+    }
+    
+    if (svmlight_flag && (timeline_path || timestamp_flag))
+    {
+        fprintf(stderr, 
+                "Timestamps cannot be dumped in SVMlight format.\n"); fflush(stderr);
+        return 0;        
+    }
+    
+    if (svmlight_flag && multiple_flag)
+    {
+        fprintf(stderr, 
+                "SVMlight format does not support multiple entries per line.\n"); fflush(stderr);
+        return 0;
+    }
+    
+    return 1;
+}
 
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
 			"USAGE: %s [options] FILE\n", path2tool);
 	fprintf(stdout, 
-			"       -t PATH, --timeline=PATH\n"
-			"           Dump timeline at PATH\n"
-			"       -d PATH, --dataset=PATH\n"
-			"           Dump dataset at PATH\n"
-            "                --svmlight\n"
-            "           Use SVMlight format\n"
-			"       -s, --timestamp\n"
-			"           Show timestamps\n"
-			"           --text\n"
-			"           Display char as text\n");
+			"       -t PATH, --timeline=PATH                                        \n"
+			"                Dump timeline at PATH                                  \n"
+            "                                                                       \n"
+			"       -d PATH, --dataset=PATH                                         \n"
+			"                Dump dataset at PATH                                   \n"
+			"       -s, --timestamp                                                 \n"
+			"                Prepend each line with the corresponding timestamp.    \n"
+            "       --multiple                                                      \n"
+            "                Multiple entries per line                              \n"
+            "                Default is one entry per line, timestamps are repeated.\n"
+            "       --text                                                          \n"
+			"                Display char as text                                   \n"
+            "                                                                       \n"
+            "       --svmlight                                                      \n"
+            "                Use SVMlight format (with label field set to -1)       \n"
+            );
 	fflush(stdout);
 }
 
@@ -59,7 +107,6 @@ int main (int argc, char *const  argv[])
 	char* pinocchio_file = NULL;
 	char* timeline_path = NULL;
 	char* dataset_path = NULL;
-	int timestamp_flag = 0;
 	
 	int tr; // timerange index
 	void* buffer = NULL; // data buffer
@@ -89,8 +136,9 @@ int main (int argc, char *const  argv[])
 			{"timeline",  required_argument, 0, 't'},
 			{"dataset",   required_argument, 0, 'd'},
 			{"timestamp", no_argument,       0, 's'},
+            {"multiple",  no_argument,       &multiple_flag, 1},
             {"svmlight",  no_argument,       &svmlight_flag, 1},
-			{"text",      no_argument,       &string_flag, 1},
+			{"text",      no_argument,       &string_flag,   1},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -144,37 +192,18 @@ int main (int argc, char *const  argv[])
 	
 	if (optind+1>argc)
 	{
-		fprintf(stderr, "Missing path to pinocchIO file.\n");
-		fflush(stderr); 
+		fprintf(stderr, "Missing path to pinocchIO file.\n"); fflush(stderr); 
 		usage(argv[0]);
 		exit(-1);		
-	}
-	
-	if ((dataset_path && timeline_path) || (!dataset_path && !timeline_path))
-	{
-		fprintf(stderr, "Choose between --timeline or --dataset.\n");
-		fflush(stderr); 
-		usage(argv[0]);
-		exit(-1);		
-	}
+	} 
+    pinocchio_file = argv[optind];
     
-    if (svmlight_flag && string_flag)
+    
+    if (!checkArguments(timeline_path, dataset_path))
     {
-        fprintf(stderr, "Incompatible options (svmlight and text)\n");
-        fflush(stderr);
         usage(argv[0]);
         exit(-1);
-    }
-    if (svmlight_flag && timeline_path)
-    {
-        fprintf(stderr, "Incompatible options (svmlight and timeline)\n");
-        fflush(stderr);
-        usage(argv[0]);
-        exit(-1);        
-    }
-    if (svmlight_flag) timestamp_flag = 0;
-	
-	pinocchio_file = argv[optind];
+    }        
 	
 	PIOFile pioFile = pioOpenFile(pinocchio_file, PINOCCHIO_READONLY);
 	if (PIOFileIsInvalid(pioFile))
@@ -233,11 +262,11 @@ int main (int argc, char *const  argv[])
             
             dimension = pioDatatype.dimension;
             
-			if (string_flag & (pioDatatype.type==PINOCCHIO_TYPE_CHAR) & (dimension == 1))
+			if (string_flag && (pioDatatype.type==PINOCCHIO_TYPE_CHAR) && (dimension == 1))
 			{
 				if (timestamp_flag)
 				{
-					fprintf(stdout, "%lf %lf | ", 
+					fprintf(stdout, "%lf %lf ", 
 							(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
 							(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
 				}
@@ -250,11 +279,20 @@ int main (int argc, char *const  argv[])
 			}
 			else
 			{
+                // one timestamp for all entries
+                if (timestamp_flag && multiple_flag)
+                {
+                    fprintf(stdout, "%lf %lf ", 
+                            (double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
+                            (double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									                    
+                }
+                
 				for (n=0; n<numberOfVectors; n++)
-				{				
-					if (timestamp_flag)
+				{	
+                    // one timestamp per entry
+					if (timestamp_flag && !multiple_flag)
 					{
-						fprintf(stdout, "%lf %lf | ", 
+						fprintf(stdout, "%lf %lf ", 
 								(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
 								(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
 					}
@@ -263,7 +301,8 @@ int main (int argc, char *const  argv[])
                     
 					for (d=0; d<dimension; d++)
 					{					
-						switch (pioDatatype.type) {
+						switch (pioDatatype.type)
+                        {
                             case PINOCCHIO_TYPE_INT:
                                 if (svmlight_flag && (buffer_int[n*dimension+d]))
                                     fprintf(stdout, "%d:%d ", d, buffer_int[n*dimension+d]);
@@ -292,8 +331,9 @@ int main (int argc, char *const  argv[])
                                 break;                                
 						}
 					}
-					fprintf(stdout, "\n");
-				}
+                    if (!multiple_flag) fprintf(stdout, "\n");
+				} 
+                if (multiple_flag) fprintf(stdout, "\n");
 			}
 		}
 		
