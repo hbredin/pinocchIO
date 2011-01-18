@@ -93,13 +93,26 @@ int readLines(const char* ascii_file, int nLines, char** *strings)
 	return lineId;	
 }
 
+/**
+ @brief Parse section "filter"
+ 
+ @param[in] filename Path to configuration file
+ @param[out] labelFilterType Type of filter
+ @param[out] labelFilterReference Filter reference
+ 
+ @returns
+ - 0 if configuration file has no "filter" section
+ - 1 if successful
+ - -1 in case of failure
+ */
 int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* labelFilterType, int* labelFilterReference)
 {
     config_t config;
     const config_setting_t *filter_section = NULL;
 
     config_init(&config);
-    // raed configuration file
+    
+    // read configuration file
     if (config_read_file(&config, filename) == CONFIG_FALSE)
     {
         fprintf(stderr,
@@ -108,48 +121,74 @@ int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* lab
         fprintf(stderr, "%s at line %d\n", config_error_text(&config), config_error_line(&config));
         fflush(stderr);
         config_destroy(&config);
-        return 0;
+        
+        return -1;
     }    
     
     *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_UNDEFINED;
     *labelFilterReference = -1;    
     
     filter_section = config_lookup(&config, GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_FILTER);
-    if (filter_section)
+    if (!filter_section)
     {
-        if (config_setting_lookup_int(filter_section,
-                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_NONE,
-                                      labelFilterReference) == CONFIG_TRUE)
-            *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
-        
-        if (config_setting_lookup_int(filter_section, 
-                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_EQUALS_TO, 
-                                      labelFilterReference) == CONFIG_TRUE)
-            *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_EQUALS_TO;
-        
-        if (config_setting_lookup_int(filter_section, 
-                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_DIFFERS_FROM, 
-                                      labelFilterReference) == CONFIG_TRUE)
-            *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_DIFFERS_FROM;
-        
-        if (config_setting_lookup_int(filter_section, 
-                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_GREATER_THAN, 
-                                      labelFilterReference) == CONFIG_TRUE)
-            *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_GREATER_THAN;
-        
-        if (config_setting_lookup_int(filter_section, 
-                                      GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_SMALLER_THAN, 
-                                      labelFilterReference) == CONFIG_TRUE)
-            *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_SMALLER_THAN;        
+        config_destroy(&config);
+
+        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_UNDEFINED;
+        *labelFilterReference = -1;    
+        return 0;
     }
+    
+    if (config_setting_lookup_int(filter_section,
+                                  GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_NONE,
+                                  labelFilterReference) == CONFIG_TRUE)
+        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
+    
+    if (config_setting_lookup_int(filter_section, 
+                                  GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_EQUALS_TO, 
+                                  labelFilterReference) == CONFIG_TRUE)
+        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_EQUALS_TO;
+    
+    if (config_setting_lookup_int(filter_section, 
+                                  GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_DIFFERS_FROM, 
+                                  labelFilterReference) == CONFIG_TRUE)
+        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_DIFFERS_FROM;
+    
+    if (config_setting_lookup_int(filter_section, 
+                                  GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_GREATER_THAN, 
+                                  labelFilterReference) == CONFIG_TRUE)
+        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_GREATER_THAN;
+    
+    if (config_setting_lookup_int(filter_section, 
+                                  GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_SMALLER_THAN, 
+                                  labelFilterReference) == CONFIG_TRUE)
+        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_SMALLER_THAN;        
     
     config_destroy(&config);
     
     return 1;
 }
 
+/**
+ @brief Parse section "label" or "data"
+ 
+ @param[in] filename Path to configuration file
+ @param[in] data_or_label Name of section to parse (GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_DATA or GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_LABEL)
+ @param[out] numberOfFiles Number of pinocchIO files
+ @param[out] pathToFile List of paths to pinocchIO files
+ @param[out] pathToDataset Path to pinocchIO dataset
+ 
+ @returns
+    - 0 if successful but requested section does not exist
+    - number of files if successful
+    - -1 in case of failure
+ 
+ @note 
+ @a numberOfFiles is set to -1 in case of failure.
+ 
+ */
 int getPathsFromConfigurationFile(const char* filename, const char* data_or_label,
                                   int* numberOfFiles, char*** pathToFile, char** pathToDataset)
+
 {
     int f, ff; // file counter
     
@@ -168,10 +207,14 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
     const char* base_list = NULL;
     char** base_path = NULL;
     
+    *numberOfFiles = -1;
+    *pathToFile = NULL;
+    *pathToDataset = NULL;
+    
     // initialize configuration file parser
     config_init(&config);
     
-    // raed configuration file
+    // read configuration file
     if (config_read_file(&config, filename) == CONFIG_FALSE)
     {
         fprintf(stderr,
@@ -179,8 +222,11 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
                 filename);
         fflush(stderr);
         fprintf(stderr, "%s at line %d\n", config_error_text(&config), config_error_line(&config));
+        
         config_destroy(&config);
-        return 0;
+        
+        *numberOfFiles = -1;        
+        return -1;
     }
     
     // data_or_label is "data" or "label"
@@ -192,9 +238,11 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
                 "Did not find any \"%s\" section in configuration file %s.\n",
                 data_or_label, filename);
         fflush(stdout);
-        *numberOfFiles = 0;
+        
         config_destroy(&config);
-        return 0;        
+
+        *numberOfFiles = 0;        
+        return *numberOfFiles;        
     }
     
     // get path to dataset
@@ -204,8 +252,11 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
                 "Could not find %s/dataset in configuration file %s.\n",
                 data_or_label, filename);
         fflush(stderr);
+        
         config_destroy(&config);
-        return 0;                
+        
+        *numberOfFiles = -1;
+        return -1;                
     }
     
     // get files section
@@ -216,8 +267,11 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
                 "Could not find %s/files section in configuration file %s.\n",
                 data_or_label, filename);
         fflush(stderr);
+        
         config_destroy(&config);
-        return 0;
+        
+        *numberOfFiles = -1;
+        return -1;
     }
     
     is_list = config_setting_is_list(files_section);
@@ -228,7 +282,9 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
         fprintf(stderr, "Files must be provided as a list of files.\n");
         fprintf(stderr, "Example: files = ( \"file1\", \"file2\" );");
         config_destroy(&config);
-        return 0;          
+        
+        *numberOfFiles = -1;
+        return -1;          
     }
     
     // alloc/copy path to dataset
@@ -251,10 +307,12 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
                 fprintf(stderr, 
                         "There must be something wrong with %dth file in list.\n", 
                         f+1);
-                for (ff=0; ff<f; ff++) free((*pathToFile)[ff]); free((*pathToFile));
-                free(*pathToDataset);
                 config_destroy(&config);
-                return 0;                            
+
+                for (ff=0; ff<f; ff++) free((*pathToFile)[ff]); free((*pathToFile)); *pathToFile = NULL;
+                free(*pathToDataset); *pathToDataset = NULL;
+                *numberOfFiles = -1;
+                return -1;                            
             }
             
             (*pathToFile)[f] = (char*) malloc((strlen(cur_file)+1)*sizeof(char));
@@ -277,9 +335,11 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
                     GEPETTO_CONFIGURATION_FILE_LIST_OF_FILES, 
                     filename);
             fflush(stderr);
-            free(*pathToDataset);
             config_destroy(&config);
-            return 0;
+            
+            free(*pathToDataset); *pathToDataset = NULL;
+            *numberOfFiles = -1;
+            return -1;
         }
 
         // get number of files
@@ -288,9 +348,11 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
         {
             fprintf(stderr, "Problem with list %s.\n", base_list);
             fflush(stderr);
-            free(*pathToDataset);
             config_destroy(&config);
-            return 0;
+
+            free(*pathToDataset); *pathToDataset = NULL;
+            *numberOfFiles = -1;
+            return -1;
         }
         
         // get base paths to files
@@ -310,7 +372,7 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
     
     config_destroy(&config);
     
-    return 1;
+    return *numberOfFiles;
 }
 
 
@@ -331,33 +393,47 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     
     int f;
     
-    // parse "data" section
-    if (!getPathsFromConfigurationFile(filename, 
+    // try and parse "data" section
+    if (getPathsFromConfigurationFile(filename, 
                                        GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_DATA, 
-                                       &numberOfDataFiles, &pathToDataFile, &pathToDataDataset))
+                                       &numberOfDataFiles, &pathToDataFile, &pathToDataDataset) < 0)
+        // return invalid gepetto server if an error happened
         return GPTServerInvalid;
-    
+        
     // try and parse "filter" section
-    if (!getFilterFromConfigurationFile(filename, &labelFilterType, &labelFilterReference))
+    if (getFilterFromConfigurationFile(filename, &labelFilterType, &labelFilterReference) < 0)
     {
+        // return invalid gepetto server if an error happened
+        for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile); 
+        free(pathToDataDataset); 
+        
+        return GPTServerInvalid;
+    }
+    
+    // try and parse "label" section
+    if (getPathsFromConfigurationFile(filename, 
+                                       GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_LABEL,
+                                       &numberOfLabelFiles, &pathToLabelFile, &pathToLabelDataset) < 0)
+    {
+        // return invalid gepetto server if an error happened
         for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile);
         free(pathToDataDataset);
+        
         return GPTServerInvalid;
     }
     
-    // if filter section parsing proved to provided a filter (even NONE filter), parse "label" section
-    if (labelFilterType != GEPETTO_LABEL_FILTER_TYPE_UNDEFINED)
+    // check coherence between filter and labels
+    // label section MUST exist in case filter is defined (even of type NONE)
+    if ((labelFilterType != GEPETTO_LABEL_FILTER_TYPE_UNDEFINED) &&
+        (numberOfLabelFiles == -1))
     {
-        if (!getPathsFromConfigurationFile(filename, 
-                                           GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_LABEL,
-                                           &numberOfLabelFiles, &pathToLabelFile, &pathToLabelDataset))
-        {
-            for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile);
-            free(pathToDataDataset);
-            return GPTServerInvalid;
-        }        
+        // return invalid gepetto server if 
+        for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile);
+        free(pathToDataDataset);
+        
+        return GPTServerInvalid;        
     }
-    
+        
     // initialize server
     gptServer = gptNewServer(numberOfDataFiles, pathToDataFile, pathToDataDataset,
                              labelFilterType, labelFilterReference, 
@@ -367,11 +443,8 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile);
     free(pathToDataDataset);
 
-    if (labelFilterType != GEPETTO_LABEL_FILTER_TYPE_UNDEFINED)
-    {
-        for (f=0; f<numberOfLabelFiles; f++) free(pathToLabelFile[f]); free(pathToLabelFile);
-        free(pathToLabelDataset);
-    }
+    for (f=0; f<numberOfLabelFiles; f++) free(pathToLabelFile[f]); free(pathToLabelFile);
+    free(pathToLabelDataset);
     
     return gptServer;
 }
