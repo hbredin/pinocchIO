@@ -160,7 +160,7 @@ int main (int argc, char *const  argv[])
     
     dimension = gptGetServerDimension(gptServer);
     
-    numberOfVectors = gptReadNextData(&gptServer, gptServer.datatype, &buffer, &label);
+    numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &label);
     while (gptServer.eof == 0) 
     {
         if (numberOfVectors > 0)
@@ -222,7 +222,7 @@ int main (int argc, char *const  argv[])
                 }
             }
         }
-        numberOfVectors = gptReadNextData(&gptServer, gptServer.datatype, &buffer, &label);        
+        numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &label);        
     }
     
     fflush(stdout);
