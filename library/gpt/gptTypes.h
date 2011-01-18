@@ -22,20 +22,42 @@
 #define _GEPETTO_TYPES_H
 
 #include "pinocchIO.h"
+#include "list_utils.h"
 
+/**
+ @brief Type of filter
+ 
+ Depending on their associated label, Gepetto servers are able to filter out data
+ entries to serve.
+ 
+ @ingroup server
+ */
 typedef enum {
-    GEPETTO_LABEL_FILTER_TYPE_UNDEFINED = -1,
-    GEPETTO_LABEL_FILTER_TYPE_NONE,
-    GEPETTO_LABEL_FILTER_TYPE_EQUALS_TO,
-    GEPETTO_LABEL_FILTER_TYPE_DIFFERS_FROM,
-    GEPETTO_LABEL_FILTER_TYPE_GREATER_THAN,
-    GEPETTO_LABEL_FILTER_TYPE_SMALLER_THAN
+    /** Undefined filter */
+	GEPETTO_LABEL_FILTER_TYPE_UNDEFINED = -1,
+    /** No filter. Server serves all data entries */
+	GEPETTO_LABEL_FILTER_TYPE_NONE, 
+    /** "Equals to" filter. Server only serves data entries whose label equals to a predefined value */
+	GEPETTO_LABEL_FILTER_TYPE_EQUALS_TO, 
+    /** "Differs from" filter. Server only serves data entries whose label differs from a predefined value */
+	GEPETTO_LABEL_FILTER_TYPE_DIFFERS_FROM, 
+    /** "Greater than" filter. Server only serves data entries whose label is greater than a predefined value */
+	GEPETTO_LABEL_FILTER_TYPE_GREATER_THAN, 
+    /** "Smaller than" filter. Server only serves data entries whose label is smaller than a predefined value */
+	GEPETTO_LABEL_FILTER_TYPE_SMALLER_THAN
 } GPTLabelFilterType;
 
 /// gepetto server
 typedef struct {
     
     // === DATA ===
+    
+    // does server serve data?
+    int servesData;
+    
+    //
+    listOfLabels_t*  dataCountsPerLabelTotal;
+    listOfLabels_t** dataCountsPerLabelPerFile;
     
     // number of pinocchIO files containing the actual data
     int numberOfDataFiles;
@@ -48,6 +70,13 @@ typedef struct {
     int* lengthOfDataTimeline;
     
     // === LABELS ===
+    
+    // does server server labels?
+    int servesLabels;
+    
+    // 
+    listOfLabels_t*  labelCountsTotal;
+    listOfLabels_t** labelCountsPerFile;
     
     // number of pinocchIO files containing labels
     int numberOfLabelFiles;       
@@ -73,6 +102,7 @@ typedef struct {
     // === SAMPLING ===
     
     
+    
     // === INTERNALS ===
     
     PIODatatype datatype;
@@ -90,12 +120,21 @@ typedef struct {
     
 } GPTServer;
 
+/**
+	@brief Invalid Gepetto server
+ */
 #define GPTServerInvalid ((GPTServer) {             \
+/* servesData */                -1,                 \
+/* dataCountsPerLabelTotal */   NULL,               \
+/* dataCountsPerLabelPerFile */ NULL,               \
 /* numberOfDataFiles */         -1,                 \
 /* pathToDataFile */            NULL,               \
 /* pathToDataDataset */         NULL,               \
 /* dataTimeline */              NULL,               \
 /* lengthOfDataTimeline */      NULL,               \
+/* servesLabels */              -1,                 \
+/* labelCountsTotal */          NULL,               \
+/* labelCountsPerFile */        NULL,               \
 /* numberOfLabelFiles */        -1,                 \
 /* pathToLabelFile */           NULL,               \
 /* pathToLabelDataset */        NULL,               \
