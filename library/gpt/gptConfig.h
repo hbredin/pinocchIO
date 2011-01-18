@@ -23,26 +23,61 @@
  \defgroup config Server configuration
  \ingroup gepetto
  
- @brief Not documented yet.
+ @brief Functions dealing with Gepetto server configuration
+
+ \verbatim
+## Gepetto server
+## Sample configuration file
+data = {
+	dataset = "ColorHistogram/B10G10R10"; 
+	files = {
+		list = "/people/bredin/lists/videos/TRECVid2007_devel.lst";
+		prefix = "/vol/raid220/bredin/Features/";
+		suffix = ".pio";
+	};
+};
+
+label = {
+	dataset = "TRECVid/Annotation/2007/1001"; // Person
+	files = {
+		list = "/people/bredin/lists/videos/TRECVid2007_devel.lst";
+		prefix = "/vol/raid220/bredin/Annotations/";
+		suffix = ".pio";
+	};
+};
+
+filter = {
+	# none = 1;
+	equalsTo = 1;
+	# differsFrom = -1;
+	# greaterThan = 1;
+	# smallerThan = 1;
+};
+\endverbatim
+
  
- @{
  */
 
 #ifndef _GEPETTO_CONFIG_H
 #define _GEPETTO_CONFIG_H
 
 /**
-	@brief Creates new gepetto server from configuration file
-	@param[in] filename path to configuration file
-	@returns
-        - gepetto server if successful
-        - invalid gepetto server otherwise 
+ @brief Create new Gepetto server from configuration file
+
+ Create a new Gepetto server based on a configuration file.
+ 
+ @param[in] filename Path to configurtion file
+ @returns 
+    - Gepetto server if successful
+    - invalid Gepetto server otherwise
+ 
+ @note
+ Use gptCloseServer() to close the server when no longer needed. 
+ 
+ \ingroup config
  */
 GPTServer gptNewServerFromConfigurationFile(const char* filename);
 
-#endif
 
-/**
-	@}
- */
+#endif
 
