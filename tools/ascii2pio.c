@@ -343,7 +343,7 @@ int usage(int argc, char *const argv[])
 			"   -D, --description=\"DESCRIPTION\"                               \n" \
 			"                   Dataset/timeline description                    \n" \
 			"                                                                   \n" \
-            " Timeline format - one segment per line: TIMERANGE                 \n" \ 
+            " Timeline format - one segment per line: TIMERANGE                 \n" \
             "                                                                   \n" \
             " Data format - zero, one or multiple descriptors per line          \n" \
             "             ~ TIMERANGE DATA                                      \n" \
