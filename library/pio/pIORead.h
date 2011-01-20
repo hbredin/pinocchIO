@@ -96,10 +96,12 @@ int pioReadNumber(PIODataset dataset,
 
  @param[in] dataset Dataset
  @param[in] datatype Buffer datatype
- @param[in, out] buffer Data buffer 
+ @param[in, out] buffer Data buffer
+ @param[in, out] number Number of entries per timerange
  
  Entries are stored in the buffer the one after the other,
  sorted in time range chronological order.
+ Their number per timerange are stored in array @a number if it is not NULL.
 
  @note
  Buffer @a datatype does not have to match @a dataset datatype exactly.\n 
@@ -110,6 +112,9 @@ int pioReadNumber(PIODataset dataset,
  @a buffer has to be allocated with enough memory space to contain the whole
  @a dataset. A first call with a NULL buffer will return the required buffer
  size in bytes.
+ 
+ @note
+ @a number has to be allocated first. See example below.
   
  @returns 
     - required buffer size in bytes if successful if buffer!=NULL
@@ -118,9 +123,13 @@ int pioReadNumber(PIODataset dataset,
   
  \par Example
 \verbatim
- size_t size = pioDumpDataset(dataset, datatype, NULL);
+ // Get amount of memory needed to store the whole dataset
+ size_t size = pioDumpDataset(dataset, datatype, NULL, NULL);
+ // Allocate buffer for data and array for number of entries per timerange
  buffer = malloc(size);
- number = pioDumpDataset(dataset, datatype, buffer)
+ number = (int*)malloc(dataset.ntimeranges*sizeof(int));
+ // Dump the whole dataset
+ totalNumber = pioDumpDataset(dataset, datatype, buffer, number)
 \endverbatim
  
  
@@ -128,7 +137,8 @@ int pioReadNumber(PIODataset dataset,
  */
 int pioDumpDataset(PIODataset* dataset,
                    PIODatatype datatype,
-                   void* buffer);
+                   void* buffer,
+                   int* number);
 
 #endif
 

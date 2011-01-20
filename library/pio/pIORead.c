@@ -119,36 +119,40 @@ int pioReadNumber(PIODataset pioDataset, int timerangeIndex)
 
 int pioDumpDataset(PIODataset* pioDataset, 
                    PIODatatype pioDatatype, 
-                   void* already_allocated_buffer)
+                   void* buffer,
+                   int* number)
 {
     int tr = 0;
     
-    int tmp_number = -1;
-    int number = 0;
+    int localNumber = -1;
+    int totalNumber = 0;
 
     size_t tmp_size = -1;
     size_t size = 0;
-    void* tmp_buffer = NULL;
+    void* localBuffer = NULL;
     
-    if (already_allocated_buffer)
+    if (buffer)
     {
         for (tr=0; tr<pioDataset->ntimeranges; tr++)
         {
             // read data for timerange tr
-            tmp_number = pioReadData(pioDataset, tr, pioDatatype, &tmp_buffer);
-            if (tmp_number < 0) return -1; // stop if something bad happened
+            localNumber = pioReadData(pioDataset, tr, pioDatatype, &localBuffer);
+            if (localNumber < 0) return -1; // stop if something bad happened
             
             // deduce buffer size from number of read data
-            tmp_size = tmp_number*pioGetSize(pioDatatype);
+            tmp_size = localNumber*pioGetSize(pioDatatype);
             
             // copy buffer at correct position
-            memcpy(already_allocated_buffer+size, tmp_buffer, tmp_size);
+            memcpy(buffer+size, localBuffer, tmp_size);
             
             // update position in output buffer
             size = size + tmp_size;
             
             // update total number of read data
-            number = number + tmp_number;
+            totalNumber = totalNumber + localNumber;
+            
+            // store number of read data
+            if (number) number[tr] = localNumber;
         }
     }
     else 
@@ -156,20 +160,23 @@ int pioDumpDataset(PIODataset* pioDataset,
         for (tr=0; tr<pioDataset->ntimeranges; tr++)
         {
             // read number of data for timerange tr
-            tmp_number = pioReadNumber(*pioDataset, tr);
-            if (tmp_number < 0) return -1; // stop if something bad happened
+            localNumber = pioReadNumber(*pioDataset, tr);
+            if (localNumber < 0) return -1; // stop if something bad happened
                         
             // update total number of data
-            number = number + tmp_number;
+            totalNumber = totalNumber + localNumber;
+            
+            // store number of data
+            if (number) number[tr] = localNumber;
         }
         
         // deduce buffer size from number of data
-        size = number*pioGetSize(pioDatatype);
+        size = totalNumber*pioGetSize(pioDatatype);
         
         return size;
     }
     
-    return number;
+    return totalNumber;
 }
 
 
