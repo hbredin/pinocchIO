@@ -53,6 +53,11 @@
     -p, --precision=SCALE                                           
                     Set precision used for new timeline.           
                     Default is 1000 (1 ms precision).              
+
+    -u, --unit=UNIT                                           
+                    Indicate the unit of the timestamps in text file
+                    Use 1000 for milliseconds, 100 for centiseconds, ...
+                    Default is 1 (i.e. timestamps are in second).
                                                                    
     -D, --description=DESCR                              
                     Set dataset/timeline description                   
@@ -133,7 +138,7 @@ int getNumberOfLines( const char* ascii_file )
 	return numberOfLines;
 }
 
-int readTimeline( const char* ascii_file, int nLines, PIOTimeRange* timeline, int32_t scale)
+int readTimeline( const char* ascii_file, int nLines, PIOTimeRange* timeline, int32_t scale, int32_t unit)
 {
 	char* line = NULL;
 	FILE* file = NULL;
@@ -153,8 +158,8 @@ int readTimeline( const char* ascii_file, int nLines, PIOTimeRange* timeline, in
 		stop_sec = atof(strtok(NULL, separator));
 		
 		timeline[lineId].scale    = scale;
-		timeline[lineId].time     = start_sec*scale;
-		timeline[lineId].duration = (stop_sec-start_sec)*scale;	
+		timeline[lineId].time     = (start_sec*scale)/unit;
+		timeline[lineId].duration = ((stop_sec-start_sec)*scale)/unit;	
 	}
 	fclose(file);
 	return lineId;
@@ -326,7 +331,7 @@ int usage(int argc, char *const argv[])
 			"   -n, --dimension=D                                               \n" \
 			"                   Set array dimension. Default is 1               \n" \
 			"                                                                   \n" \
-			"       --string    Data is stored as string.                        \n" \
+			"       --string    Data is stored as string.                       \n" \
 			"                                                                   \n" \
 			"   -t, --timeline=PATH                                             \n" \
 			"                   If timeline at PATH does not exist:             \n" \
@@ -339,6 +344,12 @@ int usage(int argc, char *const argv[])
 			"   -p, --precision=SCALE                                           \n" \
 			"                   Set precision used for new timeline.            \n" \
 			"                   Default is 1000 (1 ms precision).               \n" \
+			"                      					                            \n" \
+            "   -u, --unit=UNIT                                                 \n" \
+            "                   Indicate the unit of timestamps in text file.   \n" \
+            "                   Use 1000 for milliseconds, 100 for centiseconds,\n" \
+            "                   1 000 000 for microseconds, ...                 \n" \
+            "                   Default is 1 (i.e. timestamps in second).       \n" \
 			"                                                                   \n" \
 			"   -D, --description=\"DESCRIPTION\"                               \n" \
 			"                   Dataset/timeline description                    \n" \
@@ -371,6 +382,7 @@ int main (int argc, char *const  argv[])
 	char* path2dataset = NULL;
 	char* path2timeline = NULL;
 	int precision = 1000;
+	int unit = 1;
 	char* dataset_description = NULL;
 	char* timeline_description = NULL;
 	int dimension = 1;
@@ -409,6 +421,8 @@ int main (int argc, char *const  argv[])
 			// precision of timeline
 			{"precision",   required_argument, 0, 'p'},
 			
+			{"unit",        required_argument, 0, 'u'},
+			
 			// description of timeline/dataset
 			{"description", required_argument, 0, 'D'},
 			
@@ -420,7 +434,7 @@ int main (int argc, char *const  argv[])
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "d:n:t:p:D:", long_options, &option_index);
+		c = getopt_long (argc, argv, "d:n:t:p:D:u:", long_options, &option_index);
 		
 		/* Detect the end of the options. */
 		if (c == -1) break;
@@ -446,6 +460,9 @@ int main (int argc, char *const  argv[])
 				break;
 			case 'p':
 				precision = atoi(optarg);
+				break;
+			case 'u':
+				unit = atoi(optarg);
 				break;
 			case 'd':
 				path2dataset = optarg;
@@ -517,7 +534,7 @@ int main (int argc, char *const  argv[])
 	{
 		// timeline probably does not exist --> create it
 		timeline = (PIOTimeRange*) malloc(ntimeranges*sizeof(PIOTimeRange));
-		readTimeline( in_ascii, ntimeranges, timeline, precision);
+		readTimeline( in_ascii, ntimeranges, timeline, precision, unit);
 		pioTimeline = pioNewTimeline(pioFile, path2timeline, timeline_description, ntimeranges, timeline);
 		free(timeline);
 		if (PIOTimelineIsInvalid(pioTimeline))
