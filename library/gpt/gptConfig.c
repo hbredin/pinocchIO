@@ -233,12 +233,7 @@ int getPathsFromConfigurationFile(const char* filename, const char* data_or_labe
     // get corresponding section in configuration file
     data_or_label_section = config_lookup(&config, data_or_label);
     if (!data_or_label_section)
-    {
-        fprintf(stdout,
-                "Did not find any \"%s\" section in configuration file %s.\n",
-                data_or_label, filename);
-        fflush(stdout);
-        
+    {        
         config_destroy(&config);
 
         *numberOfFiles = 0;        
