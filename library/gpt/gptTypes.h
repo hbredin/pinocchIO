@@ -21,8 +21,14 @@
 #ifndef _GEPETTO_TYPES_H
 #define _GEPETTO_TYPES_H
 
-#include "pinocchIO.h"
-#include "list_utils.h"
+#include "pinocchIO/pinocchIO.h"
+
+typedef struct listOfLabels_s {
+    int value;
+    int count;
+    struct listOfLabels_s *next;
+} listOfLabels_t;
+
 
 /**
  @brief Type of filter
@@ -47,6 +53,8 @@ typedef enum {
 	GEPETTO_LABEL_FILTER_TYPE_SMALLER_THAN
 } GPTLabelFilterType;
 
+
+
 /// gepetto server
 typedef struct {
     
@@ -55,7 +63,6 @@ typedef struct {
     // does server serve data?
     int servesData;
     
-    //
     listOfLabels_t*  dataCountsPerLabelTotal;
     listOfLabels_t** dataCountsPerLabelPerFile;
     
@@ -74,7 +81,6 @@ typedef struct {
     // does server server labels?
     int servesLabels;
     
-    // 
     listOfLabels_t*  labelCountsTotal;
     listOfLabels_t** labelCountsPerFile;
     
@@ -86,9 +92,19 @@ typedef struct {
     char* pathToLabelDataset;
     
     // label storage
-    PIOTimeRange** labelTimeline;
-    int* lengthOfLabelTimeline;
+    
+    /** labelTimeline[f][t] is the t^th label timerange of the f^th file */
+    PIOTimeRange** labelTimeline; // 
+
+    /** lengthOfLabelTimeline[f] is the number of label timeranges of the f^th file */
+    int* lengthOfLabelTimeline;  
+    
+    /** label[f] contains all labels from the f^th file in chronological order */
     int** label;
+    
+    int** numberOfLabelsPerFilePerTimerange; // numberOfLabels[f][i] is the number of label available for ith timerange of fth file
+    int** indexOfFirstLabelPerFilePerTimerange;  // indexOfLabels[f][i] is the index of first label for ith timerange of fth file
+                          // label[f][indexOfLabels[f][i]] is therefore the first label of ith timerange of fth file
 
     // === FILTER ===
 
@@ -96,7 +112,7 @@ typedef struct {
     int labelFilterReference;
 
     // labels are propagated from label timeline to data timeline
-    int** propagatedLabel;
+    int** propagatedLabel; // propagatedLabel[f][t] is the index of label timerange corresponding to the tth data timerange of fth file
     int** filterMask; 
     
     // === SAMPLING ===
@@ -124,7 +140,7 @@ typedef struct {
 	@brief Invalid Gepetto server
  */
 #define GPTServerInvalid ((GPTServer) {             \
-/* servesData */                -1,                 \
+/* servesData */                0,                  \
 /* dataCountsPerLabelTotal */   NULL,               \
 /* dataCountsPerLabelPerFile */ NULL,               \
 /* numberOfDataFiles */         -1,                 \
@@ -132,7 +148,7 @@ typedef struct {
 /* pathToDataDataset */         NULL,               \
 /* dataTimeline */              NULL,               \
 /* lengthOfDataTimeline */      NULL,               \
-/* servesLabels */              -1,                 \
+/* servesLabels */              0,                 \
 /* labelCountsTotal */          NULL,               \
 /* labelCountsPerFile */        NULL,               \
 /* numberOfLabelFiles */        -1,                 \
@@ -141,6 +157,8 @@ typedef struct {
 /* labelTimeline */             NULL,               \
 /* lengthOfLabelTimeline */     NULL,               \
 /* label */                     NULL,               \
+/* numberOfLabelsPerFilePerTimerange */     NULL,   \
+/* indexOfFirstLabelPerFilePerTimerange */  NULL,   \
 /* labelFilterType */           -1,                 \
 /* labelFilterReference */      -1,                 \
 /* propagatedLabel */           NULL,               \
@@ -155,6 +173,67 @@ typedef struct {
 /* current_timeline */          PIOTimelineInvalid, \
 /* eof */                       -1                  \
 })
+
+
+/**
+ @brief pinocchIO time range
+ 
+ A time range can be seen as a time segment, with a start \a time and a \a duration.
+ 
+ pinocchIO stores time ranges internally using three integer values: \a time, \a duration and \a scale.
+ 
+ See \ref PIOTime for more detail on how to efficiently choose the \a scale.
+ 
+ @ingroup time
+ */
+typedef struct {
+    /** pinocchIO timerange */
+    PIOTimeRange timerange;
+    /** file index */
+    int fileIndex;
+} GPTTimeRange;
+
+// Macro for easy access to labels
+
+#define LBL_AVAILABLE(server)               ((server).servesLabels)
+
+#define LBL_NFILES(server)                  ((server).numberOfLabelFiles)
+#define LBL_PATHS(server)                   ((server).pathToLabelFile)
+#define LBL_PATH(server, f)                 ((LBL_PATHS((server)))[(f)])
+
+#define LBL_DATASET(server)                 ((server).pathToLabelDataset)
+
+#define LBL_LABELS( server, f, t)           ((server).label[(f)]+(server).indexOfFirstLabelPerFilePerTimerange[(f)][(t)])
+#define LBL_NLABELS(server, f, t)           ((server).numberOfLabelsPerFilePerTimerange[(f)][(t)])
+#define LBL_LABEL(  server, f, t, r)        ((LBL_LABELS((server), (f), (t)))[(r)])
+
+#define LBL_TIMELINES(server)               ((server).labelTimeline)
+#define LBL_TIMELINE(server, f)             ((LBL_TIMELINES((server)))[(f)])
+#define LBL_NTIMERANGES(server, f)          ((server).lengthOfLabelTimeline[(f)])
+#define LBL_TIMERANGE(server, f, t)         ((LBL_TIMELINE((server), (f)))[(t)])
+
+// Macro for easy access to data labels
+
+#define DAT_AVAILABLE(server)               ((server).servesData)
+
+#define DAT_NFILES(server)                  ((server).numberOfDataFiles)
+#define DAT_PATHS(server)                   ((server).pathToDataFile)
+#define DAT_PATH(server, f)                 ((DAT_PATHS((server)))[(f)])
+
+#define DAT_DATASET(server)                 ((server).pathToDataDataset)
+
+
+#define DAT_MATCHING_LABEL(server, f, t)    ((server).propagatedLabel[(f)][(t)])
+#define DAT_FILTERED(server, f, t)          ((server).filterMask[(f)][(t)])
+
+#define DAT_LABELS( server, f, t)           (LBL_LABELS( (server), (f), DAT_MATCHING_LABEL((server), (f), (t))     ))
+#define DAT_NLABELS(server, f, t)           (LBL_NLABELS((server), (f), DAT_MATCHING_LABEL((server), (f), (t))     ))
+#define DAT_LABEL(  server, f, t, r)        (LBL_LABEL(  (server), (f), DAT_MATCHING_LABEL((server), (f), (t)), (r)))
+
+#define DAT_TIMELINES(server)               ((server).dataTimeline)
+#define DAT_TIMELINE(server, f)             ((DAT_TIMELINES((server)))[(f)])
+#define DAT_NTIMERANGES(server, f)          ((server).lengthOfDataTimeline[(f)])
+#define DAT_TIMERANGE(server, f, t)         ((DAT_TIMELINE((server), (f)))[(t)])
 
 
 #endif

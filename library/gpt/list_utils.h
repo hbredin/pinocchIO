@@ -21,14 +21,7 @@
 #ifndef _LIST_UTILS_H
 #define _LIST_UTILS_H
 
-/**
- \internal
- */
-typedef struct listOfLabels_s {
-    int value;
-    int count;
-    struct listOfLabels_s *next;
-} listOfLabels_t;
+#include "gptTypes.h"
 
 int             numberOfLabelsInList (listOfLabels_t* list);
 

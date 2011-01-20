@@ -45,7 +45,7 @@
  - TRUE if the Gepetto server is invalid
  - FALSE otherwise
  */
-#define GPTServerIsInvalid(o)   ((o).numberOfDataFiles < 1)
+#define GPTServerIsInvalid(o)   (!LBL_AVAILABLE(o) && !DAT_AVAILABLE(o))
 
 /**
  @brief Check server validity
@@ -91,47 +91,6 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
  - 0 otherwise
  */
 int gptCloseServer(GPTServer* server);
-
-/**
- @brief Get dimension of server data
-
- Get the dimension of the entries provided by the server.
- 
- @param[in] server Gepetto server
- @returns
-    - the dimension of data if server serves data
-    - -1 otherwise
- */
-int gptGetServerDimension(GPTServer server);
-
-
-/**
- @brief Read next data and its label from server
- 
- Update @a buffer (and @a label) so that it contains next data entries (and their label) 
- available from the @a server.
- 
- @note
- Gepetto uses an internal buffer to store the requested data. <b>Do not free it!</b>\n
- This buffer is modified (and possibly moved) by each call to gptReadNext().\n
- Typically, one would call gptReadNext() and then copy the buffer content 
- into another variable before calling gptReadNext() again.\n
- See pioRead() documentation for more information on how to use @a buffer.
- 
- @param[in,out] server Gepetto server 
- @param[in] datatype Buffer datatype
- @param[out] buffer Data buffer
- @param[in, out] label Data label. Use NULL if you are not interested in the label. 
- 
- @returns
- - @a number of entries when successful
- - -1 otherwise
- 
- */
-int gptReadNext(GPTServer* server,
-                PIODatatype datatype,
-                void** buffer,
-                int* label);
 
 /**
  @brief Read next data from server

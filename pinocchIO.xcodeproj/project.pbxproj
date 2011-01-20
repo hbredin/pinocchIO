@@ -85,6 +85,10 @@
 		2890C3A2129A79D90018F31E /* gptConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 2890C3A0129A79D90018F31E /* gptConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2890C3A3129A79D90018F31E /* gptConfig.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890C3A1129A79D90018F31E /* gptConfig.c */; };
 		2890C3EF129A87D30018F31E /* gptdump.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890C3A4129A7BBC0018F31E /* gptdump.c */; };
+		2890E5F312E82CD900A6E3D8 /* gptLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 2890E5F112E82CD900A6E3D8 /* gptLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2890E5F412E82CD900A6E3D8 /* gptLabel.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890E5F212E82CD900A6E3D8 /* gptLabel.c */; };
+		2890E6FE12E86A5C00A6E3D8 /* dump_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890E6FD12E86A5C00A6E3D8 /* dump_utils.c */; };
+		2890E6FF12E86A5C00A6E3D8 /* dump_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890E6FD12E86A5C00A6E3D8 /* dump_utils.c */; };
 		289554AF12B1836A002D0FC1 /* pioinit.c in Sources */ = {isa = PBXBuildFile; fileRef = 289554AD12B1836A002D0FC1 /* pioinit.c */; };
 		2895EB7712706C4B00CA5A76 /* piols.c in Sources */ = {isa = PBXBuildFile; fileRef = 2895EB3A127061E400CA5A76 /* piols.c */; };
 		2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304EED12676DB5003292A5 /* test_PIOFile.c */; };
@@ -99,6 +103,8 @@
 		28BF3C2812E5982F008B2531 /* list_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BF3C2612E5982F008B2531 /* list_utils.h */; };
 		28BF3C2912E5982F008B2531 /* list_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 28BF3C2712E5982F008B2531 /* list_utils.c */; };
 		28BF3CC012E5C9A7008B2531 /* gptstat.c in Sources */ = {isa = PBXBuildFile; fileRef = 28BF3C9212E5C4F3008B2531 /* gptstat.c */; };
+		28BF3D8C12E6E620008B2531 /* gptData.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BF3D8A12E6E620008B2531 /* gptData.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		28BF3D8D12E6E620008B2531 /* gptData.c in Sources */ = {isa = PBXBuildFile; fileRef = 28BF3D8B12E6E620008B2531 /* gptData.c */; };
 		28EF86F71282CFD80031E147 /* fgetln.c in Sources */ = {isa = PBXBuildFile; fileRef = 28EF86F61282CFD80031E147 /* fgetln.c */; };
 		28F29C2312916F4E0007866F /* test_server.c in Sources */ = {isa = PBXBuildFile; fileRef = 28F29C1512916BC70007866F /* test_server.c */; };
 		28F8A1F9129D01C500E8E834 /* piocp.c in Sources */ = {isa = PBXBuildFile; fileRef = 28C49BC1129C4C0900649013 /* piocp.c */; };
@@ -257,7 +263,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 28BF3C9312E5C5AF008B2531 /* gptstat */;
+			remoteGlobalIDString = 28BF3C9312E5C5AF008B2531;
 			remoteInfo = gptstat;
 		};
 		28EF86C31282BDAB0031E147 /* PBXContainerItemProxy */ = {
@@ -335,6 +341,9 @@
 		2890C3A1129A79D90018F31E /* gptConfig.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptConfig.c; sourceTree = "<group>"; };
 		2890C3A4129A7BBC0018F31E /* gptdump.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptdump.c; sourceTree = "<group>"; };
 		2890C3EB129A87B40018F31E /* gptdump */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gptdump; sourceTree = BUILT_PRODUCTS_DIR; };
+		2890E5F112E82CD900A6E3D8 /* gptLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gptLabel.h; sourceTree = "<group>"; };
+		2890E5F212E82CD900A6E3D8 /* gptLabel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptLabel.c; sourceTree = "<group>"; };
+		2890E6FD12E86A5C00A6E3D8 /* dump_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dump_utils.c; sourceTree = "<group>"; };
 		289554AB12B182F9002D0FC1 /* pioinit */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pioinit; sourceTree = BUILT_PRODUCTS_DIR; };
 		289554AD12B1836A002D0FC1 /* pioinit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pioinit.c; sourceTree = "<group>"; };
 		2895EB3A127061E400CA5A76 /* piols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = piols.c; sourceTree = "<group>"; };
@@ -350,6 +359,8 @@
 		28BF3C2712E5982F008B2531 /* list_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = list_utils.c; sourceTree = "<group>"; };
 		28BF3C9212E5C4F3008B2531 /* gptstat.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptstat.c; sourceTree = "<group>"; };
 		28BF3C9C12E5C5AF008B2531 /* gptstat */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gptstat; sourceTree = BUILT_PRODUCTS_DIR; };
+		28BF3D8A12E6E620008B2531 /* gptData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gptData.h; sourceTree = "<group>"; };
+		28BF3D8B12E6E620008B2531 /* gptData.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptData.c; sourceTree = "<group>"; };
 		28C49BC1129C4C0900649013 /* piocp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = piocp.c; sourceTree = "<group>"; };
 		28EF86F61282CFD80031E147 /* fgetln.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fgetln.c; sourceTree = "<group>"; };
 		28F29C1512916BC70007866F /* test_server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_server.c; sourceTree = "<group>"; };
@@ -563,6 +574,10 @@
 				2890C3A1129A79D90018F31E /* gptConfig.c */,
 				28BF3C2612E5982F008B2531 /* list_utils.h */,
 				28BF3C2712E5982F008B2531 /* list_utils.c */,
+				28BF3D8A12E6E620008B2531 /* gptData.h */,
+				28BF3D8B12E6E620008B2531 /* gptData.c */,
+				2890E5F112E82CD900A6E3D8 /* gptLabel.h */,
+				2890E5F212E82CD900A6E3D8 /* gptLabel.c */,
 			);
 			path = gpt;
 			sourceTree = "<group>";
@@ -581,6 +596,7 @@
 				2872832612A6612500FA13BD /* pioaggregate.c */,
 				289554AD12B1836A002D0FC1 /* pioinit.c */,
 				28BF3C9212E5C4F3008B2531 /* gptstat.c */,
+				2890E6FD12E86A5C00A6E3D8 /* dump_utils.c */,
 			);
 			path = tools;
 			sourceTree = "<group>";
@@ -597,6 +613,8 @@
 				28967BE11295706500F34412 /* gepetto.h in Headers */,
 				2890C3A2129A79D90018F31E /* gptConfig.h in Headers */,
 				28BF3C2812E5982F008B2531 /* list_utils.h in Headers */,
+				28BF3D8C12E6E620008B2531 /* gptData.h in Headers */,
+				2890E5F312E82CD900A6E3D8 /* gptLabel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -939,6 +957,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				283EF6571271C935003F82A0 /* piodump.c in Sources */,
+				2890E6FF12E86A5C00A6E3D8 /* dump_utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -955,6 +974,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2890C3EF129A87D30018F31E /* gptdump.c in Sources */,
+				2890E6FE12E86A5C00A6E3D8 /* dump_utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -998,6 +1018,8 @@
 				28967BF4129572E600F34412 /* gptServer.c in Sources */,
 				2890C3A3129A79D90018F31E /* gptConfig.c in Sources */,
 				28BF3C2912E5982F008B2531 /* list_utils.c in Sources */,
+				28BF3D8D12E6E620008B2531 /* gptData.c in Sources */,
+				2890E5F412E82CD900A6E3D8 /* gptLabel.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1243,6 +1265,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CURRENT_PROJECT_VERSION = 0.25;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1267,6 +1290,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CURRENT_PROJECT_VERSION = 0.25;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\\\"0.2.5\\\"",

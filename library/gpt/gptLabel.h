@@ -1,5 +1,5 @@
 // 
-// Copyright 2010 Herve BREDIN (bredin@limsi.fr)
+// Copyright 2011 Herve BREDIN (bredin@limsi.fr)
 // Contact: http://pinocchio.niderb.fr/
 // 
 // This file is part of pinocchIO.
@@ -18,36 +18,23 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
-/**
- \defgroup gepetto Gepetto
- \ingroup api
- 
- @brief Not documented yet.
- 
- @{
- */
-
-#ifndef _GEPETTO_H
-#define _GEPETTO_H
-
-#ifdef __cplusplus
-    extern "C" {
-#endif
+#ifndef _GEPETTO_LABEL_H
+#define _GEPETTO_LABEL_H
 
 #include "gptTypes.h"
-#include "gptServer.h"
-#include "gptConfig.h"
-
-#include "gptData.h"
-#include "gptLabel.h"
-
-#ifdef __cplusplus
-    }
-#endif
-        
-#endif
 
 /**
-	@}
+	<#Description#>
+	@param[in] server <#server description#>
+	@param[in] labelValue <#labelValue description#>
+	@param[out] timeranges <#timeranges description#>
+	@returns <#return value description#>
  */
+int gptGetTimerangesForLabel(GPTServer server,
+                             int labelValue,
+                             GPTTimeRange* timeranges);
+                             
+
+
+#endif
 
