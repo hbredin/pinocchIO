@@ -38,6 +38,18 @@ static int string_flag = 0;
 static int multiple_flag = 0;
 static int svmlight_flag = 0;
 
+extern int ez_dump(FILE* file,
+                  void* buffer, PIODatatype datatype, int numberOfEntries,
+                  int* labels, int numberOfLabels,
+                  PIOTimeRange timerange,
+                  int multiple,
+                  int label_flag,
+                  int timestamp,
+                  int svmlight);
+
+extern int timestamp_dump(FILE* file, PIOTimeRange timerange);
+
+
 int checkArguments(const char* timeline_path, const char* dataset_path)
 {
     if (dataset_path && timeline_path)
@@ -110,18 +122,8 @@ int main (int argc, char *const  argv[])
 	
 	int tr; // timerange index
 	void* buffer = NULL; // data buffer
-	
-	int* buffer_int;
-	float* buffer_float;
-	double* buffer_double;
-	char* buffer_char;
-	char* string = NULL;
-    
-	
+	    
 	int numberOfVectors; // number of vector for each timerange
-	int dimension;
-    int n; // vector counter
-	int d; // dimension counter
 	
 	int c;
 	while (1)
@@ -248,93 +250,12 @@ int main (int argc, char *const  argv[])
 		for (tr=0; tr<pioDataset.ntimeranges; tr++)
 		{
 			numberOfVectors = pioRead(&pioDataset, tr, pioDatatype, &buffer);
-			if (numberOfVectors < 0)
-			{
-				fprintf(stderr, "Error. Cannot read dataset for timerange #%d\n", tr);
-				fflush(stderr);
-				continue;				
-			}
-
-            buffer_int = (int*)buffer;
-			buffer_float = (float*)buffer;
-			buffer_double = (double*)buffer;
-			buffer_char = (char*)buffer;			            
             
-            dimension = pioDatatype.dimension;
-            
-			if (string_flag && (pioDatatype.type==PINOCCHIO_TYPE_CHAR) && (dimension == 1))
-			{
-				if (timestamp_flag)
-				{
-					fprintf(stdout, "%lf %lf ", 
-							(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
-							(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
-				}
-
-				string = (char*) malloc((numberOfVectors+1)*sizeof(char*));
-				memcpy(string, buffer_char, numberOfVectors);
-				string[numberOfVectors] = '\0';
-				fprintf(stdout, "%s\n", string);
-				free(string);
-			}
-			else
-			{
-                // one timestamp for all entries
-                if (timestamp_flag && multiple_flag)
-                {
-                    fprintf(stdout, "%lf %lf ", 
-                            (double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
-                            (double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									                    
-                }
-                
-				for (n=0; n<numberOfVectors; n++)
-				{	
-                    // one timestamp per entry
-					if (timestamp_flag && !multiple_flag)
-					{
-						fprintf(stdout, "%lf %lf ", 
-								(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
-								(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);									
-					}
-					
-                    if (svmlight_flag) fprintf(stdout, "-1 ");
-                    
-					for (d=0; d<dimension; d++)
-					{					
-						switch (pioDatatype.type)
-                        {
-                            case PINOCCHIO_TYPE_INT:
-                                if (svmlight_flag && (buffer_int[n*dimension+d]))
-                                    fprintf(stdout, "%d:%d ", d, buffer_int[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%d ", buffer_int[n*dimension+d]);
-                                break;
-                            case PINOCCHIO_TYPE_FLOAT:
-                                if (svmlight_flag && (buffer_float[n*dimension+d]))
-                                    fprintf(stdout, "%d:%f ", d, buffer_float[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%f ", buffer_float[n*dimension+d]);
-                                break;
-                            case PINOCCHIO_TYPE_DOUBLE:
-                                if (svmlight_flag && (buffer_double[n*dimension+d]))
-                                    fprintf(stdout, "%d:%lf ", d, buffer_double[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%lf ", buffer_double[n*dimension+d]);
-                                break;
-                            case PINOCCHIO_TYPE_CHAR:
-                                if (svmlight_flag && (buffer_char[n*dimension+d]))
-                                    fprintf(stdout, "%d:%c ", d, buffer_char[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%c ", buffer_char[n*dimension+d]);                            
-                                break;
-                            default:
-                                break;                                
-						}
-					}
-                    if (!multiple_flag) fprintf(stdout, "\n");
-				} 
-                if (multiple_flag) fprintf(stdout, "\n");
-			}
+            ez_dump(stdout, 
+                    buffer, pioDatatype, numberOfVectors,
+                    NULL, 0, 
+                    pioTimeline.timeranges[tr], 
+                    multiple_flag, 0, timestamp_flag, svmlight_flag);
 		}
 		
 		pioCloseDatatype(&pioDatatype);
@@ -353,10 +274,10 @@ int main (int argc, char *const  argv[])
 			exit(-1);
 		}
 		
-		for (tr=0; tr<pioTimeline.ntimeranges; tr++) {
-			fprintf(stdout, "%lf %lf\n", 
-					(double)(1.*pioTimeline.timeranges[tr].time)/pioTimeline.timeranges[tr].scale,
-					(double)(1.*(pioTimeline.timeranges[tr].time+pioTimeline.timeranges[tr].duration))/pioTimeline.timeranges[tr].scale);
+		for (tr=0; tr<pioTimeline.ntimeranges; tr++)
+        {
+            timestamp_dump(stdout, pioTimeline.timeranges[tr]);
+            fprintf(stdout, "\n");
 		}
 		
 		pioCloseTimeline(&pioTimeline);
