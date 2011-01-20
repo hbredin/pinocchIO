@@ -32,24 +32,53 @@
 #include <string.h>
 #include "gepetto.h"
 
+extern int ez_dump(FILE* file,
+                   void* buffer, PIODatatype datatype, int numberOfEntries,
+                   int* labels, int numberOfLabels,
+                   PIOTimeRange timerange,
+                   int multiple,
+                   int label_flag,
+                   int timestamp,
+                   int svmlight);
+
+
+
 static int verbose_flag = 0;
-static int string_flag = 0;
-static int label_flag = 0;
+static int multiple_flag = 0;
 static int svmlight_flag = 0;
+static int label_flag = 0;
+
+int checkArguments()
+{
+    if (svmlight_flag && multiple_flag)
+    {
+        fprintf(stderr, 
+                "SVMlight format does not support multiple entries per line.\n"); fflush(stderr);
+        return 0;
+    }
+    
+    if (svmlight_flag) label_flag = 1;
+    
+    return 1;
+}
+
 
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
 			"USAGE: %s [options] FILE\n", path2tool);
-    fprintf(stdout, 
-            "           --svmlight\n"
-            "           Use SVMlight format\n"
-            "       -L, --label\n"
-            "           Show label\n"
-			"           --text\n"
-			"           Display char as text\n");
+	fprintf(stdout, 
+            "       --multiple                                                      \n"
+            "                Multiple entries per line                              \n"
+            "       --label                                                         \n"
+            "                Prepend each line with the label when available        \n"
+            "       --svmlight                                                      \n"
+            "                Use SVMlight format (implies --label)                  \n"
+            );
 	fflush(stdout);
 }
+
+
 
 int main (int argc, char *const  argv[])
 {	
@@ -57,17 +86,11 @@ int main (int argc, char *const  argv[])
 
 	void* buffer = NULL; // data buffer
 	
-	int* buffer_int;
-	float* buffer_float;
-	double* buffer_double;
-	char* buffer_char;
-	char* string = NULL;
-
     int numberOfVectors; // number of vector for each timerange
-	int n; // vector counter
-    int dimension;
-	int d; // dimension counter
-    int label;
+
+    int* labels = NULL; // labels for a given timerange
+    int nLabels;        // their number
+
     
 	int c;
 	while (1)
@@ -79,9 +102,9 @@ int main (int argc, char *const  argv[])
 			{"brief",   no_argument, &verbose_flag, 0},
 			/* These options don't set a flag.
 			 We distinguish them by their indices. */
+            {"multiple", no_argument, &multiple_flag, 1},
             {"svmlight", no_argument, &svmlight_flag, 1},
-            {"label",    no_argument, 0,              'L'},
-			{"text",     no_argument, &string_flag,   1},
+            {"label",    no_argument, &label_flag,    1},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -89,7 +112,7 @@ int main (int argc, char *const  argv[])
 		
 //		c = getopt_long (argc, argv, "hs",
 //						 long_options, &option_index);
-		c = getopt_long (argc, argv, "hL",
+		c = getopt_long (argc, argv, "h",
 						 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -107,15 +130,7 @@ int main (int argc, char *const  argv[])
 				//					printf (" with arg %s", optarg);
 				//				printf ("\n");
 				break;
-				
-//			case 's':
-//				timestamp_flag = 1;
-//				break;
-                
-            case 'L':
-                label_flag = 1;
-                break;
-				
+
 			case 'h':
 				usage(argv[0]);
 				exit(-1);
@@ -131,15 +146,6 @@ int main (int argc, char *const  argv[])
 		}
 	}
 	
-    if (svmlight_flag) label_flag = 1;
-    if (svmlight_flag && string_flag)
-    {
-        fprintf(stderr, "Incompatible options (svmlight and text)\n");
-        fflush(stderr);
-        usage(argv[0]);
-        exit(-1);
-    }
-    
 	if (optind+1>argc)
 	{
 		fprintf(stderr, "Missing path to gepetto configuration file.\n");
@@ -148,7 +154,13 @@ int main (int argc, char *const  argv[])
 		exit(-1);		
 	}
 	gepetto_configuration_file = argv[optind];
-
+    
+    if (!checkArguments())
+    {
+        usage(argv[0]);
+        exit(-1);
+    }
+        
     GPTServer gptServer = gptNewServerFromConfigurationFile(gepetto_configuration_file);
     if (GPTServerIsInvalid(gptServer))
     {
@@ -157,72 +169,16 @@ int main (int argc, char *const  argv[])
         fflush(stderr);
         exit(-1);
     }
-    
-    dimension = gptGetServerDimension(gptServer);
-    
-    numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &label);
-    while (gptServer.eof == 0) 
-    {
-        if (numberOfVectors > 0)
-        {
-            buffer_int = (int*)buffer;
-            buffer_float = (float*)buffer;
-            buffer_double = (double*)buffer;
-            buffer_char = (char*)buffer;			            
             
-            if (label_flag)
-                fprintf(stdout, "%d ", label);
-            
-            if (string_flag & 
-                (gptServer.datatype.type==PINOCCHIO_TYPE_CHAR) & 
-                (dimension == 1))
-            {            
-                string = (char*) malloc((numberOfVectors+1)*sizeof(char*));
-                memcpy(string, buffer_char, numberOfVectors);
-                string[numberOfVectors] = '\0';
-                fprintf(stdout, "%s\n", string);
-                free(string);
-            }
-            else
-            {
-                for (n=0; n<numberOfVectors; n++)
-                {				                
-                    for (d=0; d<dimension; d++)
-                    {					
-                        switch (gptServer.datatype.type) {
-                            case PINOCCHIO_TYPE_INT:
-                                if (svmlight_flag && (buffer_int[n*dimension+d]))
-                                    fprintf(stdout, "%d:%d ", d, buffer_int[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%d ", buffer_int[n*dimension+d]);
-                                break;
-                            case PINOCCHIO_TYPE_FLOAT:
-                                if (svmlight_flag && (buffer_float[n*dimension+d]))
-                                    fprintf(stdout, "%d:%f ", d, buffer_float[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%f ", buffer_float[n*dimension+d]);
-                                break;
-                            case PINOCCHIO_TYPE_DOUBLE:
-                                if (svmlight_flag && (buffer_double[n*dimension+d]))
-                                    fprintf(stdout, "%d:%lf ", d, buffer_double[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%lf ", buffer_double[n*dimension+d]);
-                                break;
-                            case PINOCCHIO_TYPE_CHAR:
-                                if (svmlight_flag && (buffer_char[n*dimension+d]))
-                                    fprintf(stdout, "%d:%c ", d, buffer_char[n*dimension+d]);
-                                else
-                                    if (!svmlight_flag) fprintf(stdout, "%c ", buffer_char[n*dimension+d]);                            
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    fprintf(stdout, "\n");
-                }
-            }
-        }
-        numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &label);        
+    numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &labels, &nLabels);
+    while (numberOfVectors >= 0) 
+    {        
+        ez_dump(stdout, 
+                buffer, gptServer.datatype, numberOfVectors, 
+                labels, nLabels, 
+                PIOTimeRangeInvalid, multiple_flag, label_flag, 0, svmlight_flag);
+
+        numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &labels, &nLabels);        
     }
     
     fflush(stdout);
