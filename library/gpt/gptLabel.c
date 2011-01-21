@@ -75,7 +75,7 @@ int gptGetTimerangesForLabel(GPTServer server,
     if (timeranges)
     {
         totalNumberOfTimeranges = 0;
-        for (f=0; f<server.numberOfLabelFiles; f++) 
+        for (f=0; f<LBL_NFILES(server); f++) 
         {
             localNumberOfTimeranges = getTimerangesForLabelAndFile(server, labelValue, f, NULL);
             localTimeranges = (PIOTimeRange*) malloc(localNumberOfTimeranges*sizeof(PIOTimeRange));
@@ -92,7 +92,7 @@ int gptGetTimerangesForLabel(GPTServer server,
     else 
     {
         totalNumberOfTimeranges = 0;
-        for (f=0; f<server.numberOfLabelFiles; f++) 
+        for (f=0; f<LBL_NFILES(server); f++) 
             totalNumberOfTimeranges += getTimerangesForLabelAndFile(server, 
                                                                     labelValue,
                                                                     f, NULL);

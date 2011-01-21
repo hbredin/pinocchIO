@@ -24,11 +24,22 @@
 #include "gptTypes.h"
 
 /**
-	<#Description#>
-	@param[in] server <#server description#>
-	@param[in] labelValue <#labelValue description#>
-	@param[out] timeranges <#timeranges description#>
-	@returns <#return value description#>
+ @brief Get list of timeranges with a specified label
+ 
+ @param[in] server Gepetto server
+ @param[in] labelValue Label value
+ @param[out] timeranges Array of timeranges with requested label
+ @returns total number of timeranges with matching label when successful
+    
+    @note
+ @a timeranges has to be allocated first. A first call to gptGetTimerangesForLabel()
+ with @a timeranges = NULL can be used to get the expected number of timeranges.
+\verbatim
+ numberOfTimeranges = gptGetTimerangesForLabel(server, labelValue, NULL);
+ timeranges = (GPTTimeRange*) malloc(numberOfTimeranges*sizeof(GPTTimeRange));
+ numberOfTimeranges = gptGetTimerangesForLabel(server, labelValue, timeranges);
+\endverbatim
+ 
  */
 int gptGetTimerangesForLabel(GPTServer server,
                              int labelValue,
