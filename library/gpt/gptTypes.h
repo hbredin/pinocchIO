@@ -23,13 +23,6 @@
 
 #include "pinocchIO/pinocchIO.h"
 
-typedef struct listOfLabels_s {
-    int value;
-    int count;
-    struct listOfLabels_s *next;
-} listOfLabels_t;
-
-
 /**
  @brief Type of filter
  
@@ -63,9 +56,6 @@ typedef struct {
     // does server serve data?
     int servesData;
     
-    listOfLabels_t*  dataCountsPerLabelTotal;
-    listOfLabels_t** dataCountsPerLabelPerFile;
-    
     // number of pinocchIO files containing the actual data
     int numberOfDataFiles;
     // their paths
@@ -81,9 +71,12 @@ typedef struct {
     // does server server labels?
     int servesLabels;
     
-    listOfLabels_t*  labelCountsTotal;
-    listOfLabels_t** labelCountsPerFile;
+    int  numberOfDistinctLabels;
+    int* listOfDistinctLabels;
     
+    int* labelCounts;
+    int** labelCountsPerFile;
+        
     // number of pinocchIO files containing labels
     int numberOfLabelFiles;       
     // their paths
@@ -141,15 +134,15 @@ typedef struct {
  */
 #define GPTServerInvalid ((GPTServer) {             \
 /* servesData */                0,                  \
-/* dataCountsPerLabelTotal */   NULL,               \
-/* dataCountsPerLabelPerFile */ NULL,               \
 /* numberOfDataFiles */         -1,                 \
 /* pathToDataFile */            NULL,               \
 /* pathToDataDataset */         NULL,               \
 /* dataTimeline */              NULL,               \
 /* lengthOfDataTimeline */      NULL,               \
-/* servesLabels */              0,                 \
-/* labelCountsTotal */          NULL,               \
+/* servesLabels */              0,                  \
+/* numberOfDistinctLabels */    0,                  \
+/* listOfDistinctLabels */      NULL,               \
+/* labelCounts */               NULL,               \
 /* labelCountsPerFile */        NULL,               \
 /* numberOfLabelFiles */        -1,                 \
 /* pathToLabelFile */           NULL,               \
@@ -202,6 +195,12 @@ typedef struct {
 #define LBL_PATH(server, f)                 ((LBL_PATHS((server)))[(f)])
 
 #define LBL_DATASET(server)                 ((server).pathToLabelDataset)
+
+#define LBL_NUMBER(server)                  ((server).numberOfDistinctLabels)
+#define LBL_LIST(server)                    ((server).listOfDistinctLabels)
+#define LBL_VALUE(server, i)                ((LBL_LIST(server))[(i)])
+#define LBL_COUNT(server, i)                ((server).labelCounts[(i)])
+#define LBL_COUNTF(server, f, i)            ((server).labelCountsPerFile[(f)][(i)])
 
 #define LBL_LABELS( server, f, t)           ((server).label[(f)]+(server).indexOfFirstLabelPerFilePerTimerange[(f)][(t)])
 #define LBL_NLABELS(server, f, t)           ((server).numberOfLabelsPerFilePerTimerange[(f)][(t)])

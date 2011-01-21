@@ -92,37 +92,6 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
  */
 int gptCloseServer(GPTServer* server);
 
-/**
- @brief Read next data from server
- 
- Update @a buffer so that it contains next data entries available from the @a server.
- 
- @note
- Gepetto uses an internal buffer to store the requested data. <b>Do not free it!</b>\n
- This buffer is modified (and possibly moved) by each call to gptReadNext().\n
- Typically, one would call gptReadNext() and then copy the buffer content 
- into another variable before calling gptReadNext() again.\n
- See pioRead() documentation for more information on how to use @a buffer.
- 
- @param[in,out] server Gepetto server 
- @param[in] datatype Buffer datatype
- @param[out] buffer Data buffer
- 
- @returns
- - @a number of entries when successful
- - -1 otherwise
- */
-#define gptReadNextData(server, datatype, buffer) gptReadNext((server), (datatype), (buffer), NULL)
-
-int gptPrintStatistics(GPTServer server, FILE* file);
-
-
-// 2 steps usage:
-//   - already_allocated_buffer = malloc(pioDumpServer(pioServer, pioDatatype, NULL))
-//   - number = pioDumpServer(pioServer, pioDatatype, already_allocated_buffer)
-//int gptDumpServer(GPTServer* server, 
-//                  PIODatatype pioDatatype, 
-//                  void* already_allocated_buffer);
 
 #endif
 

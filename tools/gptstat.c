@@ -42,8 +42,10 @@ void usage(const char * path2tool)
 int main (int argc, char *const  argv[])
 {	
     int c;
+    int i, f;
 	char* gepetto_configuration_file = NULL;
-        
+    FILE* file = stdout;    
+    
 	while (1)
 	{
 		static struct option long_options[] =
@@ -97,19 +99,55 @@ int main (int argc, char *const  argv[])
 	}
 	gepetto_configuration_file = argv[optind];
     
-    GPTServer gptServer = gptNewServerFromConfigurationFile(gepetto_configuration_file);
-    if (GPTServerIsInvalid(gptServer))
+    GPTServer server = gptNewServerFromConfigurationFile(gepetto_configuration_file);
+    if (GPTServerIsInvalid(server))
     {
         fprintf(stderr, "Could not initialize Gepetto server from configuration file %s.\n",
                 gepetto_configuration_file);
         fflush(stderr);
         exit(-1);
     }
-
-    gptPrintStatistics(gptServer, stdout);
-    fflush(stdout);
     
-    gptCloseServer(&gptServer);
+        for (i=0; i<LBL_NUMBER(server); i++)
+            fprintf(file, "-------");
+        fprintf(file, "\n");
+        
+        for (i=0; i<LBL_NUMBER(server); i++)
+            fprintf(file, "%7d", LBL_VALUE(server, i));
+        fprintf(file, "\n");
+        
+        for (i=0; i<LBL_NUMBER(server); i++)
+            fprintf(file, "-------");
+        fprintf(file, "\n");
+        
+        for (i=0; i<LBL_NUMBER(server); i++)
+            if (LBL_COUNT(server, i) > 0)
+                fprintf(file, "%7d", LBL_COUNT(server, i));
+            else 
+                fprintf(file, "      .");
+        fprintf(file, "\n");
+        
+        for (i=0; i<LBL_NUMBER(server); i++)
+            fprintf(file, "-------");
+        fprintf(file, "\n");
+        
+        for (f=0; f<LBL_NFILES(server); f++) 
+        {
+            for (i=0; i<LBL_NUMBER(server); i++)
+                if (LBL_COUNTF(server, f, i)>0)
+                    fprintf(file, "%7d", LBL_COUNTF(server, f, i));
+                else 
+                    fprintf(file, "      .");        
+            fprintf(file, "\n");        
+        }
+        
+        for (i=0; i<LBL_NUMBER(server); i++)
+            fprintf(file, "-------");
+        fprintf(file, "\n");
+        
+    
+    
+    gptCloseServer(&server);
     
 	return 1;
 }

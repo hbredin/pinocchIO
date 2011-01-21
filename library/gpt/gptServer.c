@@ -24,10 +24,10 @@
 #include "gptServer.h"
 #include "list_utils.h"
 
-int isFiltered(int* labels, 
-               int nLabels,
-               GPTLabelFilterType labelFilterType,
-               int labelFilterReference)
+static int isFiltered(int* labels, 
+                      int nLabels,
+                      GPTLabelFilterType labelFilterType,
+                      int labelFilterReference)
 {
     int i;
     int result = 0;
@@ -59,12 +59,75 @@ int isFiltered(int* labels,
     return result;
 }
 
+static int compareLabels (void const *a, void const *b)
+{
+    int const *pa = a;
+    int const *pb = b;    
+    return *pa - *pb;
+}
+
+static int getStatsOnLabels( GPTServer server, int* labels, int* labelCounts, int** labelCountsPerFile)
+{
+    int f, t, i;
+    int count;
+    listOfLabels_t* list = NULL;
+    listOfLabels_t** listPerFile = NULL;
+    
+    listPerFile = (listOfLabels_t**) malloc(LBL_NFILES(server)*sizeof(listOfLabels_t*));
+    
+    count = 0; // number of distinct labels so far
+    for(f=0; f<LBL_NFILES(server); f++)
+    {
+        listPerFile[f] = NULL;
+        for(t=0; t<LBL_NTIMERANGES(server, f); t++)
+        {
+            for(i=0; i<LBL_NLABELS(server, f, t); i++)
+            {
+                if (!isLabelInList(list, LBL_LABEL(server, f, t, i)))
+                {
+                    if (labels) labels[count] = LBL_LABEL(server, f, t, i);
+                    count++;
+                }
+                list           = updateLabelCount(list,           LBL_LABEL(server, f, t, i), 1);
+                listPerFile[f] = updateLabelCount(listPerFile[f], LBL_LABEL(server, f, t, i), 1);
+
+            }
+        }
+    }
+    
+    if (labels)
+    {
+        // sort labels
+        qsort(labels, count, sizeof(int), compareLabels);
+        if (labelCounts)
+        {
+            for (i=0; i<count; i++)
+                labelCounts[i] = getLabelCount(list, labels[i]);
+        }
+        
+        if (labelCountsPerFile)
+        {
+            for (f=0; f<LBL_NFILES(server); f++)
+                for (i=0; i<count; i++)
+                    labelCountsPerFile[f][i] = getLabelCount(listPerFile[f], labels[i]);
+        }
+    }
+    
+    destroyListOfLabels(list);
+    for (f=0; f<LBL_NFILES(server); f++) 
+        destroyListOfLabels(listPerFile[f]);
+    free(listPerFile);
+    
+    return count;
+}
+
+
+
 GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char* pathToDataDataset,
                        GPTLabelFilterType labelFilterType, int labelFilterReference,
                        int numberOfLabelFiles, char** pathToLabelFile, const char* pathToLabelDataset)
 {
     int f = 0; // file counter
-    int i = 0; // label counter
     int label_t = 0; // label timerange counter
     int data_t = 0;  // data timerange counter
     
@@ -135,10 +198,10 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
         
         // labels are integers
         gptServer.labelDatatype = pioNewDatatype(PINOCCHIO_TYPE_INT, 1);        
-        // label counts
-        gptServer.labelCountsTotal = NULL;
-        gptServer.labelCountsPerFile = (listOfLabels_t**) malloc(LBL_NFILES(gptServer)*sizeof(listOfLabels_t*));
-        for (f=0; f<LBL_NFILES(gptServer); f++) gptServer.labelCountsPerFile[f] = NULL;
+//        // label counts
+//        gptServer.labelCountsTotal = NULL;
+//        gptServer.labelCountsPerFile = (listOfLabels_t**) malloc(LBL_NFILES(gptServer)*sizeof(listOfLabels_t*));
+//        for (f=0; f<LBL_NFILES(gptServer); f++) gptServer.labelCountsPerFile[f] = NULL;
         
         for (f=0; f<LBL_NFILES(gptServer); f++)
         {
@@ -235,25 +298,34 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
                 gptServer.indexOfFirstLabelPerFilePerTimerange[f][label_t] = gptServer.indexOfFirstLabelPerFilePerTimerange[f][label_t-1] + LBL_NLABELS(gptServer, f, label_t-1);
             
             // update label counts
-            for (label_t=0; label_t<LBL_NTIMERANGES(gptServer, f); label_t++) 
-            {
-                for (i=0; i<LBL_NLABELS(gptServer, f, label_t); i++) 
-                {
-                    gptServer.labelCountsPerFile[f] = updateLabelCount(gptServer.labelCountsPerFile[f],
-                                                                       LBL_LABEL(gptServer, f, label_t, i),
-                                                                       1);
-                    gptServer.labelCountsTotal      = updateLabelCount(gptServer.labelCountsTotal,
-                                                                       LBL_LABEL(gptServer, f, label_t, i),
-                                                                       1);                    
-                }
-            }
+//            for (label_t=0; label_t<LBL_NTIMERANGES(gptServer, f); label_t++) 
+//            {
+//                for (i=0; i<LBL_NLABELS(gptServer, f, label_t); i++) 
+//                {
+//                    gptServer.labelCountsPerFile[f] = updateLabelCount(gptServer.labelCountsPerFile[f],
+//                                                                       LBL_LABEL(gptServer, f, label_t, i),
+//                                                                       1);
+//                    gptServer.labelCountsTotal      = updateLabelCount(gptServer.labelCountsTotal,
+//                                                                       LBL_LABEL(gptServer, f, label_t, i),
+//                                                                       1);                    
+//                }
+//            }
             
             // prepare for next file
             pioCloseTimeline(&(gptServer.current_timeline));
             pioCloseDatatype(&(gptServer.current_datatype));
             pioCloseDataset(&(gptServer.current_dataset));
             pioCloseFile(&(gptServer.current_file));
-        }        
+        }    
+        
+        // list of distinct labels + total/per file counts
+        LBL_NUMBER(gptServer) = getStatsOnLabels(gptServer, NULL, NULL, NULL);
+        LBL_LIST(gptServer) = (int*) malloc(LBL_NUMBER(gptServer)*sizeof(int));
+        gptServer.labelCounts = (int*) malloc(LBL_NUMBER(gptServer)*sizeof(int));
+        gptServer.labelCountsPerFile = (int**) malloc(LBL_NFILES(gptServer)*sizeof(int*));
+        for (f=0; f<LBL_NFILES(gptServer); f++)
+            gptServer.labelCountsPerFile[f] = (int*) malloc(LBL_NUMBER(gptServer)*sizeof(int));
+        getStatsOnLabels(gptServer, LBL_LIST(gptServer), gptServer.labelCounts, gptServer.labelCountsPerFile);
     }
 
     if (DAT_AVAILABLE(gptServer))
@@ -270,10 +342,10 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
         
         gptServer.lengthOfDataTimeline = (int*) malloc(DAT_NFILES(gptServer)*sizeof(int));
         
-        // label counts
-        gptServer.dataCountsPerLabelTotal = NULL;
-        gptServer.dataCountsPerLabelPerFile = (listOfLabels_t**) malloc(DAT_NFILES(gptServer)*sizeof(listOfLabels_t*));
-        for (f=0; f<DAT_NFILES(gptServer); f++) gptServer.dataCountsPerLabelPerFile[f] = NULL;
+//        // label counts
+//        gptServer.dataCountsPerLabelTotal = NULL;
+//        gptServer.dataCountsPerLabelPerFile = (listOfLabels_t**) malloc(DAT_NFILES(gptServer)*sizeof(listOfLabels_t*));
+//        for (f=0; f<DAT_NFILES(gptServer); f++) gptServer.dataCountsPerLabelPerFile[f] = NULL;
         
         // test, initialize and (partially, timeline only) load data
         for (f=0; f<DAT_NFILES(gptServer); f++)
@@ -428,18 +500,18 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
                         DAT_FILTERED(gptServer, f, data_t) = -1;
                     }
                     
-                    if (DAT_MATCHING_LABEL(gptServer, f, data_t) >= 0)
-                    {
-                        for (i=0; i<DAT_NLABELS(gptServer, f, data_t); i++) 
-                        {
-                            gptServer.dataCountsPerLabelPerFile[f] = updateLabelCount(gptServer.dataCountsPerLabelPerFile[f],
-                                                                                      DAT_LABEL(gptServer, f, data_t, i),
-                                                                                      1);
-                            gptServer.dataCountsPerLabelTotal = updateLabelCount(gptServer.dataCountsPerLabelTotal,
-                                                                                      DAT_LABEL(gptServer, f, data_t, i),
-                                                                                      1);
-                        }
-                    }
+//                    if (DAT_MATCHING_LABEL(gptServer, f, data_t) >= 0)
+//                    {
+//                        for (i=0; i<DAT_NLABELS(gptServer, f, data_t); i++) 
+//                        {
+//                            gptServer.dataCountsPerLabelPerFile[f] = updateLabelCount(gptServer.dataCountsPerLabelPerFile[f],
+//                                                                                      DAT_LABEL(gptServer, f, data_t, i),
+//                                                                                      1);
+//                            gptServer.dataCountsPerLabelTotal = updateLabelCount(gptServer.dataCountsPerLabelTotal,
+//                                                                                      DAT_LABEL(gptServer, f, data_t, i),
+//                                                                                      1);
+//                        }
+//                    }
                 }
             }
         }
@@ -460,20 +532,20 @@ int gptCloseServer(GPTServer* gptServer)
 {
     int f = 0;
     
-    // free data counts
-    if (gptServer->dataCountsPerLabelTotal)
-        destroyListOfLabels(gptServer->dataCountsPerLabelTotal);
-    gptServer->dataCountsPerLabelTotal = NULL;
-    
-    if (gptServer->dataCountsPerLabelPerFile)
-    {
-        for (f=0; f<gptServer->numberOfDataFiles; f++) {
-            destroyListOfLabels(gptServer->dataCountsPerLabelPerFile[f]);
-            gptServer->dataCountsPerLabelPerFile[f] = NULL;
-        }
-        free(gptServer->dataCountsPerLabelPerFile);
-    }
-    gptServer->dataCountsPerLabelPerFile = NULL;
+//    // free data counts
+//    if (gptServer->dataCountsPerLabelTotal)
+//        destroyListOfLabels(gptServer->dataCountsPerLabelTotal);
+//    gptServer->dataCountsPerLabelTotal = NULL;
+//    
+//    if (gptServer->dataCountsPerLabelPerFile)
+//    {
+//        for (f=0; f<gptServer->numberOfDataFiles; f++) {
+//            destroyListOfLabels(gptServer->dataCountsPerLabelPerFile[f]);
+//            gptServer->dataCountsPerLabelPerFile[f] = NULL;
+//        }
+//        free(gptServer->dataCountsPerLabelPerFile);
+//    }
+//    gptServer->dataCountsPerLabelPerFile = NULL;
     
     // free pathToDataFile
     if (gptServer->pathToDataFile)
@@ -505,20 +577,17 @@ int gptCloseServer(GPTServer* gptServer)
     if (gptServer->lengthOfDataTimeline) free(gptServer->lengthOfDataTimeline);
     gptServer->lengthOfDataTimeline = NULL;
 
+    // free list of distinct labels
+    free(LBL_LIST(*gptServer)); 
     // free label counts
-    if (gptServer->labelCountsTotal)
-        destroyListOfLabels(gptServer->labelCountsTotal);
-    gptServer->labelCountsTotal = NULL;
-    
-    if (gptServer->labelCountsPerFile)
+    free(gptServer->labelCounts);
+    // free per file label counts
+    for (f=0; f<LBL_NFILES(*gptServer); f++)
     {
-        for (f=0; f<gptServer->numberOfLabelFiles; f++) {
-            destroyListOfLabels(gptServer->labelCountsPerFile[f]);
-            gptServer->labelCountsPerFile[f] = NULL;
-        }
-        free(gptServer->labelCountsPerFile);
+        free(gptServer->labelCountsPerFile[f]);
+        gptServer->labelCountsPerFile[f] = NULL;
     }
-    gptServer->labelCountsPerFile = NULL;
+    free(gptServer->labelCountsPerFile); 
     
     // free pathToLabelFile
     if (gptServer->pathToLabelFile)
@@ -633,79 +702,4 @@ int gptCloseServer(GPTServer* gptServer)
     return 1;
 }
 
-int gptPrintStatistics(GPTServer server, FILE* file)
-{    
-    int f, i;
-    int numberOfLabels = 0;
-    int* labels = NULL;
-    listOfLabels_t* labelCounts = NULL;
-    
-    numberOfLabels = numberOfLabelsInList(server.labelCountsTotal);
-    labels = (int*) malloc(numberOfLabels*sizeof(int));
-    labelCounts = server.labelCountsTotal;
-    i = 0;
-    while (labelCounts) 
-    {
-        labels[i] = labelCounts->value;
-        labelCounts = labelCounts->next;
-        i++;
-    }
-    
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "-------");
-    fprintf(file, "  ");
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "-------");
-    fprintf(file, "\n");
-    
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "%7d", labels[i]);
-    fprintf(file, "  ");
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "%7d", labels[i]);
-    fprintf(file, "\n");
-    
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "-------");
-    fprintf(file, "  ");
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "-------");
-    fprintf(file, "\n");
-    
-    for (i=0; i<numberOfLabels; i++)
-    {
-        listOfLabels_t* element = isLabelInList(server.labelCountsTotal, labels[i]);
-        fprintf(file, "%7d", element->count);
-    }
-    fprintf(file, "  ");
-    for (i=0; i<numberOfLabels; i++)
-    {
-        listOfLabels_t* element = isLabelInList(server.dataCountsPerLabelTotal, labels[i]);
-        fprintf(file, "%7d", element->count);
-    }
-    fprintf(file, "\n");
-    
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "-------");
-    fprintf(file, "  ");
-    for (i=0; i<numberOfLabels; i++)
-        fprintf(file, "-------");
-    fprintf(file, "\n");
-    
-
-    for (f=0; f<server.numberOfLabelFiles; f++) {
-        for (i=0; i<numberOfLabels; i++)
-        {
-            listOfLabels_t* element = isLabelInList(server.labelCountsPerFile[f], labels[i]);
-            if (!element)
-                fprintf(file, "     --");
-            else
-                fprintf(file, "%7d", element->count);
-        }
-        fprintf(file, "\n");
-        
-    }
-    
-    return 1;
-}
 

@@ -21,7 +21,11 @@
 #ifndef _LIST_UTILS_H
 #define _LIST_UTILS_H
 
-#include "gptTypes.h"
+typedef struct listOfLabels_s {
+    int value;
+    int count;
+    struct listOfLabels_s *next;
+} listOfLabels_t;
 
 int             numberOfLabelsInList (listOfLabels_t* list);
 
