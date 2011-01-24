@@ -125,7 +125,7 @@ int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* lab
         return -1;
     }    
     
-    *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_UNDEFINED;
+    *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
     *labelFilterReference = -1;    
     
     filter_section = config_lookup(&config, GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_FILTER);
@@ -133,7 +133,7 @@ int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* lab
     {
         config_destroy(&config);
 
-        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_UNDEFINED;
+        *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
         *labelFilterReference = -1;    
         return 0;
     }
@@ -383,7 +383,7 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     char** pathToLabelFile = NULL;
     char* pathToLabelDataset = NULL;
     
-    GPTLabelFilterType labelFilterType = GEPETTO_LABEL_FILTER_TYPE_UNDEFINED;
+    GPTLabelFilterType labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
     int labelFilterReference = -1;
     
     int f;
@@ -395,16 +395,6 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
         // return invalid gepetto server if an error happened
         return GPTServerInvalid;
         
-    // try and parse "filter" section
-    if (getFilterFromConfigurationFile(filename, &labelFilterType, &labelFilterReference) < 0)
-    {
-        // return invalid gepetto server if an error happened
-        for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile); 
-        free(pathToDataDataset); 
-        
-        return GPTServerInvalid;
-    }
-    
     // try and parse "label" section
     if (getPathsFromConfigurationFile(filename, 
                                        GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_LABEL,
@@ -416,19 +406,19 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
         
         return GPTServerInvalid;
     }
-    
-    // check coherence between filter and labels
-    // label section MUST exist in case filter is defined (even of type NONE)
-    if ((labelFilterType != GEPETTO_LABEL_FILTER_TYPE_UNDEFINED) &&
-        (numberOfLabelFiles == -1))
+
+    // try and parse "filter" section
+    if (getFilterFromConfigurationFile(filename, &labelFilterType, &labelFilterReference) < 0)
     {
-        // return invalid gepetto server if 
-        for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile);
-        free(pathToDataDataset);
+        // return invalid gepetto server if an error happened
+        for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile); 
+        for (f=0; f<numberOfLabelFiles; f++) free(pathToLabelFile[f]); free(pathToLabelFile); 
+        free(pathToDataDataset); 
+        free(pathToLabelDataset); 
         
-        return GPTServerInvalid;        
+        return GPTServerInvalid;
     }
-        
+    
     // initialize server
     gptServer = gptNewServer(numberOfDataFiles, pathToDataFile, pathToDataDataset,
                              labelFilterType, labelFilterReference, 

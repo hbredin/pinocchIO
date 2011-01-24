@@ -32,8 +32,8 @@
  @ingroup server
  */
 typedef enum {
-    /** Undefined filter */
-	GEPETTO_LABEL_FILTER_TYPE_UNDEFINED = -1,
+//    /** Undefined filter */
+//	GEPETTO_LABEL_FILTER_TYPE_UNDEFINED = -1,
     /** No filter. Server serves all data entries */
 	GEPETTO_LABEL_FILTER_TYPE_NONE, 
     /** "Equals to" filter. Server only serves data entries whose label equals to a predefined value */
@@ -48,65 +48,235 @@ typedef enum {
 
 
 
-/// gepetto server
+/**
+ @brief Label/data server
+ 
+ @ingroup server
+ */
 typedef struct {
     
-    // === DATA ===
+    // ===================================
+    // Labels
+    // ===================================
     
-    // does server serve data?
-    int servesData;
-    
-    // number of pinocchIO files containing the actual data
-    int numberOfDataFiles;
-    // their paths
-    char** pathToDataFile;
-    // internal path to the pinocchIO dataset containing the actual data
-    char* pathToDataDataset;   
-    
-    PIOTimeRange** dataTimeline;
-    int* lengthOfDataTimeline;
-    
-    // === LABELS ===
-    
-    // does server server labels?
+    /** 
+     @brief Label availibility flag.
+     
+     Getter: LBL_AVAILABLE(server) 
+     */
     int servesLabels;
     
+    // -------------
+    // configuration
+    // -------------
+    
+    /** 
+     @brief Number of label pinocchIO files 
+     
+     Getter: LBL_NFILES(server)
+     */
+    int numberOfLabelFiles;  
+    
+    /** 
+     @brief List of paths to label pinocchIO files.
+     
+     pathToLabelFile[f] is the path to the fth label pinocchIO file\n
+     Getter: LBL_PATH(server, f)
+     */
+    char** pathToLabelFile;
+    
+    /** 
+     @brief Path to label pinocchIO dataset
+     
+     Getter: LBL_DATASET(server)
+     */
+    char* pathToLabelDataset;    
+    
+    // ----------
+    // statistics
+    // ----------
+    
+    /**
+     @brief Number of distinct label values
+     
+     Getter: LBL_NUMBER(server)
+     */
     int  numberOfDistinctLabels;
+    
+    /**
+     @brief List of label values
+     
+     listofDistinctLabels[i] is the value of the ith label.\n
+     Getter: LBL_VALUE(server, i)
+     */
     int* listOfDistinctLabels;
     
+    /**
+     @brief Distribution of label values
+     
+     labelCounts[i] is the number of label timeranges with ith label value.\n
+     Getter: LBL_COUNT(server, i)
+     */
     int* labelCounts;
+    
+    /**
+     @brief  Distribution of label values, for each file
+     
+     labelCountsPerFile[f][i] is the number of label timeranges with ith label value in fth label file.\n
+     Getter: LBL_COUNTF(server, f, i)
+     */
     int** labelCountsPerFile;
-        
-    // number of pinocchIO files containing labels
-    int numberOfLabelFiles;       
-    // their paths
-    char** pathToLabelFile;
-    // internal path to the pinocchIO dataset containing labels
-    char* pathToLabelDataset;
     
-    // label storage
+    // -------
+    // storage
+    // -------
     
-    /** labelTimeline[f][t] is the t^th label timerange of the f^th file */
-    PIOTimeRange** labelTimeline; // 
-
-    /** lengthOfLabelTimeline[f] is the number of label timeranges of the f^th file */
+    /** 
+     @brief Length of timelines of pinocchIO label datasets, for each file
+     
+     lengthOfLabelTimeline[f] is the length of the timeline of the label dataset in the fth file.\n
+     Getter: LBL_NTIMERANGES(server, f)
+    */
     int* lengthOfLabelTimeline;  
+
+    /** 
+     @brief Timelines of pinocchIO lable datasets, for each file
+     
+     labelTimeline[f][t] is the tth timerange in the timeline of the label dataset for the fth file.\n 
+     Getter: LBL_TIMERANGE(server, f, t)
+     */
+    PIOTimeRange** labelTimeline; 
     
-    /** label[f] contains all labels from the f^th file in chronological order */
+    /** 
+     @brief Labels, in chronological order, for each file
+     
+     There can be more than one label per timerange.\n     
+     Getter: LBL_LABEL(server, f, t, i) is the ith label for the tth timerange in the label dataset timeline of the fth file.
+     */
     int** label;
     
-    int** numberOfLabelsPerFilePerTimerange; // numberOfLabels[f][i] is the number of label available for ith timerange of fth file
-    int** indexOfFirstLabelPerFilePerTimerange;  // indexOfLabels[f][i] is the index of first label for ith timerange of fth file
-                          // label[f][indexOfLabels[f][i]] is therefore the first label of ith timerange of fth file
-
-    // === FILTER ===
-
-    GPTLabelFilterType labelFilterType; // NONE, EQUALS_TO, DIFFERS_FROM, IS_GREATER_THAN, IS_SMALLER_THAN
+    /**
+     @brief Number of labels per timerange, for each file
+     
+     numberOfLabelsPerFilePerTimerange[f][t] is the number of labels for tth timerange in the label dataset timeline of the fth file.\n
+     Getter: LBL_NLABELS(server, f, t)
+     */
+    int** numberOfLabelsPerFilePerTimerange;
+    
+    /**
+     @brief Position in @a label of the first label for each timerange, for each file
+     
+     labels[f][ indexOfFirstLabelPerFilePerTimerange[f][t] ] is the first label of the tth timerange
+     in the label dataset timeline of the fth file.
+     */
+    int** indexOfFirstLabelPerFilePerTimerange; 
+    
+    // ===================================
+    // Data
+    // ===================================
+    
+    /** 
+     @brief Data availibility flag.
+     
+     Getter: DAT_AVAILABLE(server) 
+     */
+    int servesData;
+    
+    // -------------
+    // configuration
+    // -------------
+    
+    /** 
+     @brief Number of data pinocchIO files 
+     
+     Getter: DAT_NFILES(server)
+     */
+    int numberOfDataFiles;
+    
+    /** 
+     @brief List of paths to data pinocchIO files.
+     
+     pathToDataFile[f] is the path to the fth data pinocchIO file\n
+     Getter: DAT_PATH(server, f)
+     */
+    char** pathToDataFile;
+    
+    /** 
+     @brief Path to label pinocchIO dataset
+     
+     Getter: LBL_DATASET(server)
+     */
+    char* pathToDataDataset;   
+    
+    // ----------
+    // statistics
+    // ----------    
+    
+    /**
+     @brief Distribution of data with respect to labels
+     
+     dataCountsForLabel[i] is the number of data entries with ith label value.\n
+     Getter: DAT_COUNT(server, i)
+     */
+    int*  dataCountsForLabel;
+    
+    /**
+     @brief  Distribution of data with respect to labels, for each file
+     
+     dataCountsPerFileForLabel[f][i] is the number of data entries with ith label value in fth label file.\n
+     Getter: DAT_COUNTF(server, f, i)
+     */
+    int** dataCountsPerFileForLabel;    
+    
+    // -------
+    // storage
+    // -------
+    
+    /** 
+     @brief Length of timelines of pinocchIO data datasets, for each file
+     
+     lengthOfDataTimeline[f] is the length of the timeline of the data dataset in the fth file.\n
+     Getter: DAT_NTIMERANGES(server, f)
+     */
+    int* lengthOfDataTimeline;
+    
+    /** 
+     @brief Timelines of pinocchIO data datasets, for each file
+     
+     dataTimeline[f][t] is the tth timerange in the timeline of the data dataset for the fth file.\n 
+     Getter: DAT_TIMERANGE(server, f, t)
+     */
+    PIOTimeRange** dataTimeline;
+                
+    // ===================================
+    // Data filtering based on labels
+    // ===================================
+        
+    // -------------
+    // configuration
+    // -------------
+    
+    /**
+     @brief Type of label filter
+     
+     NONE, EQUALS_TO, DIFFERS_FROM, IS_GREATER_THAN, IS_SMALLER_THAN
+     */
+    GPTLabelFilterType labelFilterType;
+    
+    /**
+     @brief Label filter reference value
+     */
     int labelFilterReference;
 
     // labels are propagated from label timeline to data timeline
-    int** propagatedLabel; // propagatedLabel[f][t] is the index of label timerange corresponding to the tth data timerange of fth file
-    int** filterMask; 
+
+    /**
+     @brief 
+     */
+    int** firstCorrespondingLabelTimerange; // firstCorrespondingLabelTimerange[f][t] is the index of label timerange corresponding to the tth data timerange of fth file
+    int** numberOfCorrespondingLabelTimerange;
+    
+    int** filtered; 
     
     // === SAMPLING ===
     
@@ -127,35 +297,42 @@ typedef struct {
     
     int         eof;
     
+    int  current_data_labels_number;
+    int* current_data_labels;
+    
+    
 } GPTServer;
 
 /**
 	@brief Invalid Gepetto server
  */
 #define GPTServerInvalid ((GPTServer) {             \
-/* servesData */                0,                  \
-/* numberOfDataFiles */         -1,                 \
-/* pathToDataFile */            NULL,               \
-/* pathToDataDataset */         NULL,               \
-/* dataTimeline */              NULL,               \
-/* lengthOfDataTimeline */      NULL,               \
 /* servesLabels */              0,                  \
+/* numberOfLabelFiles */        -1,                 \
+/* pathToLabelFile */           NULL,               \
+/* pathToLabelDataset */        NULL,               \
 /* numberOfDistinctLabels */    0,                  \
 /* listOfDistinctLabels */      NULL,               \
 /* labelCounts */               NULL,               \
 /* labelCountsPerFile */        NULL,               \
-/* numberOfLabelFiles */        -1,                 \
-/* pathToLabelFile */           NULL,               \
-/* pathToLabelDataset */        NULL,               \
-/* labelTimeline */             NULL,               \
 /* lengthOfLabelTimeline */     NULL,               \
+/* labelTimeline */             NULL,               \
 /* label */                     NULL,               \
 /* numberOfLabelsPerFilePerTimerange */     NULL,   \
 /* indexOfFirstLabelPerFilePerTimerange */  NULL,   \
+/* servesData */                0,                  \
+/* numberOfDataFiles */         -1,                 \
+/* pathToDataFile */            NULL,               \
+/* pathToDataDataset */         NULL,               \
+/* dataCountsForLabel */        NULL,               \
+/* dataCountsPerFileForLabel */ NULL,               \
+/* lengthOfDataTimeline */      NULL,               \
+/* dataTimeline */              NULL,               \
 /* labelFilterType */           -1,                 \
 /* labelFilterReference */      -1,                 \
-/* propagatedLabel */           NULL,               \
-/* filterMask */                NULL,               \
+/* firstCorrespondingLabelTimerange */           NULL,   \
+/* numberOfCorrespondingLabelTimerange */       NULL, \
+/* filtered */                NULL,               \
 /* datatype */                  PIODatatypeInvalid, \
 /* labelDatatype */             PIODatatypeInvalid, \
 /* current_file_index */        -1,                 \
@@ -164,7 +341,9 @@ typedef struct {
 /* current_dataset */           PIODatasetInvalid,  \
 /* current_datatype */          PIODatatypeInvalid, \
 /* current_timeline */          PIOTimelineInvalid, \
-/* eof */                       -1                  \
+/* eof */                       -1,                 \
+/* current_data_labels_number */ -1,                \
+/* current_data_labels */       NULL                \
 })
 
 
@@ -186,7 +365,7 @@ typedef struct {
     int fileIndex;
 } GPTTimeRange;
 
-// Macro for easy access to labels
+// Label-related getters
 
 #define LBL_AVAILABLE(server)               ((server).servesLabels)
 
@@ -199,6 +378,7 @@ typedef struct {
 #define LBL_NUMBER(server)                  ((server).numberOfDistinctLabels)
 #define LBL_LIST(server)                    ((server).listOfDistinctLabels)
 #define LBL_VALUE(server, i)                ((LBL_LIST(server))[(i)])
+
 #define LBL_COUNT(server, i)                ((server).labelCounts[(i)])
 #define LBL_COUNTF(server, f, i)            ((server).labelCountsPerFile[(f)][(i)])
 
@@ -211,7 +391,7 @@ typedef struct {
 #define LBL_NTIMERANGES(server, f)          ((server).lengthOfLabelTimeline[(f)])
 #define LBL_TIMERANGE(server, f, t)         ((LBL_TIMELINE((server), (f)))[(t)])
 
-// Macro for easy access to data labels
+// Data-related getters
 
 #define DAT_AVAILABLE(server)               ((server).servesData)
 
@@ -221,13 +401,10 @@ typedef struct {
 
 #define DAT_DATASET(server)                 ((server).pathToDataDataset)
 
+#define DAT_COUNT(server, i)                ((server).dataCountsForLabel[(i)])
+#define DAT_COUNTF(server, f, i)            ((server).dataCountsPerFileForLabel[(f)][(i)])
 
-#define DAT_MATCHING_LABEL(server, f, t)    ((server).propagatedLabel[(f)][(t)])
-#define DAT_FILTERED(server, f, t)          ((server).filterMask[(f)][(t)])
-
-#define DAT_LABELS( server, f, t)           (LBL_LABELS( (server), (f), DAT_MATCHING_LABEL((server), (f), (t))     ))
-#define DAT_NLABELS(server, f, t)           (LBL_NLABELS((server), (f), DAT_MATCHING_LABEL((server), (f), (t))     ))
-#define DAT_LABEL(  server, f, t, r)        (LBL_LABEL(  (server), (f), DAT_MATCHING_LABEL((server), (f), (t)), (r)))
+#define DAT_FILTERED(server, f, t)          ((server).filtered[(f)][(t)])
 
 #define DAT_TIMELINES(server)               ((server).dataTimeline)
 #define DAT_TIMELINE(server, f)             ((DAT_TIMELINES((server)))[(f)])

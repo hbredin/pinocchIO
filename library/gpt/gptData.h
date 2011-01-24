@@ -66,8 +66,8 @@ int gptGetServerDimension(GPTServer server);
 int gptReadNext(GPTServer* gptServer,
                 PIODatatype pioDatatype, 
                 void** buffer, 
-                int** labels, 
-                int* nLabels);
+                int* nLabels, 
+                int** labels);
 
 /**
  @brief Read next data from server

@@ -30,9 +30,12 @@ int gptGetServerDimension(GPTServer gptServer)
         return -1;
 }
 
-int gptReadNext(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer, int** labels, int* nLabels)
+int gptReadNext(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer, 
+                int* nLabels, int** labels)
 {
     int number = -1;
+    int numberOfLabels = -1;
+    int i, r;
     
     if (!DAT_AVAILABLE(*gptServer)) 
     {
@@ -78,22 +81,63 @@ int gptReadNext(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer, in
                          pioDatatype, 
                          buffer);
         
-        if (labels)
+        // get total number of corresponding labels
+        // (as the sum of number of labels for each corresponding timeranges)
+        if (nLabels || labels)
         {
             if (LBL_AVAILABLE(*gptServer))
-                *labels = DAT_LABELS(*gptServer, 
-                                     gptServer->current_file_index, 
-                                     gptServer->current_timerange_index);
-            else *labels = NULL;
+            {
+                numberOfLabels = 0;
+                for (i=0; 
+                     i<gptServer->numberOfCorrespondingLabelTimerange[gptServer->current_file_index][gptServer->current_timerange_index]; 
+                     i++) 
+                {
+                    numberOfLabels += LBL_NLABELS(*gptServer, 
+                                                  gptServer->current_file_index, 
+                                                  i+gptServer->firstCorrespondingLabelTimerange[gptServer->current_file_index][gptServer->current_timerange_index]);
+                }
+            }
         }
         
         if (nLabels)
         {
-            if (LBL_AVAILABLE(*gptServer))
-                *nLabels = DAT_NLABELS(*gptServer, 
-                                       gptServer->current_file_index, 
-                                       gptServer->current_timerange_index);
+            if (LBL_AVAILABLE(*gptServer)) *nLabels = numberOfLabels;
             else *nLabels = 0;
+        }
+            
+        if (labels)
+        {
+            if (LBL_AVAILABLE(*gptServer))
+            {
+                if (numberOfLabels > gptServer->current_data_labels_number)
+                {
+                    gptServer->current_data_labels_number = numberOfLabels;
+                    gptServer->current_data_labels = (int*) realloc(gptServer->current_data_labels,
+                                                                    gptServer->current_data_labels_number*sizeof(int));
+                }
+                
+                numberOfLabels = 0;
+                for (i=0; 
+                     i<gptServer->numberOfCorrespondingLabelTimerange[gptServer->current_file_index][gptServer->current_timerange_index]; 
+                     i++) 
+                {
+                    for (r=0; 
+                         r<LBL_NLABELS(*gptServer, 
+                                       gptServer->current_file_index, 
+                                       i+gptServer->firstCorrespondingLabelTimerange[gptServer->current_file_index][gptServer->current_timerange_index]); 
+                         r++) 
+                    {
+                        gptServer->current_data_labels[numberOfLabels] = LBL_LABEL(*gptServer,
+                                                                                   gptServer->current_file_index,
+                                                                                   i+gptServer->firstCorrespondingLabelTimerange[gptServer->current_file_index][gptServer->current_timerange_index],
+                                                                                   r);
+                        numberOfLabels++;
+                    }
+                }
+                
+                *labels = gptServer->current_data_labels;
+            }
+            else *labels = NULL;
         }
         
         gptServer->current_timerange_index++;
@@ -102,7 +146,7 @@ int gptReadNext(GPTServer* gptServer, PIODatatype pioDatatype, void** buffer, in
     else 
     {
         gptServer->current_timerange_index++;
-        number = gptReadNext(gptServer, pioDatatype, buffer, labels, nLabels);
+        number = gptReadNext(gptServer, pioDatatype, buffer, nLabels, labels);
     }
     
     // return number of data
