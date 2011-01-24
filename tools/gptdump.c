@@ -33,13 +33,11 @@
 #include "gepetto.h"
 
 extern int ez_dump(FILE* file,
-                   void* buffer, PIODatatype datatype, int numberOfEntries,
-                   int* labels, int numberOfLabels,
-                   PIOTimeRange timerange,
-                   int multiple,
-                   int label_flag,
-                   int timestamp,
-                   int svmlight);
+                   void* buffer, PIODatatype bufferDatatype, 
+                   int numberOfEntriesInBuffer, int dumpMultipleEntriesIntoOneLine,
+                   int dumpLabel, int* labels, int numberOfLabels,
+                   int dumpTimerange, PIOTimeRange timerange,
+                   int useSVMLightFormat);
 
 
 
@@ -88,9 +86,8 @@ int main (int argc, char *const  argv[])
 	
     int numberOfVectors; // number of vector for each timerange
 
-    int* labels = NULL; // labels for a given timerange
-    int nLabels;        // their number
-
+    int nLabels = -1; 
+    int* labels = NULL;
     
 	int c;
 	while (1)
@@ -110,8 +107,6 @@ int main (int argc, char *const  argv[])
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-//		c = getopt_long (argc, argv, "hs",
-//						 long_options, &option_index);
 		c = getopt_long (argc, argv, "h",
 						 long_options, &option_index);
 		
@@ -125,10 +120,6 @@ int main (int argc, char *const  argv[])
 				/* If this option set a flag, do nothing else now. */
 				if (long_options[option_index].flag != 0)
 					break;
-				//				printf ("option %s", long_options[option_index].name);
-				//				if (optarg)
-				//					printf (" with arg %s", optarg);
-				//				printf ("\n");
 				break;
 
 			case 'h':
@@ -137,7 +128,6 @@ int main (int argc, char *const  argv[])
 				break;
 				
 			case '?':
-				/* getopt_long already printed an error message. */
 				usage(argv[0]);
 				break;
 				
@@ -170,15 +160,31 @@ int main (int argc, char *const  argv[])
         exit(-1);
     }
             
-    numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &labels, &nLabels);
-    while (numberOfVectors >= 0) 
-    {        
-        ez_dump(stdout, 
-                buffer, gptServer.datatype, numberOfVectors, 
-                labels, nLabels, 
-                PIOTimeRangeInvalid, multiple_flag, label_flag, 0, svmlight_flag);
-
-        numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &labels, &nLabels);        
+    while (gptServer.eof == 0) 
+    {   
+        numberOfVectors = gptReadNext(&gptServer, gptServer.datatype, &buffer, &nLabels, &labels);
+        
+        if (numberOfVectors >= 0)
+        {
+            if (label_flag)
+            {
+                ez_dump(stdout, 
+                        buffer, gptServer.datatype, 
+                        numberOfVectors, multiple_flag, 
+                        label_flag, labels, nLabels, 
+                        0, PIOTimeRangeInvalid, 
+                        svmlight_flag);
+            }
+            else 
+            {
+                ez_dump(stdout, 
+                        buffer, gptServer.datatype, 
+                        numberOfVectors, multiple_flag, 
+                        label_flag, NULL, -1, 
+                        0, PIOTimeRangeInvalid,
+                        svmlight_flag);            
+            }
+        }
     }
     
     fflush(stdout);

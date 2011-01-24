@@ -86,49 +86,73 @@ int one_array_dump(FILE* file,
                 
 
 int ez_dump(FILE* file,
-            void* buffer, PIODatatype datatype, int numberOfEntries,
-            int* labels, int numberOfLabels,
-            PIOTimeRange timerange,
-            int multiple,
-            int label,
-            int timestamp,
-            int svmlight)
+            void* buffer, PIODatatype bufferDatatype, 
+            int numberOfEntriesInBuffer, int dumpMultipleEntriesIntoOneLine,
+            int dumpLabel,     int* labels, int numberOfLabels,
+            int dumpTimerange, PIOTimeRange timerange,
+            int useSVMLightFormat)
 {
     int n;
+    int i;
     
-    if ((datatype.type == PINOCCHIO_TYPE_CHAR) && (datatype.dimension == 1))
+    if ((bufferDatatype.type == PINOCCHIO_TYPE_CHAR) && (bufferDatatype.dimension == 1))
     {
-        if (timestamp) timestamp_dump(file, timerange);
+        if (dumpTimerange) timestamp_dump(file, timerange);
         
-        text_dump(file, buffer, numberOfEntries);
+        text_dump(file, buffer, numberOfEntriesInBuffer);
     }
     else 
     {
-        if (multiple)
+        if (dumpMultipleEntriesIntoOneLine)
         {
-            if (timestamp) timestamp_dump(file, timerange);
-            for (n=0; n<numberOfEntries; n++) 
-                one_array_dump(file, buffer, datatype, n, svmlight);
+            if (dumpTimerange) timestamp_dump(file, timerange);
+            if (dumpLabel)
+            {
+                if (numberOfLabels > 0)
+                {
+                    fprintf(file, "%d", labels[0]);
+                    for (i=1; i<numberOfLabels; i++) fprintf(file, "/%d", labels[i]);
+                }
+                else fprintf(file, "-1");
+                fprintf(file, " ");
+            }
+            
+            for (n=0; n<numberOfEntriesInBuffer; n++) 
+                one_array_dump(file, buffer, bufferDatatype, n, useSVMLightFormat);
             fprintf(file, "\n");
         }
         else 
         {
-            for (n=0; n<numberOfEntries; n++) 
+            for (n=0; n<numberOfEntriesInBuffer; n++) 
             {
-                if (timestamp) timestamp_dump(file, timerange);
-                if (svmlight) 
+                if (dumpTimerange) timestamp_dump(file, timerange);
+                
+                if (dumpLabel)
                 {
-                    if ((label) && (numberOfLabels > 0))
-                        fprintf(file, "%d ", labels[0]);
-                    else
-                        fprintf(file, "%d ", -1);
+                    if (useSVMLightFormat)
+                    {
+                        if (numberOfLabels > 0)
+                            fprintf(file, "%d", labels[0]);
+                        else fprintf(file, "-1");
+                    }
+                    else 
+                    {
+                        if (numberOfLabels > 0)
+                        {
+                            fprintf(file, "%d", labels[0]);
+                            for (i=1; i<numberOfLabels; i++) fprintf(file, "/%d", labels[i]);
+                        }
+                        
+                        else fprintf(file, "-1");
+                    }
+                    fprintf(file, " ");
                 }
 
-                one_array_dump(file, buffer, datatype, n, svmlight);
+                one_array_dump(file, buffer, bufferDatatype, n, useSVMLightFormat);
                 fprintf(file, "\n");
             }
         }
     }
     
-    return numberOfEntries;
+    return numberOfEntriesInBuffer;
 }

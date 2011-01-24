@@ -39,13 +39,11 @@ static int multiple_flag = 0;
 static int svmlight_flag = 0;
 
 extern int ez_dump(FILE* file,
-                  void* buffer, PIODatatype datatype, int numberOfEntries,
-                  int* labels, int numberOfLabels,
-                  PIOTimeRange timerange,
-                  int multiple,
-                  int label_flag,
-                  int timestamp,
-                  int svmlight);
+            void* buffer, PIODatatype bufferDatatype, 
+            int numberOfEntriesInBuffer, int dumpMultipleEntriesIntoOneLine,
+            int dumpLabel,     int* labels, int numberOfLabels,
+            int dumpTimerange, PIOTimeRange timerange,
+            int useSVMLightFormat);
 
 extern int timestamp_dump(FILE* file, PIOTimeRange timerange);
 
@@ -252,10 +250,11 @@ int main (int argc, char *const  argv[])
 			numberOfVectors = pioRead(&pioDataset, tr, pioDatatype, &buffer);
             
             ez_dump(stdout, 
-                    buffer, pioDatatype, numberOfVectors,
-                    NULL, 0, 
-                    pioTimeline.timeranges[tr], 
-                    multiple_flag, 0, timestamp_flag, svmlight_flag);
+                    buffer, pioDatatype, 
+                    numberOfVectors, multiple_flag,
+                    0, NULL, 0,  
+                    timestamp_flag, pioTimeline.timeranges[tr], 
+                    svmlight_flag);
 		}
 		
 		pioCloseDatatype(&pioDatatype);
