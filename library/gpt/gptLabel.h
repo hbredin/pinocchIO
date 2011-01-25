@@ -31,6 +31,30 @@
 
 #include "gptTypes.h"
 
+
+/**
+ @brief Get list of of distinct labels
+ 
+ @param[in] server Gepetto server
+ @param[out] list Sorted list of distinct label values
+ @returns 
+    - 0 if server does not serve labels
+    - number of distinct labels otherwise
+ 
+ @note
+ @a list has to be allocated with enough memory space to store all label values.
+ A first call to gptGetListOfDistinctLabels() with NULL list will help you:
+\verbatim
+ numberOfDistinctLabels = gptGetListOfDistinctLabels(server, NULL);
+ listOfDistinctLabels = (int*) malloc(numberOfDistinctLabels*sizeof(int));
+ gptGetListOfDistinctLabels(server, listOfDistinctLabels);
+\endverbatim
+ 
+ @ingroup gptlabel
+ 
+ */
+int gptGetListOfDistinctLabels(GPTServer server, int* list);
+
 /**
  @brief Get list of timeranges with a specified label
  

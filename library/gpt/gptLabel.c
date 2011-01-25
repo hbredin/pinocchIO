@@ -21,6 +21,22 @@
 #include "gptLabel.h"
 #include <stdlib.h>
 
+int gptGetListOfDistinctLabels(GPTServer server, int* list)
+{
+    int i; 
+    
+    if (LBL_AVAILABLE(server))
+    {
+        if (list)
+        {
+            for (i=0; i<LBL_NUMBER(server); i++)
+                list[i] = LBL_VALUE(server, i);
+        }
+        return LBL_NUMBER(server);
+    }
+    else return 0;
+}
+
 /**
  @internal
 
