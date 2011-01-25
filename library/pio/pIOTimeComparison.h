@@ -102,13 +102,65 @@ int pioTimeInTimeRange( PIOTime t, PIOTimeRange tr);
 int pioTimeRangeInTimeRange( PIOTimeRange tr1, PIOTimeRange tr2);
 
 /**
+ @brief Get latest timestamp among two timestamps
+
+ @param[in] t1 First timestamp
+ @param[in] t2 Second timestamp
+ 
+ @returns latest timestamp among them
+ 
+ @ingroup time
+ */
+PIOTime pioGetTimeMax(PIOTime t1, PIOTime t2);
+
+/**
+ @brief Get earliest timestamp among two timestamps
+ 
+ @param[in] t1 First timestamp
+ @param[in] t2 Second timestamp
+ 
+ @returns earliest timestamp among them
+ 
+ @ingroup time
+ */
+PIOTime pioGetTimeMin(PIOTime t1, PIOTime t2);
+
+/**
+ @brief Get time range starting and ending at provided timestamps
+ 
+ @param[in] start Start timestamp
+ @param[in] stop End timestamp
+ 
+ @returns
+    - time range starting at @a start and ending at @a stop 
+    - PIOTimeRangeEmpty if @a start is later than @a stop.
+ 
+ @ingroup time
+ */
+PIOTimeRange pioGetTimeRangeBetweenTimes( PIOTime start, PIOTime stop);
+
+/**
+ @brief Get intersection of two time ranges
+ 
+ @param[in] tr1 First time range
+ @param[in] tr2 Second time range
+ 
+ @returns 
+    - intersection of the two time ranges
+    - PIOTimeRangeEmpy if intersection is empty
+    
+ @ingroup time
+ */
+PIOTimeRange pioGetTimeRangeIntersection( PIOTimeRange tr1, PIOTimeRange tr2);
+
+/**
  @brief Check intersection of time ranges
  
  @param[in] tr1 First time range
  @param[in] tr2 Second time range
  
  @returns 
- - FALSE if intersection of \a tr1 and \a tr2 is empty
+ - FALSE if intersection of @a tr1 and @a tr2 is empty
  - TRUE otherwise
  
  @ingroup time

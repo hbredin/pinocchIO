@@ -95,12 +95,47 @@ int pioTimeRangeInTimeRange( PIOTimeRange tr1, PIOTimeRange tr2)
 			(  (tr1.time+tr1.duration)	* tr2.scale <= (tr2.time+tr2.duration)	* tr1.scale));
 }
 
+PIOTime pioGetTimeMax(PIOTime t1, PIOTime t2)
+{
+    if (t1.time * t2.scale > t2.time * t1.scale) return t1;
+    else return t2;
+}
+
+PIOTime pioGetTimeMin(PIOTime t1, PIOTime t2)
+{
+    if (t1.time * t2.scale < t2.time * t1.scale) return t1;
+    else return t2;    
+}
+
+PIOTimeRange pioGetTimeRangeBetweenTimes( PIOTime start, PIOTime stop)
+{
+    if (pioCompareTimes(start, stop) == PINOCCHIO_TIME_COMPARISON_DESCENDING)
+        return PIOTimeRangeEmpty;
+    
+    if (start.scale == stop.scale)
+        return (PIOTimeRange){start.time, stop.time-start.time, start.scale};
+    
+    return (PIOTimeRange){start.time*stop.scale, stop.time*start.scale - start.time*stop.scale, start.scale*stop.scale};
+}
+
+PIOTimeRange pioGetTimeRangeIntersection( PIOTimeRange tr1, PIOTimeRange tr2)
+{
+    PIOTime start1, start2, stop1, stop2;
+    
+    start1 = (PIOTime){tr1.time, tr1.scale};
+    start2 = (PIOTime){tr2.time, tr2.scale};
+    stop1  = (PIOTime){tr1.time+tr1.duration, tr1.scale};
+    stop2  = (PIOTime){tr2.time+tr2.duration, tr2.scale};
+    
+    return pioGetTimeRangeBetweenTimes(pioGetTimeMax(start1, start2),
+                                       pioGetTimeMin(stop1, stop2));
+}
+
 int pioTimeRangeIntersectsTimeRange( PIOTimeRange tr1, PIOTimeRange tr2)
 {
-	PIOTime t1, t2;
-	t1.time = tr1.time; t1.scale = tr1.scale;
-	t2.time = tr2.time; t2.scale = tr2.scale;
-	return (pioTimeInTimeRange(t1, tr2) || pioTimeInTimeRange(t2, tr1));
+    PIOTimeRange intersection = pioGetTimeRangeIntersection(tr1, tr2);
+    
+    return (intersection.duration > 0);
 }
 
 #pragma mark Timelines functions
