@@ -56,6 +56,10 @@
  <td>\subpage gptdump</td>
  <td>Dump a Gepetto server into a file</td>
  </tr>
+ <tr>
+ <td>\subpage gptstat</td>
+ <td>Get statistics on a Gepetto server</td>
+ </tr>
  </table> 
  */
 
