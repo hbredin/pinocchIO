@@ -25,10 +25,29 @@
 #include "list_utils.h"
 
 #ifndef MAX
-#define MAX(a,b) ((a) > (b) ? (a) : (b)) 
+/**
+ @internal
+ @brief Maximum of two numbers
+ @param a First number
+ @param b Second number
+ @returns 
+    - @a a if @a a > @a b
+    - @a b otherwise
+ */
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-static int applyFilter(int label, 
+/**
+ @internal
+ @brief Apply filter on given label
+ @param[in] label Input label
+ @param[in] labelFilterType Label filter type
+ @param[in] labelFilterReference Label filter reference value
+ @returns 
+    - 1 if label value matches filter
+    - 0 otherwise
+ */
+static int applyFilter(int label,
                       GPTLabelFilterType labelFilterType,
                       int labelFilterReference)
 {
@@ -57,6 +76,14 @@ static int applyFilter(int label,
     return result;
 }
 
+/**
+ @internal
+ @brief Apply server filter on given 
+ @param[in] server <#server description#>
+ @param[in] f <#f description#>
+ @param[in] data_t <#data_t description#>
+ @returns <#return value description#>
+ */
 static int isFiltered(GPTServer server,
                     int f,
                     int data_t)
@@ -75,14 +102,25 @@ static int isFiltered(GPTServer server,
     return result;
 }
 
+/**
+ @internal
+ @brief Compare two integer labels
+ @param[in] a First label value
+ @param[in] b Second label value
+ @returns 
+    - positive value if @a a is greater than @a b
+    - negative value otherwise
+ */
 static int compareLabels (void const *a, void const *b)
 {
     int const *pa = a;
-    int const *pb = b;    
+    int const *pb = b;
     return *pa - *pb;
 }
 
 /**
+ @internal
+
 	@brief Init label configuration variables
  
     Allocate and set:
@@ -91,12 +129,14 @@ static int compareLabels (void const *a, void const *b)
         - server.pathToLabelFile
         - server.pathToLabelDataset
  
-	@param server Gepetto server
-	@param numberOfLabelFiles Number of label pinocchIO files
-	@param pathToLabelFile Paths to each of them
-	@param pathToLabelDataset pinocchIO path to label dataset
+	@param[in,out] server Gepetto server
+	@param[in] numberOfLabelFiles Number of label pinocchIO files
+	@param[in] pathToLabelFile Paths to each of them
+	@param[in] pathToLabelDataset pinocchIO path to label dataset
  
-	@returns 1
+	@returns 
+        - 1 when succesful
+        - negative value otherwise
  */
 static int initLabelConfiguration( GPTServer* server, int numberOfLabelFiles, char** pathToLabelFile, const char* pathToLabelDataset)
 {
@@ -123,133 +163,158 @@ static int initLabelConfiguration( GPTServer* server, int numberOfLabelFiles, ch
     return 1;
 }
 
-static int initLabelStorage(GPTServer* gptServer)
-
+/**
+ @internal
+ @brief Init label storage variables
+ 
+ Allocate and set:
+    - server.lengthOfLabelTimeline
+    - server.labelTimeline
+    - server.numberOfLabelsPerFilePerTimerange
+    - server.indexOfFirstLabelPerFilePerTimerange
+    - server.label
+    - server.labelDatatype
+ 
+ @param[in, out] server Gepetto server
+ @returns
+    - 1 when successful
+    - -1 in case of failure (server is closed, also).
+ */
+static int initLabelStorage(GPTServer* server)
 {
     int f;
     int label_t;
     size_t labelBufferSize = -1;
 
     // label timelines
-    LBL_TIMELINES(*gptServer) = (PIOTimeRange**) malloc(LBL_NFILES(*gptServer)*sizeof(PIOTimeRange*));
-    for (f=0; f<LBL_NFILES(*gptServer); f++) LBL_TIMELINE(*gptServer,f) = NULL;
-    gptServer->lengthOfLabelTimeline = (int*) malloc(LBL_NFILES(*gptServer)*sizeof(int));
+    LBL_TIMELINES(*server) = (PIOTimeRange**) malloc(LBL_NFILES(*server)*sizeof(PIOTimeRange*));
+    for (f=0; f<LBL_NFILES(*server); f++) LBL_TIMELINE(*server,f) = NULL;
+    server->lengthOfLabelTimeline = (int*) malloc(LBL_NFILES(*server)*sizeof(int));
     
     // labels
-    gptServer->label                 = (int**) malloc(LBL_NFILES(*gptServer)*sizeof(int*));   
-    for (f=0; f<LBL_NFILES(*gptServer); f++) gptServer->label[f] = NULL;
+    server->label                 = (int**) malloc(LBL_NFILES(*server)*sizeof(int*));   
+    for (f=0; f<LBL_NFILES(*server); f++) server->label[f] = NULL;
     
     // Number of labels per file per timerange
-    gptServer->numberOfLabelsPerFilePerTimerange        = (int**) malloc(LBL_NFILES(*gptServer)*sizeof(int*));
-    for (f=0; f<LBL_NFILES(*gptServer); f++) gptServer->numberOfLabelsPerFilePerTimerange[f] = NULL;
+    server->numberOfLabelsPerFilePerTimerange        = (int**) malloc(LBL_NFILES(*server)*sizeof(int*));
+    for (f=0; f<LBL_NFILES(*server); f++) server->numberOfLabelsPerFilePerTimerange[f] = NULL;
     
     // Index of first label per file per timerange
-    gptServer->indexOfFirstLabelPerFilePerTimerange        = (int**) malloc(LBL_NFILES(*gptServer)*sizeof(int*));
-    for (f=0; f<LBL_NFILES(*gptServer); f++) gptServer->indexOfFirstLabelPerFilePerTimerange[f] = NULL;
+    server->indexOfFirstLabelPerFilePerTimerange        = (int**) malloc(LBL_NFILES(*server)*sizeof(int*));
+    for (f=0; f<LBL_NFILES(*server); f++) server->indexOfFirstLabelPerFilePerTimerange[f] = NULL;
     
     // labels are integers
-    gptServer->labelDatatype = pioNewDatatype(PINOCCHIO_TYPE_INT, 1);        
+    server->labelDatatype = pioNewDatatype(PINOCCHIO_TYPE_INT, 1);        
     
-    for (f=0; f<LBL_NFILES(*gptServer); f++)
+    for (f=0; f<LBL_NFILES(*server); f++)
     {
         // check if label file is readable
-        gptServer->current_file = pioOpenFile(LBL_PATH(*gptServer, f), PINOCCHIO_READONLY);
-        if (PIOFileIsInvalid(gptServer->current_file)) 
+        server->current_file = pioOpenFile(LBL_PATH(*server, f), PINOCCHIO_READONLY);
+        if (PIOFileIsInvalid(server->current_file)) 
         {
-            fprintf(stderr, "Geppeto cannot open label file %s.\n", LBL_PATH(*gptServer, f));
+            fprintf(stderr, "Geppeto cannot open label file %s.\n", LBL_PATH(*server, f));
             fflush(stderr);
-            gptCloseServer(gptServer);
+            gptCloseServer(server);
             return -1;
         }
         
         // check if label dataset is readable
-        gptServer->current_dataset = pioOpenDataset(PIOMakeObject(gptServer->current_file),
-                                                   LBL_DATASET(*gptServer));
-        if (PIODatasetIsInvalid(gptServer->current_dataset))
+        server->current_dataset = pioOpenDataset(PIOMakeObject(server->current_file),
+                                                   LBL_DATASET(*server));
+        if (PIODatasetIsInvalid(server->current_dataset))
         {
             fprintf(stderr, "Gepetto cannot open label dataset %s in file %s.\n",
-                    LBL_DATASET(*gptServer), LBL_PATH(*gptServer, f));
+                    LBL_DATASET(*server), LBL_PATH(*server, f));
             fflush(stderr);
-            gptCloseServer(gptServer);
+            gptCloseServer(server);
             return -1;
         }
         
         // check if label datatype is mono-dimensional
-        gptServer->current_datatype = pioGetDatatype(gptServer->current_dataset);
-        if (PIODatatypeIsInvalid(gptServer->current_datatype))
+        server->current_datatype = pioGetDatatype(server->current_dataset);
+        if (PIODatatypeIsInvalid(server->current_datatype))
         {
             fprintf(stderr, "Gepetto cannot get datatype of label dataset %s in file %s.\n",
-                    LBL_DATASET(*gptServer), LBL_PATH(*gptServer, f));
+                    LBL_DATASET(*server), LBL_PATH(*server, f));
             fflush(stderr);
-            gptCloseServer(gptServer);
+            gptCloseServer(server);
             return -1;            
         }
-        if (gptServer->current_datatype.dimension != 1)
+        if (server->current_datatype.dimension != 1)
         {
             fprintf(stderr, 
                     "Gepetto found that the datatype of label dataset %s in file %s is not mono-dimensional.\n",
-                    LBL_DATASET(*gptServer), LBL_PATH(*gptServer, f));
+                    LBL_DATASET(*server), LBL_PATH(*server, f));
             fflush(stderr);                
-            gptCloseServer(gptServer);
+            gptCloseServer(server);
             return -1;            
         }
         
         // load label timeline
-        gptServer->current_timeline = pioGetTimeline(gptServer->current_dataset);
-        if (PIOTimelineIsInvalid(gptServer->current_timeline))
+        server->current_timeline = pioGetTimeline(server->current_dataset);
+        if (PIOTimelineIsInvalid(server->current_timeline))
         {
             fprintf(stderr, "Geppeto cannot open timeline of label dataset %s in file %s.\n",
-                    LBL_DATASET(*gptServer), LBL_PATH(*gptServer, f));
+                    LBL_DATASET(*server), LBL_PATH(*server, f));
             fflush(stderr);
-            gptCloseServer(gptServer);
+            gptCloseServer(server);
             return -1;
             
         }
-        LBL_NTIMERANGES(*gptServer, f) = gptServer->current_timeline.ntimeranges;
-        LBL_TIMELINE(*gptServer, f) = (PIOTimeRange*) malloc(LBL_NTIMERANGES(*gptServer, f)*sizeof(PIOTimeRange));
-        for (label_t=0; label_t<LBL_NTIMERANGES(*gptServer, f); label_t++) 
-            LBL_TIMERANGE(*gptServer, f, label_t) = gptServer->current_timeline.timeranges[label_t];
+        LBL_NTIMERANGES(*server, f) = server->current_timeline.ntimeranges;
+        LBL_TIMELINE(*server, f) = (PIOTimeRange*) malloc(LBL_NTIMERANGES(*server, f)*sizeof(PIOTimeRange));
+        for (label_t=0; label_t<LBL_NTIMERANGES(*server, f); label_t++) 
+            LBL_TIMERANGE(*server, f, label_t) = server->current_timeline.timeranges[label_t];
         
         // load label data
-        labelBufferSize = pioDumpDataset(&(gptServer->current_dataset), gptServer->labelDatatype, NULL, NULL);
+        labelBufferSize = pioDumpDataset(&(server->current_dataset), server->labelDatatype, NULL, NULL);
         if (labelBufferSize <= 0)
         {
             fprintf(stderr, 
                     "Gepetto cannot find any label in dataset %s in file %s.\n",
-                    LBL_DATASET(*gptServer), LBL_PATH(*gptServer, f));
+                    LBL_DATASET(*server), LBL_PATH(*server, f));
             fflush(stderr);
-            gptCloseServer(gptServer);
+            gptCloseServer(server);
             return -1;                
         }
         
-        gptServer->label[f] = (int*) malloc(labelBufferSize);
-        gptServer->numberOfLabelsPerFilePerTimerange[f] = (int*) malloc(LBL_NTIMERANGES(*gptServer, f)*sizeof(int));
+        server->label[f] = (int*) malloc(labelBufferSize);
+        server->numberOfLabelsPerFilePerTimerange[f] = (int*) malloc(LBL_NTIMERANGES(*server, f)*sizeof(int));
         
-        if (pioDumpDataset(&(gptServer->current_dataset), gptServer->labelDatatype, gptServer->label[f], gptServer->numberOfLabelsPerFilePerTimerange[f]) < 0)
+        if (pioDumpDataset(&(server->current_dataset), server->labelDatatype, server->label[f], server->numberOfLabelsPerFilePerTimerange[f]) < 0)
         {
             fprintf(stderr, 
                     "Gepetto cannot dump label dataset %s in file %s.\n",
-                    LBL_DATASET(*gptServer), LBL_PATH(*gptServer, f));
+                    LBL_DATASET(*server), LBL_PATH(*server, f));
             fflush(stderr);
-            gptCloseServer(gptServer);
+            gptCloseServer(server);
             return -1;
         }
         
-        gptServer->indexOfFirstLabelPerFilePerTimerange[f]  = (int*) malloc(LBL_NTIMERANGES(*gptServer, f)*sizeof(int));
-        gptServer->indexOfFirstLabelPerFilePerTimerange[f][0] = 0;
-        for (label_t=1; label_t<LBL_NTIMERANGES(*gptServer, f); label_t++)
-            gptServer->indexOfFirstLabelPerFilePerTimerange[f][label_t] = gptServer->indexOfFirstLabelPerFilePerTimerange[f][label_t-1] + LBL_NLABELS(*gptServer, f, label_t-1);
+        server->indexOfFirstLabelPerFilePerTimerange[f]  = (int*) malloc(LBL_NTIMERANGES(*server, f)*sizeof(int));
+        server->indexOfFirstLabelPerFilePerTimerange[f][0] = 0;
+        for (label_t=1; label_t<LBL_NTIMERANGES(*server, f); label_t++)
+            server->indexOfFirstLabelPerFilePerTimerange[f][label_t] = server->indexOfFirstLabelPerFilePerTimerange[f][label_t-1] + LBL_NLABELS(*server, f, label_t-1);
         
         // prepare for next file
-        pioCloseTimeline(&(gptServer->current_timeline));
-        pioCloseDatatype(&(gptServer->current_datatype));
-        pioCloseDataset(&(gptServer->current_dataset));
-        pioCloseFile(&(gptServer->current_file));
+        pioCloseTimeline(&(server->current_timeline));
+        pioCloseDatatype(&(server->current_datatype));
+        pioCloseDataset(&(server->current_dataset));
+        pioCloseFile(&(server->current_file));
     }    
     
     return 1;
 }
 
+/**
+ @internal
+ @brief Get statistics on labels
+	@param[in] server Gepetto server
+	@param[out] labels List of distinct label values, sorted in ascending order
+	@param[out] labelCounts Label counts for each label value
+	@param[out] labelCountsPerFile Label counts for each label value, per file
+	@returns number of distinct label values
+ */
 static int getStatsOnLabels(GPTServer server, int* labels, int* labelCounts, int** labelCountsPerFile)
 {
     int f, t, i;
@@ -306,19 +371,30 @@ static int getStatsOnLabels(GPTServer server, int* labels, int* labelCounts, int
     return count;
 }
 
-static int initLabelStatistics(GPTServer* gptServer)
+/**
+ @brief Init label statistics variables
+ 
+ Allocate and set:
+    - server.numberOfDistinctLabels
+    - server.listOfDistinctLabels
+    - server.labelCounts
+    - server.labelCountsPerFile
+ 
+ @param server Gepetto server
+ @returns
+    - 1 when successful
+    - -1 otherwise
+ */
+static int initLabelStatistics(GPTServer* server)
 {
     int f;
-    
-    LBL_NUMBER(*gptServer) = getStatsOnLabels(*gptServer, NULL, NULL, NULL);
-
-    LBL_LIST(*gptServer) = (int*) malloc(LBL_NUMBER(*gptServer)*sizeof(int));
-    gptServer->labelCounts = (int*) malloc(LBL_NUMBER(*gptServer)*sizeof(int));
-    gptServer->labelCountsPerFile = (int**) malloc(LBL_NFILES(*gptServer)*sizeof(int*));
-    for (f=0; f<LBL_NFILES(*gptServer); f++)
-        gptServer->labelCountsPerFile[f] = (int*) malloc(LBL_NUMBER(*gptServer)*sizeof(int));
-    getStatsOnLabels(*gptServer, LBL_LIST(*gptServer), gptServer->labelCounts, gptServer->labelCountsPerFile);
-    
+    LBL_NUMBER(*server) = getStatsOnLabels(*server, NULL, NULL, NULL);
+    LBL_LIST(*server) = (int*) malloc(LBL_NUMBER(*server)*sizeof(int));
+    server->labelCounts = (int*) malloc(LBL_NUMBER(*server)*sizeof(int));
+    server->labelCountsPerFile = (int**) malloc(LBL_NFILES(*server)*sizeof(int*));
+    for (f=0; f<LBL_NFILES(*server); f++)
+        server->labelCountsPerFile[f] = (int*) malloc(LBL_NUMBER(*server)*sizeof(int));
+    getStatsOnLabels(*server, LBL_LIST(*server), server->labelCounts, server->labelCountsPerFile);
     return 1;
 }
 
@@ -363,6 +439,20 @@ static int initDataConfiguration( GPTServer* server, int numberOfDataFiles, char
     return 1;
 }
 
+/**
+ @internal
+ @brief Init data storage variables
+ 
+ Allocate and set:
+ - server.lengthOfDataTimeline
+ - server.dataTimeline
+ - server.datatype
+ 
+ @param[in, out] server Gepetto server
+ @returns
+ - 1 when successful
+ - -1 in case of failure (server is closed, also).
+ */
 static int initDataStorage(GPTServer* gptServer)
 {
     int f;
@@ -467,65 +557,82 @@ static int initDataStorage(GPTServer* gptServer)
     
 }
 
-static int initDataFiltering(GPTServer* gptServer, GPTLabelFilterType labelFilterType, int labelFilterReference)
+/**
+ @internal
+ @brief Init data filtering variables
+ 
+ Allocate and set:
+    - server.labelFilterType
+    - server.labelFilterReference
+    - server.firstCorrespondingLabelTimerange
+    - server.numberOfCorrespondingLabelTimerange
+ 
+ @param[in, out] server Gepetto server
+ @param[in] type Type of label filter
+ @param[in] referene Label filter reference value
+ @returns 
+    - 1 when successful
+    - negative value otherwise
+ */
+static int initDataFiltering(GPTServer* server, GPTLabelFilterType type, int reference)
 {
     int f;
     int label_t;
     int data_t;
     
-    gptServer->labelFilterType = labelFilterType;
-    gptServer->labelFilterReference = labelFilterReference;
+    server->labelFilterType = type;
+    server->labelFilterReference = reference;
     
-    gptServer->firstCorrespondingLabelTimerange = (int**) malloc(DAT_NFILES(*gptServer)*sizeof(int*));   
-    gptServer->numberOfCorrespondingLabelTimerange = (int**) malloc(DAT_NFILES(*gptServer)*sizeof(int*));   
+    server->firstCorrespondingLabelTimerange = (int**) malloc(DAT_NFILES(*server)*sizeof(int*));   
+    server->numberOfCorrespondingLabelTimerange = (int**) malloc(DAT_NFILES(*server)*sizeof(int*));   
     
-    for (f=0; f<DAT_NFILES(*gptServer); f++) 
+    for (f=0; f<DAT_NFILES(*server); f++) 
     {
         // initialize with default "no available label" behavior
-        gptServer->firstCorrespondingLabelTimerange[f] = (int*) malloc(DAT_NTIMERANGES(*gptServer, f)*sizeof(int));
-        gptServer->numberOfCorrespondingLabelTimerange[f] = (int*) malloc(DAT_NTIMERANGES(*gptServer, f)*sizeof(int));
-        for (data_t=0; data_t<DAT_NTIMERANGES(*gptServer, f); data_t++) 
+        server->firstCorrespondingLabelTimerange[f] = (int*) malloc(DAT_NTIMERANGES(*server, f)*sizeof(int));
+        server->numberOfCorrespondingLabelTimerange[f] = (int*) malloc(DAT_NTIMERANGES(*server, f)*sizeof(int));
+        for (data_t=0; data_t<DAT_NTIMERANGES(*server, f); data_t++) 
         {
-            gptServer->firstCorrespondingLabelTimerange[f][data_t] = -1;
-            gptServer->numberOfCorrespondingLabelTimerange[f][data_t] = 0;
+            server->firstCorrespondingLabelTimerange[f][data_t] = -1;
+            server->numberOfCorrespondingLabelTimerange[f][data_t] = 0;
         }
         
-        if (LBL_AVAILABLE(*gptServer))
+        if (LBL_AVAILABLE(*server))
         {
-            for (data_t=0; data_t<DAT_NTIMERANGES(*gptServer, f); data_t++) 
+            for (data_t=0; data_t<DAT_NTIMERANGES(*server, f); data_t++) 
             {                    
                 // start looking at first matching timerange of previous data timerange
                 if (data_t == 0) label_t = 0;
-                else label_t = MAX(gptServer->firstCorrespondingLabelTimerange[f][data_t-1], 0);
+                else label_t = MAX(server->firstCorrespondingLabelTimerange[f][data_t-1], 0);
                 
                 // look for first matching timerange
                 while (// not yet reached the end of label timeline
-                       (label_t < LBL_NTIMERANGES(*gptServer, f)) &&
+                       (label_t < LBL_NTIMERANGES(*server, f)) &&
                        // label timerange still happens BEFORE data timerange
-                       (pioCompareTimeRanges(LBL_TIMERANGE(*gptServer, f, label_t), 
-                                             DAT_TIMERANGE(*gptServer, f, data_t)) != PINOCCHIO_TIMERANGE_COMPARISON_DESCENDING) &&
+                       (pioCompareTimeRanges(LBL_TIMERANGE(*server, f, label_t), 
+                                             DAT_TIMERANGE(*server, f, data_t)) != PINOCCHIO_TIMERANGE_COMPARISON_DESCENDING) &&
                        // label timerange still DOES NOT intersect data timerange
-                       (!pioTimeRangeIntersectsTimeRange(LBL_TIMERANGE(*gptServer, f, label_t), 
-                                                         DAT_TIMERANGE(*gptServer, f, data_t))))
+                       (!pioTimeRangeIntersectsTimeRange(LBL_TIMERANGE(*server, f, label_t), 
+                                                         DAT_TIMERANGE(*server, f, data_t))))
                     label_t++;
                 
                 // if there is at least one matching timerange
-                if ((label_t < LBL_NTIMERANGES(*gptServer, f)) &&
-                    (pioTimeRangeIntersectsTimeRange(LBL_TIMERANGE(*gptServer, f, label_t), 
-                                                     DAT_TIMERANGE(*gptServer, f, data_t))))
+                if ((label_t < LBL_NTIMERANGES(*server, f)) &&
+                    (pioTimeRangeIntersectsTimeRange(LBL_TIMERANGE(*server, f, label_t), 
+                                                     DAT_TIMERANGE(*server, f, data_t))))
                 {
                     // store first matching timerange
-                    gptServer->firstCorrespondingLabelTimerange[f][data_t] = label_t;
+                    server->firstCorrespondingLabelTimerange[f][data_t] = label_t;
                     
                     // count number of matching timeranges
                     while (                           
                            // not yet reached the end of label timeline
-                           (label_t < LBL_NTIMERANGES(*gptServer, f))
+                           (label_t < LBL_NTIMERANGES(*server, f))
                            &&
-                           (pioTimeRangeIntersectsTimeRange(LBL_TIMERANGE(*gptServer, f, label_t), 
-                                                            DAT_TIMERANGE(*gptServer, f, data_t)))) 
+                           (pioTimeRangeIntersectsTimeRange(LBL_TIMERANGE(*server, f, label_t), 
+                                                            DAT_TIMERANGE(*server, f, data_t)))) 
                     {
-                        gptServer->numberOfCorrespondingLabelTimerange[f][data_t]++;    
+                        server->numberOfCorrespondingLabelTimerange[f][data_t]++;    
                         label_t++;
                     }
                 }
@@ -533,22 +640,86 @@ static int initDataFiltering(GPTServer* gptServer, GPTLabelFilterType labelFilte
         }
     }
     
-    gptServer->filtered = (int**) malloc(DAT_NFILES(*gptServer)*sizeof(int*));
-    for (f=0; f<DAT_NFILES(*gptServer); f++) 
+    server->filtered = (int**) malloc(DAT_NFILES(*server)*sizeof(int*));
+    for (f=0; f<DAT_NFILES(*server); f++) 
     {
         // initialize with "no filter" (i.e. keep everything)
-        gptServer->filtered[f] = (int*) malloc(DAT_NTIMERANGES(*gptServer, f)*sizeof(int));
-        for (data_t=0; data_t<DAT_NTIMERANGES(*gptServer, f); data_t++) 
-            gptServer->filtered[f][data_t] = 1;
+        server->filtered[f] = (int*) malloc(DAT_NTIMERANGES(*server, f)*sizeof(int));
+        for (data_t=0; data_t<DAT_NTIMERANGES(*server, f); data_t++) 
+            server->filtered[f][data_t] = 1;
 
-        if (LBL_AVAILABLE(*gptServer))
-            for (data_t=0; data_t<DAT_NTIMERANGES(*gptServer, f); data_t++) 
-                gptServer->filtered[f][data_t] = isFiltered(*gptServer, f, data_t);
+        if (LBL_AVAILABLE(*server))
+            for (data_t=0; data_t<DAT_NTIMERANGES(*server, f); data_t++) 
+                server->filtered[f][data_t] = isFiltered(*server, f, data_t);
         
     }
     
     return 1;
 }
+
+/**
+ @brief Init data statistics variables
+ 
+ Allocate and set:
+ - server.dataCountsForLabel
+ - server.dataCountsForLabelPerFile
+ 
+ @param[in] server Gepetto server
+ @returns
+ - 1 when successful
+ - -1 otherwise
+ */
+static int initDataStatistics(GPTServer* server)
+{
+    int f;
+    int data_t;
+    int label_t;
+    int i;
+    int r;
+    int n;
+    listOfLabels_t* localList;
+    
+    server->dataCountsForLabel = (int*) malloc(LBL_NUMBER(*server)*sizeof(int));
+    for (n=0; n<LBL_NUMBER(*server); n++) server->dataCountsForLabel[n] = 0;
+    
+    server->dataCountsForLabelPerFile = (int**) malloc(DAT_NFILES(*server)*sizeof(int*));
+    for (f=0; f<DAT_NFILES(*server); f++)
+    {
+        server->dataCountsForLabelPerFile[f] = (int*) malloc(LBL_NUMBER(*server)*sizeof(int));
+        for (n=0; n<LBL_NUMBER(*server); n++) 
+            server->dataCountsForLabelPerFile[f][n] = 0;        
+    }
+    
+    for (f=0; f<DAT_NFILES(*server); f++)
+    {
+        for (data_t=0; data_t<DAT_NTIMERANGES(*server, f); data_t++) 
+        {
+            localList = NULL;
+            
+            // get each data timerange label counts
+            for (i=0; i<server->numberOfCorrespondingLabelTimerange[f][data_t]; i++) 
+            {
+                label_t = server->firstCorrespondingLabelTimerange[f][data_t]+i;
+                for (r=0; r<LBL_NLABELS(*server, f, label_t); r++) 
+                    localList = updateLabelCount(localList, LBL_LABEL(*server, f, label_t, r), 1);
+            }   
+            
+            // add +1 for each data timerange with at least one corresponding label
+            for (n=0; n<LBL_NUMBER(*server); n++) 
+            {
+                if (getLabelCount(localList, LBL_VALUE(*server, n)) > 0)
+                {
+                    server->dataCountsForLabel[n]++;
+                    server->dataCountsForLabelPerFile[f][n]++;
+                }
+            }
+            
+            destroyListOfLabels(localList);
+        }
+    }
+    return 1;
+}
+
 
 GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char* pathToDataDataset,
                        GPTLabelFilterType labelFilterType, int labelFilterReference,
@@ -605,6 +776,12 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
 
         if (initDataFiltering(&gptServer, labelFilterType, labelFilterReference) < 0)
             return GPTServerInvalid;
+        
+        if (LBL_AVAILABLE(gptServer))
+        {
+            if (initDataStatistics(&gptServer) < 0)
+                return GPTServerInvalid;
+        }
     }
         
     gptServer.current_file_index = 0;
