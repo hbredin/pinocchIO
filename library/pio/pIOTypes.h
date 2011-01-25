@@ -196,6 +196,11 @@ typedef struct {
  */
 #define PIOTimeRangeInvalid ((PIOTimeRange) {-1, -1, -1})
 
+/**
+ @brief Empty pinocchIO time range
+ @ingroup time
+ */
+#define PIOTimeRangeEmpty ((PIOTimeRange) {-1, 0, -1})
 
 /**
  @brief Time ranges comparison result
