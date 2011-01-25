@@ -22,6 +22,8 @@
 #include <stdlib.h>
 
 /**
+ @internal
+
  @brief Get list of label timeranges matching a specific label value
  @param[in] server Gepetto server
  @param[in] labelValue Label value looked for
@@ -33,6 +35,8 @@
  Calling getTimerangesForLabelAndFile with NULL @a timeranges will
  return the number of label timeranges. It can be uses to preallocate
  @a timeranges with enough memory space to store the whole list of timeranges.
+ 
+ @ingroup gptlabel
  
  */
 static int getTimerangesForLabelAndFile(GPTServer server,

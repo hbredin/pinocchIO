@@ -20,8 +20,8 @@
 
 
 /**
- \defgroup config Server configuration
- \ingroup gepetto
+ \defgroup gptconfig Configuration API
+ \ingroup gptapi
  
  @brief Functions dealing with Gepetto server configuration
 
@@ -74,7 +74,7 @@ filter = {
  @note
  Use gptCloseServer() to close the server when no longer needed. 
  
- \ingroup config
+ \ingroup gptconfig
  */
 GPTServer gptNewServerFromConfigurationFile(const char* filename);
 

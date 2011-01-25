@@ -19,12 +19,7 @@
 // 
 
 /**
- \defgroup gepetto Gepetto
- \ingroup api
- 
- @brief Not documented yet.
- 
- @{
+ \defgroup gptapi Gepetto API
  */
 
 #ifndef _GEPETTO_H

@@ -130,7 +130,7 @@
  */
 
 /**
- \defgroup api API
+ \defgroup api pinocchIO API
  */
 
 #ifndef _PINOCCHIO_H

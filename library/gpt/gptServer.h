@@ -21,9 +21,9 @@
 
 /**
  \defgroup server Server API
- \ingroup gepetto
+ \ingroup gptapi
  
- @brief Not documented yet.
+ @brief Functions dealing with Gepetto servers.
  
  @{
  */

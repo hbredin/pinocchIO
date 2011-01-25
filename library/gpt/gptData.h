@@ -18,6 +18,15 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \defgroup gptdata Data API
+ \ingroup gptapi
+ 
+ @brief Functions dealing with access to data served by Gepetto servers.
+
+ */
+
+
 #ifndef _GEPETTO_DATA_H
 #define _GEPETTO_DATA_H
 
@@ -33,7 +42,7 @@
  - the dimension of data if server serves data
  - -1 otherwise
  
- @ingroup server
+ @ingroup gptdata
  */
 int gptGetServerDimension(GPTServer server);
 
@@ -61,7 +70,7 @@ int gptGetServerDimension(GPTServer server);
  - @a number of entries when successful
  - -1 otherwise
  
- @ingroup server
+ @ingroup gptdata
  */
 int gptReadNext(GPTServer* gptServer,
                 PIODatatype pioDatatype, 
@@ -89,7 +98,7 @@ int gptReadNext(GPTServer* gptServer,
  - @a number of entries when successful
  - -1 otherwise
  
- @ingroup server
+ @ingroup gptdata
  */
 #define gptReadNextData(server, datatype, buffer) gptReadNext((server), (datatype), (buffer), NULL, NULL)
 

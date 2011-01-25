@@ -18,6 +18,14 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
+/**
+ \defgroup gptlabel Label API
+ \ingroup gptapi
+ 
+ @brief Functions dealing with access to labels served by Gepetto servers.
+ 
+ */
+
 #ifndef _GEPETTO_LABEL_H
 #define _GEPETTO_LABEL_H
 
@@ -31,7 +39,7 @@
  @param[out] timeranges Array of timeranges with requested label
  @returns total number of timeranges with matching label when successful
     
-    @note
+ @note
  @a timeranges has to be allocated first. A first call to gptGetTimerangesForLabel()
  with @a timeranges = NULL can be used to get the expected number of timeranges.
 \verbatim
@@ -40,12 +48,12 @@
  numberOfTimeranges = gptGetTimerangesForLabel(server, labelValue, timeranges);
 \endverbatim
  
+ @ingroup gptlabel
+ 
  */
 int gptGetTimerangesForLabel(GPTServer server,
                              int labelValue,
                              GPTTimeRange* timeranges);
                              
-
-
 #endif
 

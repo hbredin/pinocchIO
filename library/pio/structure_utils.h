@@ -24,15 +24,21 @@
 #include <hdf5.h>
 #include "pIOTypes.h"
 
+/**
+ @internal
+ @brief Type of data stored in /path/to/dataset/link HDF5 dataset
+ */
 typedef struct {
+    /** @internal @brief position of first data entry in HDF5 dataset */
 	int32_t position;
+    /** @internal @brief number of data entries in HDF5 dataset */
 	int32_t number;
 } link_t;
 
 hid_t linkDatatype();
 
 /**
-	\internal
+	@internal
  */
 typedef struct listOfPaths_s {
     char* path;

@@ -32,8 +32,6 @@
  @ingroup server
  */
 typedef enum {
-//    /** Undefined filter */
-//	GEPETTO_LABEL_FILTER_TYPE_UNDEFINED = -1,
     /** No filter. Server serves all data entries */
 	GEPETTO_LABEL_FILTER_TYPE_NONE, 
     /** "Equals to" filter. Server only serves data entries whose label equals to a predefined value */
@@ -223,10 +221,10 @@ typedef struct {
     /**
      @brief  Distribution of data with respect to labels, for each file
      
-     dataCountsPerFileForLabel[f][i] is the number of data entries with ith label value in fth label file.\n
+     dataCountsForLabelPerFile[f][i] is the number of data entries with ith label value in fth label file.\n
      Getter: DAT_COUNTF(server, f, i)
      */
-    int** dataCountsPerFileForLabel;    
+    int** dataCountsForLabelPerFile;    
     
     // -------
     // storage
@@ -268,21 +266,39 @@ typedef struct {
      */
     int labelFilterReference;
 
-    // labels are propagated from label timeline to data timeline
-
+    // -------------------------
+    // label/data correspondence
+    // -------------------------
+    
     /**
-     @brief 
+     @brief Index of the first label timerange intersecting a given data timerange
+     
+     firstCorrespondingLabelTimerange[f][t] is the index of label timerange corresponding to the tth data timerange of fth file.
      */
-    int** firstCorrespondingLabelTimerange; // firstCorrespondingLabelTimerange[f][t] is the index of label timerange corresponding to the tth data timerange of fth file
+    int** firstCorrespondingLabelTimerange; 
+    
+    
+    /**
+     @brief Number of (consecutive) label timeranges intersecting a given data timerange
+     
+     numberOfCorrespondingLabelTimerange[f][t] is the number of label timeranges corresponding to the tth data timerange of fth file.
+     */    
     int** numberOfCorrespondingLabelTimerange;
     
+    
+    // ---------
+    // filtering
+    // ---------
+    /**
+     @brief Indicates whether a data entry matches the label filter
+     
+     filtered[f][t] is set to 1 if the tth data timerange of fth file is served by the server.
+     */
     int** filtered; 
     
-    // === SAMPLING ===
-    
-    
-    
-    // === INTERNALS ===
+    // ===================================
+    // Internals
+    // ===================================    
     
     PIODatatype datatype;
     PIODatatype labelDatatype;
@@ -304,7 +320,9 @@ typedef struct {
 } GPTServer;
 
 /**
-	@brief Invalid Gepetto server
+ @brief Invalid Gepetto server
+ 
+ @ingroup server
  */
 #define GPTServerInvalid ((GPTServer) {             \
 /* servesLabels */              0,                  \
@@ -325,7 +343,7 @@ typedef struct {
 /* pathToDataFile */            NULL,               \
 /* pathToDataDataset */         NULL,               \
 /* dataCountsForLabel */        NULL,               \
-/* dataCountsPerFileForLabel */ NULL,               \
+/* dataCountsForLabelPerFile */ NULL,               \
 /* lengthOfDataTimeline */      NULL,               \
 /* dataTimeline */              NULL,               \
 /* labelFilterType */           -1,                 \
@@ -402,7 +420,7 @@ typedef struct {
 #define DAT_DATASET(server)                 ((server).pathToDataDataset)
 
 #define DAT_COUNT(server, i)                ((server).dataCountsForLabel[(i)])
-#define DAT_COUNTF(server, f, i)            ((server).dataCountsPerFileForLabel[(f)][(i)])
+#define DAT_COUNTF(server, f, i)            ((server).dataCountsForLabelPerFile[(f)][(i)])
 
 #define DAT_FILTERED(server, f, t)          ((server).filtered[(f)][(t)])
 
