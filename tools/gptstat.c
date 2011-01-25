@@ -32,10 +32,15 @@
 #include <string.h>
 #include "gepetto.h"
 
+
+static int perfile_flag = 0;
+
 void usage(const char * path2tool)
 {
 	fprintf(stdout, 
 			"USAGE: %s FILE\n", path2tool);
+    fprintf(stdout, 
+            "       --file   Show files detail\n");
 	fflush(stdout);
 }
 
@@ -50,7 +55,7 @@ int main (int argc, char *const  argv[])
 	{
 		static struct option long_options[] =
 		{
-			/* These options set a flag. */
+            {"file",      no_argument, &perfile_flag, 1},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -108,6 +113,9 @@ int main (int argc, char *const  argv[])
         exit(-1);
     }
     
+    
+    if (LBL_AVAILABLE(server))
+    {
         for (i=0; i<LBL_NUMBER(server); i++)
             fprintf(file, "-------");
         fprintf(file, "\n");
@@ -131,21 +139,60 @@ int main (int argc, char *const  argv[])
             fprintf(file, "-------");
         fprintf(file, "\n");
         
-        for (f=0; f<LBL_NFILES(server); f++) 
+        if (perfile_flag)
         {
+            for (f=0; f<LBL_NFILES(server); f++) 
+            {
+                for (i=0; i<LBL_NUMBER(server); i++)
+                    if (LBL_COUNTF(server, f, i)>0)
+                        fprintf(file, "%7d", LBL_COUNTF(server, f, i));
+                    else 
+                        fprintf(file, "      .");        
+                fprintf(file, "\n");        
+            }
+            
             for (i=0; i<LBL_NUMBER(server); i++)
-                if (LBL_COUNTF(server, f, i)>0)
-                    fprintf(file, "%7d", LBL_COUNTF(server, f, i));
+                fprintf(file, "-------");
+            fprintf(file, "\n");
+        }   
+        
+        if (DAT_AVAILABLE(server))
+        {
+            fprintf(file, "\n");
+            
+            for (i=0; i<LBL_NUMBER(server); i++)
+                fprintf(file, "-------");
+            fprintf(file, "\n");
+            
+            for (i=0; i<LBL_NUMBER(server); i++)
+                if (DAT_COUNT(server, i) > 0)
+                    fprintf(file, "%7d", DAT_COUNT(server, i));
                 else 
-                    fprintf(file, "      .");        
-            fprintf(file, "\n");        
+                    fprintf(file, "      .");
+            fprintf(file, "\n");
+            
+            for (i=0; i<LBL_NUMBER(server); i++)
+                fprintf(file, "-------");
+            fprintf(file, "\n");
+            
+            if (perfile_flag)
+            {
+                for (f=0; f<DAT_NFILES(server); f++) 
+                {
+                    for (i=0; i<LBL_NUMBER(server); i++)
+                        if (DAT_COUNTF(server, f, i)>0)
+                            fprintf(file, "%7d", DAT_COUNTF(server, f, i));
+                        else 
+                            fprintf(file, "      .");        
+                    fprintf(file, "\n");        
+                }
+                
+                for (i=0; i<LBL_NUMBER(server); i++)
+                    fprintf(file, "-------");
+                fprintf(file, "\n");
+            }   
         }
-        
-        for (i=0; i<LBL_NUMBER(server); i++)
-            fprintf(file, "-------");
-        fprintf(file, "\n");
-        
-    
+    }
     
     gptCloseServer(&server);
     
