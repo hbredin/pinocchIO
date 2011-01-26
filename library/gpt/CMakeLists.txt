@@ -1,6 +1,6 @@
 file(GLOB gepetto_SOURCES *.c ../../tools/fgetln.c)
 file(GLOB gepetto_HEADERS *.h)
-set(gepetto_PUBLICHEADERS gepetto.h gptTypes.h gptServer.h gptConfig.h)
+set(gepetto_PUBLICHEADERS gepetto.h gptTypes.h gptServer.h gptConfig.h gptData.h gptLabel.h)
 
 set(gepetto_INCLUDE_DIRS ${LIBCONFIG_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/library/pio/)
 set(gepetto_LIBS ${LIBCONFIG_LIBRARY} pinocchIO)
@@ -12,8 +12,6 @@ set_target_properties(gepetto PROPERTIES VERSION ${PINOCCHIO_VERSION} SOVERSION 
 set_target_properties(gepetto PROPERTIES LINKER_LANGUAGE C)
 
 target_link_libraries(gepetto ${gepetto_LIBS})
-
-
 
 install(TARGETS gepetto DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${gepetto_PUBLICHEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDE}/gepetto)
