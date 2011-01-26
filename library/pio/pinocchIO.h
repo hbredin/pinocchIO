@@ -54,9 +54,12 @@
 
  -# \subpage gettingstarted "Getting started with pinocchIO"
  -# \subpage fileformat "pinocchIO file format"
- -# @ref api "pinocchIO API"
- -# \subpage cli "pinocchIO tools"
- -# \subpage gepetto "Gepetto, a pinocchIO server"
+ -# pinocchIO
+    -# @ref api "pinocchIO API"
+    -# \subpage cli "pinocchIO tools"
+ -# Gepetto - pinocchIO server
+    -# @ref gptapi "Gepetto API (pinocchIO server)"
+    -# @subpage gptcli "Gepetto tools"
  
  
  \section license License

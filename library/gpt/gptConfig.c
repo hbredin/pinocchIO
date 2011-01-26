@@ -38,6 +38,8 @@ char* fgetln(FILE *fp, size_t *lenp);
 #define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_GREATER_THAN "greaterThan"
 #define GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_SMALLER_THAN "smallerThan"
 
+#define GEPETTO_CONFIGURATION_FILE_FILTER_MAXIMUM_SAMPLES "maximumNumberOfSamples"
+
 #define GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_DATA   "data"
 #define GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_LABEL  "label"
 
@@ -99,13 +101,14 @@ int readLines(const char* ascii_file, int nLines, char** *strings)
  @param[in] filename Path to configuration file
  @param[out] labelFilterType Type of filter
  @param[out] labelFilterReference Filter reference
+ @param[out] maximumNumberOfSamplesPerLabel Maximum number of samples per label
  
  @returns
  - 0 if configuration file has no "filter" section
  - 1 if successful
  - -1 in case of failure
  */
-int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* labelFilterType, int* labelFilterReference)
+int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* labelFilterType, int* labelFilterReference, int* maximumNumberOfSamplesPerLabel)
 {
     config_t config;
     const config_setting_t *filter_section = NULL;
@@ -126,7 +129,8 @@ int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* lab
     }    
     
     *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
-    *labelFilterReference = -1;    
+    *labelFilterReference = -1; 
+    *maximumNumberOfSamplesPerLabel = -1;
     
     filter_section = config_lookup(&config, GEPETTO_CONFIGURATION_FILE_SECTION_TITLE_FILTER);
     if (!filter_section)
@@ -162,6 +166,11 @@ int getFilterFromConfigurationFile(const char* filename, GPTLabelFilterType* lab
                                   GEPETTO_CONFIGURATION_FILE_FILTER_TYPE_SMALLER_THAN, 
                                   labelFilterReference) == CONFIG_TRUE)
         *labelFilterType = GEPETTO_LABEL_FILTER_TYPE_SMALLER_THAN;        
+    
+    // maximumNumberOfSamplesPerLabel is not modified if not set in the configuration file
+    config_setting_lookup_int(filter_section, 
+                              GEPETTO_CONFIGURATION_FILE_FILTER_MAXIMUM_SAMPLES, 
+                              maximumNumberOfSamplesPerLabel);
     
     config_destroy(&config);
     
@@ -385,6 +394,7 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     
     GPTLabelFilterType labelFilterType = GEPETTO_LABEL_FILTER_TYPE_NONE;
     int labelFilterReference = -1;
+    int maximumNumberOfSamplesPerLabel = -1;
     
     int f;
     
@@ -408,7 +418,7 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     }
 
     // try and parse "filter" section
-    if (getFilterFromConfigurationFile(filename, &labelFilterType, &labelFilterReference) < 0)
+    if (getFilterFromConfigurationFile(filename, &labelFilterType, &labelFilterReference, &maximumNumberOfSamplesPerLabel) < 0)
     {
         // return invalid gepetto server if an error happened
         for (f=0; f<numberOfDataFiles; f++) free(pathToDataFile[f]); free(pathToDataFile); 
@@ -421,7 +431,7 @@ GPTServer gptNewServerFromConfigurationFile(const char* filename)
     
     // initialize server
     gptServer = gptNewServer(numberOfDataFiles, pathToDataFile, pathToDataDataset,
-                             labelFilterType, labelFilterReference, 
+                             labelFilterType, labelFilterReference, maximumNumberOfSamplesPerLabel,
                              numberOfLabelFiles, pathToLabelFile, pathToLabelDataset);
     
     // free what needs to be freed

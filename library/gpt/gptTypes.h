@@ -265,6 +265,11 @@ typedef struct {
      @brief Label filter reference value
      */
     int labelFilterReference;
+    
+    /**
+     @brief Maximum number of samples per label
+     */
+    int maximumNumberOfSamplesPerLabel;
 
     // -------------------------
     // label/data correspondence
@@ -348,9 +353,10 @@ typedef struct {
 /* dataTimeline */              NULL,               \
 /* labelFilterType */           -1,                 \
 /* labelFilterReference */      -1,                 \
-/* firstCorrespondingLabelTimerange */           NULL,   \
-/* numberOfCorrespondingLabelTimerange */       NULL, \
-/* filtered */                NULL,               \
+/* maximumNumberOfSamplesPerLabel */ -1,            \
+/* firstCorrespondingLabelTimerange */    NULL,     \
+/* numberOfCorrespondingLabelTimerange */ NULL,     \
+/* filtered */                  NULL,               \
 /* datatype */                  PIODatatypeInvalid, \
 /* labelDatatype */             PIODatatypeInvalid, \
 /* current_file_index */        -1,                 \
@@ -364,7 +370,6 @@ typedef struct {
 /* current_data_labels */       NULL                \
 })
 
-
 /**
  @brief pinocchIO time range
  
@@ -372,7 +377,7 @@ typedef struct {
  
  pinocchIO stores time ranges internally using three integer values: \a time, \a duration and \a scale.
  
- See \ref PIOTime for more detail on how to efficiently choose the \a scale.
+ See @ref PIOTime for more detail on how to efficiently choose the \a scale.
  
  @ingroup time
  */

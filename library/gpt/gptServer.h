@@ -18,7 +18,6 @@
 //      along with pinocchIO. If not, see <http://www.gnu.org/licenses/>.
 // 
 
-
 /**
  \defgroup server Server API
  \ingroup gptapi
@@ -67,6 +66,7 @@
  @param[in] pathToDataDataset Path to pinocchIO dataset containing server data
  @param[in] labelFilterType Type of label filter
  @param[in] labelFilterReference Reference of label filter
+ @param[in] maximumNumberOfSamplesPerLabel Maximum number of samples per label served by the server
  @param[in] numberOfLabelFiles Number of label pinocchIO files
  @param[in] pathToLabelFile List of paths to label pinocchIO files
  @param[in] pathToLabelDataset Path to pinocchIO dataset containing server labels
@@ -76,7 +76,7 @@
     - invalid Gepetto server (@ref GPTServerInvalid) otherwise
  */
 GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char* pathToDataDataset,
-                       GPTLabelFilterType labelFilterType, int labelFilterReference,
+                       GPTLabelFilterType labelFilterType, int labelFilterReference, int maximumNumberOfSamplesPerLabel,
                        int numberOfLabelFiles, char** pathToLabelFile, const char* pathToLabelDataset);
 
 /**

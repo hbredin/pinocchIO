@@ -79,10 +79,12 @@ static int applyFilter(int label,
 /**
  @internal
  @brief Apply server filter on given 
- @param[in] server <#server description#>
- @param[in] f <#f description#>
- @param[in] data_t <#data_t description#>
- @returns <#return value description#>
+ @param[in] server Gepetto server
+ @param[in] f File index
+ @param[in] data_t Data timerange index
+ @returns 
+    - TRUE if data matches filter
+    - FALSE otherwise
  */
 static int isFiltered(GPTServer server,
                     int f,
@@ -98,6 +100,32 @@ static int isFiltered(GPTServer server,
             result = result || applyFilter(LBL_LABEL(server, f, label_t, r), 
                                            server.labelFilterType,
                                            server.labelFilterReference); 
+    }
+    return result;
+}
+
+/**
+ @internal
+ 
+ @brief Check if data has a given label
+ @param[in] server Gepetto server
+	@param f File index
+	@param data_t Data timerange index
+	@param label Label value
+	@returns 
+        - TRUE if data has given label
+        - FALSE if it has not
+ */
+static int hasLabel(GPTServer server, int f, int data_t, int label)
+{
+    int result = 0;
+    int n, label_t, r;
+    
+    for (n=0; n<server.numberOfCorrespondingLabelTimerange[f][data_t]; n++) 
+    {
+        label_t = server.firstCorrespondingLabelTimerange[f][data_t] + n;
+        for (r=0; r<LBL_NLABELS(server, f, label_t); r++) 
+            result = result || (LBL_LABEL(server, f, label_t, r) == label);
     }
     return result;
 }
@@ -574,7 +602,7 @@ static int initDataStorage(GPTServer* gptServer)
     - 1 when successful
     - negative value otherwise
  */
-static int initDataFiltering(GPTServer* server, GPTLabelFilterType type, int reference)
+static int initDataFiltering(GPTServer* server, GPTLabelFilterType type, int reference, int maximumNumberOfSamplesPerLabel)
 {
     int f;
     int label_t;
@@ -582,6 +610,7 @@ static int initDataFiltering(GPTServer* server, GPTLabelFilterType type, int ref
     
     server->labelFilterType = type;
     server->labelFilterReference = reference;
+    server->maximumNumberOfSamplesPerLabel = maximumNumberOfSamplesPerLabel;
     
     server->firstCorrespondingLabelTimerange = (int**) malloc(DAT_NFILES(*server)*sizeof(int*));   
     server->numberOfCorrespondingLabelTimerange = (int**) malloc(DAT_NFILES(*server)*sizeof(int*));   
@@ -657,6 +686,87 @@ static int initDataFiltering(GPTServer* server, GPTLabelFilterType type, int ref
     return 1;
 }
 
+static int performDataSampling(GPTServer* server)
+{
+    int data_t;
+    int n;
+    int f;
+    
+    int** numberOfSamplesPerLabelPerFile;
+    int* numberOfSamplesPerLabel;
+    
+    numberOfSamplesPerLabel = (int*) malloc(LBL_NUMBER(*server)*sizeof(int));
+    numberOfSamplesPerLabelPerFile = (int**) malloc(LBL_NUMBER(*server)*sizeof(int*));
+    
+    for (n=0; n<LBL_NUMBER(*server); n++)
+    {
+        numberOfSamplesPerLabel[n] = 0;
+     
+        numberOfSamplesPerLabelPerFile[n] = (int*) malloc(DAT_NFILES(*server)*sizeof(int));
+        for (f=0; f<DAT_NFILES(*server); f++)
+            numberOfSamplesPerLabelPerFile[n][f] = 0;        
+        
+        // if there are too many samples for nth label
+        if (server->maximumNumberOfSamplesPerLabel < DAT_COUNT(*server, n))
+        {
+            // add samples from every file until number of samples is reached
+            while (numberOfSamplesPerLabel[n] < server->maximumNumberOfSamplesPerLabel) 
+            {
+                for (f=0; f<DAT_NFILES(*server); f++) 
+                {
+                    // make sure we do not add more samples than are available
+                    if (numberOfSamplesPerLabelPerFile[n][f] < DAT_COUNTF(*server, f, n))
+                    {
+                        numberOfSamplesPerLabelPerFile[n][f]++;
+                        numberOfSamplesPerLabel[n]++;
+                    }
+                }
+            }
+        }
+        // if there are NOT too many samples for nth label
+        // keep everything
+        else {
+            numberOfSamplesPerLabel[n] = 0;
+
+            for (f=0; f<DAT_NFILES(*server); f++)
+            {
+                numberOfSamplesPerLabelPerFile[n][f] = DAT_COUNTF(*server, f, n);
+                numberOfSamplesPerLabel[n] += numberOfSamplesPerLabelPerFile[n][f];
+            }
+        }
+    }
+    
+    // do the actual downsampling by altering server.filtered
+    for (n=0; n<LBL_NUMBER(*server); n++) 
+    {
+        for (f=0; f<DAT_NFILES(*server); f++) 
+        {
+            int keptSoFar = 0;
+            int metSoFar = 0;
+            if (numberOfSamplesPerLabelPerFile[n][f] < DAT_COUNTF(*server, f, n))
+            {
+                for (data_t=0; data_t < DAT_NTIMERANGES(*server, f); data_t++) 
+                {
+                    if (hasLabel(*server, f, data_t, LBL_VALUE(*server, n))) 
+                    {
+                        metSoFar++;
+                        if (keptSoFar*DAT_COUNTF(*server, f, n) < numberOfSamplesPerLabelPerFile[n][f]*metSoFar)
+                            keptSoFar++;
+                        else 
+                            server->filtered[f][data_t] = 0;
+                    }
+                }
+            }
+        }
+    }
+    
+    free(numberOfSamplesPerLabel);
+    for (n=0; n<LBL_NUMBER(*server); n++) free(numberOfSamplesPerLabelPerFile[n]);
+    free(numberOfSamplesPerLabelPerFile);
+    
+    return 1;
+}
+
 /**
  @brief Init data statistics variables
  
@@ -720,9 +830,8 @@ static int initDataStatistics(GPTServer* server)
     return 1;
 }
 
-
 GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char* pathToDataDataset,
-                       GPTLabelFilterType labelFilterType, int labelFilterReference,
+                       GPTLabelFilterType labelFilterType, int labelFilterReference, int maximumNumberOfSamplesPerLabel,
                        int numberOfLabelFiles, char** pathToLabelFile, const char* pathToLabelDataset)
 {        
     GPTServer gptServer = GPTServerInvalid;
@@ -774,13 +883,17 @@ GPTServer gptNewServer(int numberOfDataFiles, char** pathToDataFile, const char*
         if (initDataStorage(&gptServer) < 0)
             return GPTServerInvalid;
 
-        if (initDataFiltering(&gptServer, labelFilterType, labelFilterReference) < 0)
+        if (initDataFiltering(&gptServer, labelFilterType, labelFilterReference, maximumNumberOfSamplesPerLabel) < 0)
             return GPTServerInvalid;
         
         if (LBL_AVAILABLE(gptServer))
         {
             if (initDataStatistics(&gptServer) < 0)
                 return GPTServerInvalid;
+            
+            if (gptServer.maximumNumberOfSamplesPerLabel > 0)
+                if (performDataSampling(&gptServer) < 0)
+                    return GPTServerInvalid;
         }
     }
         
