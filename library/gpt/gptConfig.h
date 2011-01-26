@@ -52,6 +52,8 @@ filter = {
 	# differsFrom = -1;
 	# greaterThan = 1;
 	# smallerThan = 1;
+ 
+    maximumNumberOfSamples = 2000;
 };
 \endverbatim
 
