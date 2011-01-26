@@ -15,7 +15,7 @@ add_executable(piols piols.c)
 target_link_libraries(piols pinocchIO)
 install(TARGETS piols RUNTIME DESTINATION bin)
 
-add_executable(piodump piodump.c)
+add_executable(piodump piodump.c dump_utils.c)
 target_link_libraries(piodump pinocchIO)
 install(TARGETS piodump RUNTIME DESTINATION bin)
 
@@ -40,7 +40,12 @@ target_link_libraries(pioversion pinocchIO)
 install(TARGETS pioversion RUNTIME DESTINATION bin)
 
 if (LIBCONFIG_FOUND)
-   add_executable(gptdump gptdump.c)
+   add_executable(gptdump gptdump.c dump_utils.c)
    target_link_libraries(gptdump gepetto)
    install(TARGETS gptdump RUNTIME DESTINATION bin)
+
+   add_executable(gptstat gptstat.c)
+   target_link_libraries(gptstat gepetto)
+   install(TARGETS gptstat RUNTIME DESTINATION bin)
+
 endif (LIBCONFIG_FOUND)

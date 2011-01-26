@@ -156,3 +156,4 @@ int ez_dump(FILE* file,
     
     return numberOfEntriesInBuffer;
 }
+
