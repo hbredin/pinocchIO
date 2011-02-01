@@ -100,6 +100,7 @@ int ez_dump(FILE* file,
         if (dumpTimerange) timestamp_dump(file, timerange);
         
         text_dump(file, buffer, numberOfEntriesInBuffer);
+        fprintf(file, "\n");
     }
     else 
     {
