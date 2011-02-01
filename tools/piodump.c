@@ -252,7 +252,7 @@ int main (int argc, char *const  argv[])
             ez_dump(stdout, 
                     buffer, pioDatatype, 
                     numberOfVectors, multiple_flag,
-                    0, NULL, 0,  
+                    svmlight_flag, NULL, 0,  
                     timestamp_flag, pioTimeline.timeranges[tr], 
                     svmlight_flag);
 		}
