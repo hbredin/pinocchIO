@@ -32,61 +32,32 @@
 #include <string.h>
 #include "pinocchIO.h"
 
-static int verbose_flag = 0;
-static int timestamp_flag = 0;
-static int string_flag = 0;
-static int multiple_flag = 0;
-static int svmlight_flag = 0;
+//static int verbose_flag = 0;
+//static int timestamp_flag = 0;
+//static int string_flag = 0;
+//static int multiple_flag = 0;
+//static int svmlight_flag = 0;
 
-extern int ez_dump(FILE* file,
-            void* buffer, PIODatatype bufferDatatype, 
-            int numberOfEntriesInBuffer, int dumpMultipleEntriesIntoOneLine,
-            int dumpLabel,     int* labels, int numberOfLabels,
-            int dumpTimerange, PIOTimeRange timerange,
-            int useSVMLightFormat);
+char* pinocchio_path = NULL;
+char* timeline_path = NULL;
+char* dataset_path = NULL;
+char* output_path = NULL;
 
-extern int timestamp_dump(FILE* file, PIOTimeRange timerange);
+int ascii = 0;
+char* format = "%f";
+int timestamp = 0;
+int multiple = 0;
 
+int binary = 0;
+int bin_int = 0;
+int bin_float = 0;
+int bin_double = 0;
 
-int checkArguments(const char* timeline_path, const char* dataset_path)
-{
-    if (dataset_path && timeline_path)
-    {
-        fprintf(stderr, 
-                "Cannot dumped both a dataset and a timeline.\n"); fflush(stderr);
-        return 0;
-    }
-    
-    if (!dataset_path && !timeline_path)
-    {
-        fprintf(stderr, 
-                "No dataset or timeline to dump.\n"); fflush(stderr);
-        return 0;
-    }
-    
-    if (svmlight_flag && string_flag)
-    {
-        fprintf(stderr, 
-                "SVMlight format does not support text data.\n"); fflush(stderr);
-        return 0;
-    }
-    
-    if (svmlight_flag && (timeline_path || timestamp_flag))
-    {
-        fprintf(stderr, 
-                "Timestamps cannot be dumped in SVMlight format.\n"); fflush(stderr);
-        return 0;        
-    }
-    
-    if (svmlight_flag && multiple_flag)
-    {
-        fprintf(stderr, 
-                "SVMlight format does not support multiple entries per line.\n"); fflush(stderr);
-        return 0;
-    }
-    
-    return 1;
-}
+int libsvm = 0;
+int fvec = 0;
+int ivec = 0;
+int bvec = 0;
+int string = 0;
 
 void usage(const char * path2tool)
 {
@@ -98,53 +69,86 @@ void usage(const char * path2tool)
             "                                                                       \n"
 			"       -d PATH, --dataset=PATH                                         \n"
 			"                Dump dataset at PATH                                   \n"
-			"       -s, --timestamp                                                 \n"
-			"                Prepend each line with the corresponding timestamp.    \n"
-            "       --multiple                                                      \n"
-            "                Multiple entries per line                              \n"
-            "                Default is one entry per line, timestamps are repeated.\n"
-            "       --text                                                          \n"
-			"                Display char as text                                   \n"
             "                                                                       \n"
-            "       --svmlight                                                      \n"
-            "                Use SVMlight format (with label field set to -1)       \n"
+            "       -o PATH, --output=PATH                                          \n"
+            "                Dump into output file                                  \n"
+            "                Default behavior is to output to stdout                \n"
+            "                                                                       \n"
+            " * User-defined formats                                                \n"
+            "                                                                       \n"
+            "       --ascii                                                         \n"
+            "         -f FMT, --format=FMT                                          \n"
+            "                Format used by printf (%%d, %%f, %%02d, etc.)          \n"
+            "                Default is %s.                                         \n"
+            "         --timestamp                                                   \n"
+            "                Prepend each line with timestamp                       \n"
+            "         --multiple                                                    \n"
+            "                In case of multiple vectors per timerange,             \n"
+            "                concatenate them all into one single line.             \n"
+            "                Default behavior is to output one line per vector.     \n"
+            "                                                                       \n"
+            "       --binary                                                        \n"
+            "         --integer                                                     \n"
+            "         --float                                                       \n"
+            "         --double                                                      \n"
+            "                                                                       \n"
+            " * Format presets                                                      \n"
+            "                                                                       \n"
+            "       --libsvm                                                        \n"
+            "                Use libsvm format                                      \n"
+            "       --fvec                                                          \n"
+            "       --ivec                                                          \n"
+            "       --bvec                                                          \n"
+            "                Use yael file format (float, integer or bytes)         \n"
+            "       --string                                                        \n",
+            format
             );
 	fflush(stdout);
 }
 
 int main (int argc, char *const  argv[])
 {	
-	char* pinocchio_file = NULL;
-	char* timeline_path = NULL;
-	char* dataset_path = NULL;
-	
-	int tr; // timerange index
-	void* buffer = NULL; // data buffer
-	    
-	int numberOfVectors; // number of vector for each timerange
+    
+    PIOFile pioFile = PIOFileInvalid;
+    PIODataset pioDataset = PIODatasetInvalid;
+    PIODatatype pioDatatype = PIODatatypeInvalid;
+    PIOTimeline pioTimeline = PIOTimelineInvalid;
+    
+    int dimension;
+    PIOBaseType basetype; 
+    FILE* output = stdout;
 	
 	int c;
 	while (1)
 	{
 		static struct option long_options[] =
 		{
-			/* These options set a flag. */
-			{"verbose",   no_argument,       &verbose_flag, 1},
-			{"brief",     no_argument,       &verbose_flag, 0},
-			/* These options don't set a flag.
-			 We distinguish them by their indices. */
 			{"timeline",  required_argument, 0, 't'},
 			{"dataset",   required_argument, 0, 'd'},
-			{"timestamp", no_argument,       0, 's'},
-            {"multiple",  no_argument,       &multiple_flag, 1},
-            {"svmlight",  no_argument,       &svmlight_flag, 1},
-			{"text",      no_argument,       &string_flag,   1},
+            {"output",    required_argument, 0, 'o'},
+            
+            {"ascii",     no_argument,       &ascii,     1 },
+            {"format",    required_argument, 0,         'f'},
+			{"timestamp", no_argument,       &timestamp, 1 },
+            {"multiple",  no_argument,       &multiple,  1 },
+            
+            {"binary",    no_argument, &binary,     1},
+            {"integer",   no_argument, &bin_int,    1},
+            {"float",     no_argument, &bin_float,  1},
+            {"double",    no_argument, &bin_double, 1},
+            
+            {"libsvm",    no_argument, &libsvm, 1},
+            {"fvec",      no_argument, &fvec,   1},
+            {"ivec",      no_argument, &ivec,   1},
+            {"bvec",      no_argument, &bvec,   1},
+			{"string",    no_argument, &string, 1},
+            
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "ht:d:s",
+		c = getopt_long (argc, argv, "ht:d:o:f:",
 						 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -154,13 +158,8 @@ int main (int argc, char *const  argv[])
 		switch (c)
 		{
 			case 0:
-				/* If this option set a flag, do nothing else now. */
 				if (long_options[option_index].flag != 0)
 					break;
-				//				printf ("option %s", long_options[option_index].name);
-				//				if (optarg)
-				//					printf (" with arg %s", optarg);
-				//				printf ("\n");
 				break;
 				
 			case 't':
@@ -170,19 +169,18 @@ int main (int argc, char *const  argv[])
 			case 'd':
 				dataset_path = optarg;
 				break;
-				
-			case 's':
-				timestamp_flag = 1;
-				break;
-				
+					
+            case 'o':
+                output_path = optarg;
+                break;
+                
+            case 'f':
+                format = optarg;
+                break;
+                
 			case 'h':
 				usage(argv[0]);
 				exit(-1);
-				break;
-				
-			case '?':
-				/* getopt_long already printed an error message. */
-				usage(argv[0]);
 				break;
 				
 			default:
@@ -190,99 +188,415 @@ int main (int argc, char *const  argv[])
 		}
 	}
 	
-	if (optind+1>argc)
-	{
-		fprintf(stderr, "Missing path to pinocchIO file.\n"); fflush(stderr); 
+    if (optind+1<= argc)
+        pinocchio_path = argv[optind];
+	
+    if (!pinocchio_path)
+    {
+		fprintf(stderr, "Missing path to pinocchIO file.\n"); 
+        fflush(stderr); 
 		usage(argv[0]);
 		exit(-1);		
 	} 
-    pinocchio_file = argv[optind];
     
-    
-    if (!checkArguments(timeline_path, dataset_path))
+    if ((!timeline_path && !dataset_path) || (timeline_path && dataset_path))
     {
+        fprintf(stderr, "Incompatible --dataset/--timeline options.\n");
+        fflush(stderr);
         usage(argv[0]);
         exit(-1);
-    }        
-	
-	PIOFile pioFile = pioOpenFile(pinocchio_file, PINOCCHIO_READONLY);
-	if (PIOFileIsInvalid(pioFile))
-	{
-		fprintf(stderr, "Cannot open pinocchIO file %s.\n", pinocchio_file);
-		fflush(stderr);
-		exit(-1);
-	}
+    }
+    
 	
 	if (dataset_path)
 	{
-		PIODataset pioDataset = pioOpenDataset(PIOMakeObject(pioFile), dataset_path);
+        // default is ascii
+        if (!ascii && !binary && !libsvm && !string && !fvec && !ivec && !bvec)
+            ascii = 1;
+        
+        // Prepare output file
+        if (output_path)
+        {
+            if (ascii || libsvm || string)
+                output = fopen(output_path, "w");
+            
+            if (binary || fvec || ivec || bvec)
+                output = fopen(output_path, "wb");
+            
+            if (!output)
+            {
+                fprintf(stderr, "Cannot open output file %s.\n", output_path);
+                fflush(stderr);
+                exit(-1);                
+            }
+        }        
+        
+        // Get info about dataset
+
+        pioFile = pioOpenFile(pinocchio_path, PINOCCHIO_READONLY);
+        if (PIOFileIsInvalid(pioFile))
+        {
+            fprintf(stderr, "Cannot open pinocchIO file %s.\n", pinocchio_path);
+            fflush(stderr);
+            fclose(output);
+            exit(-1);
+        }
+        
+		pioDataset = pioOpenDataset(PIOMakeObject(pioFile), dataset_path);
 		if (PIODatasetIsInvalid(pioDataset)) 
 		{
-			fprintf(stderr, "Cannot open dataset %s in file %s.\n", dataset_path, pinocchio_file);
+			fprintf(stderr, "Cannot open dataset %s in file %s.\n", dataset_path, pinocchio_path);
 			fflush(stderr);
 			pioCloseFile(&pioFile);
+            fclose(output);
 			exit(-1);
 		}
 		
-		PIOTimeline pioTimeline = pioGetTimeline(pioDataset);
-		if (PIOTimelineIsInvalid(pioTimeline))
-		{
-			fprintf(stderr, "Cannot get timeline from dataset %s in file %s.\n", dataset_path, pinocchio_file);
-			fflush(stderr);
-			pioCloseDataset(&pioDataset);
-			pioCloseFile(&pioFile);
-			exit(-1);
-		}
-		
-		PIODatatype pioDatatype = pioGetDatatype(pioDataset);
+		pioDatatype = pioGetDatatype(pioDataset);
 		if (PIODatatypeIsInvalid(pioDatatype))
 		{
-			fprintf(stderr, "Cannot get datatype from dataset %s in file %s.\n", dataset_path, pinocchio_file);
+			fprintf(stderr, "Cannot get datatype from dataset %s in file %s.\n", dataset_path, pinocchio_path);
 			fflush(stderr);
-			pioCloseTimeline(&pioTimeline);
 			pioCloseDataset(&pioDataset);
 			pioCloseFile(&pioFile);
+            fclose(output);
 			exit(-1);
 		}
 		
-		for (tr=0; tr<pioDataset.ntimeranges; tr++)
-		{
-			numberOfVectors = pioRead(&pioDataset, tr, pioDatatype, &buffer);
+        dimension = pioDatatype.dimension;
+        basetype = pioDatatype.type;
+        
+        pioCloseDatatype(&pioDatatype);
+        
+        if (ascii)
+        {
+            size_t size;
+            int nVectors;
+            int tr, n, d, N;
+            double* buffer;
+            PIODatatype outDatatype = PIODatatypeInvalid;
+            pioTimeline = PIOTimelineInvalid;
+            int* number;
             
-            ez_dump(stdout, 
-                    buffer, pioDatatype, 
-                    numberOfVectors, multiple_flag,
-                    svmlight_flag, NULL, 0,  
-                    timestamp_flag, pioTimeline.timeranges[tr], 
-                    svmlight_flag);
-		}
-		
-		pioCloseDatatype(&pioDatatype);
-		pioCloseTimeline(&pioTimeline);
-		pioCloseDataset(&pioDataset);
+            outDatatype = pioNewDatatype(PINOCCHIO_TYPE_DOUBLE, dimension);
+            
+            size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
+            buffer = (double*)malloc(size);
+            number = (int*)malloc(pioDataset.ntimeranges*sizeof(int));
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, number);
+            
+            if (timestamp)
+                pioTimeline = pioGetTimeline(pioDataset);
+            
+            N = 0;
+            for (tr=0; tr<pioDataset.ntimeranges; tr++) 
+            {
+                if (multiple)
+                {
+                    if (timestamp)
+                    {
+                        fprintf(output, 
+                                "%f %f", 
+                                1.0 *  pioTimeline.timeranges[tr].time                                        / pioTimeline.timeranges[tr].scale,
+                                1.0 * (pioTimeline.timeranges[tr].time + pioTimeline.timeranges[tr].duration) / pioTimeline.timeranges[tr].scale);
+                    }
+                    for (n=0; n<number[tr]; n++)
+                    {
+                        for (d=0; d<dimension; d++)
+                        {
+                            fprintf(output, " ");
+                            fprintf(output, format, buffer[N*dimension+d]);                           
+                        }
+                        N++;
+                    } 
+                    fprintf(output, "\n");
+                }
+                else 
+                {
+                   for (n=0; n<number[tr]; n++)
+                   {
+                       if (timestamp)
+                       {
+                           fprintf(output, 
+                                   "%f %f", 
+                                   1.0 *  pioTimeline.timeranges[tr].time                                        / pioTimeline.timeranges[tr].scale,
+                                   1.0 * (pioTimeline.timeranges[tr].time + pioTimeline.timeranges[tr].duration) / pioTimeline.timeranges[tr].scale);                           
+                       }
+                       
+                       for (d=0; d<dimension; d++)
+                       {
+                           fprintf(output, " ");
+                           fprintf(output, format, buffer[N*dimension+d]);                           
+                       }
+                       N++;
+                       fprintf(output, "\n");
+                   } 
+                }                
+            }
+            
+            free(buffer);
+            free(number);
+            if (timestamp)
+                pioCloseTimeline(&pioTimeline);
+        }
+        
+        if (string)
+        {
+            if ((dimension != 1) || (basetype != PINOCCHIO_TYPE_CHAR))
+            {
+                fprintf(stderr, "Cannot dump dataset as string.\n");
+                fflush(stderr);
+                pioCloseDataset(&pioDataset);
+                pioCloseFile(&pioFile);
+                fclose(output);
+                exit(-1);
+            }
+
+            size_t size;
+            int nVectors;
+            int tr, n, N;
+            char* buffer;
+            PIODatatype outDatatype = PIODatatypeInvalid;
+            PIOTimeline pioTimeline = PIOTimelineInvalid;
+            int* number;
+            char onecharacter[2]; onecharacter[1] = '\0';
+            
+            outDatatype = pioNewDatatype(PINOCCHIO_TYPE_CHAR, dimension);
+            
+            size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
+            buffer = (char*)malloc(size);
+            number = (int*)malloc(pioDataset.ntimeranges*sizeof(int));
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, number);
+            
+            if (timestamp)
+                pioTimeline = pioGetTimeline(pioDataset);
+            
+            N = 0;
+            for (tr=0; tr<pioDataset.ntimeranges; tr++) 
+            {
+                if (timestamp)
+                {
+                    fprintf(output, 
+                            "%f %f ", 
+                            1.0 *  pioTimeline.timeranges[tr].time                                        / pioTimeline.timeranges[tr].scale,
+                            1.0 * (pioTimeline.timeranges[tr].time + pioTimeline.timeranges[tr].duration) / pioTimeline.timeranges[tr].scale);
+                }
+                for (n=0; n<number[tr]; n++)
+                {
+                    memcpy(onecharacter, buffer+N, 1);
+                    fprintf(output, "%s", onecharacter);
+                    N++;
+                } 
+                fprintf(output, "\n");
+            }
+            
+            free(buffer);
+            free(number);
+            if (timestamp)
+                pioCloseTimeline(&pioTimeline);
+        }
+        
+        if (libsvm)
+        {
+            size_t size;
+            int nVectors;
+            int n, d;
+            double* buffer;
+            PIODatatype outDatatype = PIODatatypeInvalid;
+            
+            outDatatype = pioNewDatatype(PINOCCHIO_TYPE_DOUBLE, dimension);
+            
+            size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
+            buffer = (double*)malloc(size);
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, NULL);
+            
+            for (n=0; n<nVectors; n++) 
+            {
+                // label
+                fprintf(output, "-1");
+                
+                // id:value (only when value does not equal 0)
+                for (d=0; d<dimension; d++) 
+                {
+                    if (buffer[n*dimension+d] != 0)
+                    {
+                        fprintf(output, " %d:", d);
+                        fprintf(output, format, buffer[n*dimension+d]);
+                    }
+                }                
+                fprintf(output, "\n");
+            }
+            free(buffer);
+        }
+        
+        if (binary)
+        {
+            size_t size;
+            size_t itemSize;
+            int nVectors;
+            void* buffer;
+            PIODatatype outDatatype = PIODatatypeInvalid;
+            
+            // default is float
+            if (!bin_float && !bin_int && !bin_double)
+                bin_float = 1;
+            
+            if (bin_float)
+            {
+                outDatatype = pioNewDatatype(PINOCCHIO_TYPE_FLOAT, dimension);
+                itemSize = sizeof(float);
+            }
+            if (bin_int)
+            {
+                outDatatype = pioNewDatatype(PINOCCHIO_TYPE_INT, dimension);
+                itemSize = sizeof(int);
+            }
+            if (bin_double)
+            {
+                outDatatype = pioNewDatatype(PINOCCHIO_TYPE_DOUBLE, dimension);
+                itemSize = sizeof(double);
+            }
+            
+            size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
+            buffer = malloc(size);
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, NULL);
+            fwrite(buffer, itemSize, nVectors*dimension, output);
+            free(buffer);
+        }
+        
+        if (fvec)
+        {
+            size_t size;
+            size_t itemSize;
+            size_t dimensionSize;
+            int nVectors;
+            int n;
+            float* buffer;
+            PIODatatype outDatatype = PIODatatypeInvalid;
+            
+            outDatatype = pioNewDatatype(PINOCCHIO_TYPE_FLOAT, dimension);
+            itemSize = sizeof(float);
+            
+            size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
+            buffer = (float*)malloc(size);
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, NULL);
+            
+            dimensionSize = sizeof(int);
+            for (n=0; n<nVectors; n++) 
+            {
+                fwrite(&dimension, dimensionSize, 1, output);
+                fwrite(buffer+n*dimension, itemSize, dimension, output);
+            }
+            free(buffer);
+        }
+        
+        if (ivec)
+        {
+            size_t size;
+            size_t itemSize;
+            size_t dimensionSize;
+            int nVectors;
+            int n;
+            int* buffer;
+            PIODatatype outDatatype = PIODatatypeInvalid;
+            
+            outDatatype = pioNewDatatype(PINOCCHIO_TYPE_INT, dimension);
+            itemSize = sizeof(int);
+            
+            size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
+            buffer = (int*)malloc(size);
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, NULL);
+            
+            dimensionSize = sizeof(int);
+            for (n=0; n<nVectors; n++) 
+            {
+                fwrite(&dimension, dimensionSize, 1, output);
+                fwrite(buffer+n*dimension, itemSize, dimension, output);
+            }
+            free(buffer);
+        }
+        
+        if (bvec)
+        {
+            size_t size;
+            size_t itemSize;
+            size_t dimensionSize;
+            int nVectors;
+            int n;
+            char* buffer;
+            PIODatatype outDatatype = PIODatatypeInvalid;
+            
+            outDatatype = pioNewDatatype(PINOCCHIO_TYPE_CHAR, dimension);
+            itemSize = sizeof(char);
+            
+            size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
+            buffer = (char*)malloc(size);
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, NULL);
+            
+            dimensionSize = sizeof(int);
+            for (n=0; n<nVectors; n++) 
+            {
+                fwrite(&dimension, dimensionSize, 1, output);
+                fwrite(buffer+n*dimension, itemSize, dimension, output);
+            }
+            free(buffer);
+        }
+    
+		fclose(output);
+        pioCloseDataset(&pioDataset);
+        pioCloseFile(&pioFile);
 	}
 	
 	if (timeline_path)
 	{
-		PIOTimeline pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), timeline_path);
+        int tr;
+        
+        // Prepare output file
+        
+        if (output_path)
+        {
+            output = fopen(output_path, "w");
+            if (!output)
+            {
+                fprintf(stderr, "Cannot open output file %s.\n", output_path);
+                fflush(stderr);
+                exit(-1);                
+            }
+        }        
+        
+        // Get info about timeline
+        
+        pioFile = pioOpenFile(pinocchio_path, PINOCCHIO_READONLY);
+        if (PIOFileIsInvalid(pioFile))
+        {
+            fprintf(stderr, "Cannot open pinocchIO file %s.\n", pinocchio_path);
+            fflush(stderr);
+            fclose(output);
+            exit(-1);
+        }
+        
+		pioTimeline = pioOpenTimeline(PIOMakeObject(pioFile), timeline_path);
 		if (PIOTimelineIsInvalid(pioTimeline))
 		{
-			fprintf(stderr, "Cannot open timeline %s in file %s.\n", timeline_path, pinocchio_file);
+			fprintf(stderr, "Cannot open timeline %s in file %s.\n", timeline_path, pinocchio_path);
 			fflush(stderr);
 			pioCloseFile(&pioFile);
+            fclose(output);
 			exit(-1);
 		}
 		
 		for (tr=0; tr<pioTimeline.ntimeranges; tr++)
         {
-            timestamp_dump(stdout, pioTimeline.timeranges[tr]);
-            fprintf(stdout, "\n");
+            fprintf(output, 
+                    "%f %f\n", 
+                    1.0 *  pioTimeline.timeranges[tr].time                                        / pioTimeline.timeranges[tr].scale,
+                    1.0 * (pioTimeline.timeranges[tr].time + pioTimeline.timeranges[tr].duration) / pioTimeline.timeranges[tr].scale);
 		}
 		
+        fclose(output);
 		pioCloseTimeline(&pioTimeline);
+        pioCloseFile(&pioFile);
 	}
 	
-	
-	pioCloseFile(&pioFile);
 	return 1;
 }
