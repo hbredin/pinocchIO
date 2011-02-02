@@ -88,7 +88,6 @@
 		2890E5F312E82CD900A6E3D8 /* gptLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 2890E5F112E82CD900A6E3D8 /* gptLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2890E5F412E82CD900A6E3D8 /* gptLabel.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890E5F212E82CD900A6E3D8 /* gptLabel.c */; };
 		2890E6FE12E86A5C00A6E3D8 /* dump_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890E6FD12E86A5C00A6E3D8 /* dump_utils.c */; };
-		2890E6FF12E86A5C00A6E3D8 /* dump_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 2890E6FD12E86A5C00A6E3D8 /* dump_utils.c */; };
 		289554AF12B1836A002D0FC1 /* pioinit.c in Sources */ = {isa = PBXBuildFile; fileRef = 289554AD12B1836A002D0FC1 /* pioinit.c */; };
 		2895EB7712706C4B00CA5A76 /* piols.c in Sources */ = {isa = PBXBuildFile; fileRef = 2895EB3A127061E400CA5A76 /* piols.c */; };
 		2895EBB312706D6500CA5A76 /* test_PIOFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 28304EED12676DB5003292A5 /* test_PIOFile.c */; };
@@ -957,7 +956,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				283EF6571271C935003F82A0 /* piodump.c in Sources */,
-				2890E6FF12E86A5C00A6E3D8 /* dump_utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

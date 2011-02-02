@@ -15,7 +15,7 @@ add_executable(piols piols.c)
 target_link_libraries(piols pinocchIO)
 install(TARGETS piols RUNTIME DESTINATION bin)
 
-add_executable(piodump piodump.c dump_utils.c)
+add_executable(piodump piodump.c)
 target_link_libraries(piodump pinocchIO)
 install(TARGETS piodump RUNTIME DESTINATION bin)
 
