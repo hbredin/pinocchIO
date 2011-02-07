@@ -155,7 +155,7 @@ int gptReadNext(GPTServer* server, PIODatatype datatype, void** buffer,
 }
 
 
-int gptDumpDataset(GPTServer* server,
+int gptDumpServer(GPTServer* server,
                    PIODatatype datatype,
                    void* buffer)
 {

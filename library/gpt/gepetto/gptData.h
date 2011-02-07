@@ -143,7 +143,7 @@ int gptReadNext(GPTServer* gptServer,
  
  @ingroup gptdata
  */
-int gptDumpDataset(GPTServer* server,
+int gptDumpServer(GPTServer* server,
                    PIODatatype datatype,
                    void* buffer);
 

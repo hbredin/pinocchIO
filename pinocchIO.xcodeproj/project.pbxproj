@@ -460,30 +460,53 @@
 			path = test;
 			sourceTree = "<group>";
 		};
-		2890C563129AC2480018F31E /* pio */ = {
+		288FF4DF130045C50077712D /* gepetto */ = {
+			isa = PBXGroup;
+			children = (
+				28074BFA1289CEEC0042E4D5 /* gptServer.h */,
+				28967BDC12956F5E00F34412 /* gptTypes.h */,
+				28967BE01295706500F34412 /* gepetto.h */,
+				2890C3A0129A79D90018F31E /* gptConfig.h */,
+				28BF3C2612E5982F008B2531 /* list_utils.h */,
+				28BF3D8A12E6E620008B2531 /* gptData.h */,
+				2890E5F112E82CD900A6E3D8 /* gptLabel.h */,
+			);
+			path = gepetto;
+			sourceTree = "<group>";
+		};
+		288FF4E0130045D90077712D /* pinocchIO */ = {
 			isa = PBXGroup;
 			children = (
 				28304ED012675811003292A5 /* pinocchIO.h */,
 				28304ED21267584A003292A5 /* pIOFile.h */,
-				28304ED31267584A003292A5 /* pIOFile.c */,
 				28304ED612675928003292A5 /* pIOTypes.h */,
-				28304ED712675928003292A5 /* pIOTypes.c */,
 				28304EDA126763B6003292A5 /* pIOVersion.h */,
 				28304F2A12685D43003292A5 /* pIOAttributes.h */,
-				28304F2B12685D43003292A5 /* pIOAttributes.c */,
 				28304FC412687473003292A5 /* pIOTimeline.h */,
-				28304FC512687473003292A5 /* pIOTimeline.c */,
 				28304FD412688669003292A5 /* pIOTimeComparison.h */,
-				28304FD512688669003292A5 /* pIOTimeComparison.c */,
 				282DD876126DDF7B007BA6F9 /* pIODataset.h */,
-				282DD877126DDF7B007BA6F9 /* pIODataset.c */,
 				282DD8B2126EC999007BA6F9 /* pIODatatype.h */,
-				282DD8B3126EC999007BA6F9 /* pIODatatype.c */,
 				282DD8FA126ED789007BA6F9 /* structure_utils.h */,
-				282DD8FB126ED789007BA6F9 /* structure_utils.c */,
 				283EF53D12718ACA003F82A0 /* pIOWrite.h */,
-				283EF53E12718ACA003F82A0 /* pIOWrite.c */,
 				283EF6331271AF3D003F82A0 /* pIORead.h */,
+			);
+			path = pinocchIO;
+			sourceTree = "<group>";
+			wrapsLines = 1;
+		};
+		2890C563129AC2480018F31E /* pio */ = {
+			isa = PBXGroup;
+			children = (
+				288FF4E0130045D90077712D /* pinocchIO */,
+				28304ED31267584A003292A5 /* pIOFile.c */,
+				28304ED712675928003292A5 /* pIOTypes.c */,
+				28304F2B12685D43003292A5 /* pIOAttributes.c */,
+				28304FC512687473003292A5 /* pIOTimeline.c */,
+				28304FD512688669003292A5 /* pIOTimeComparison.c */,
+				282DD877126DDF7B007BA6F9 /* pIODataset.c */,
+				282DD8B3126EC999007BA6F9 /* pIODatatype.c */,
+				282DD8FB126ED789007BA6F9 /* structure_utils.c */,
+				283EF53E12718ACA003F82A0 /* pIOWrite.c */,
 				283EF6341271AF3D003F82A0 /* pIORead.c */,
 			);
 			path = pio;
@@ -492,18 +515,12 @@
 		2890C564129AC24D0018F31E /* gpt */ = {
 			isa = PBXGroup;
 			children = (
-				28074BFA1289CEEC0042E4D5 /* gptServer.h */,
+				288FF4DF130045C50077712D /* gepetto */,
 				28074BFB1289CEEC0042E4D5 /* gptServer.c */,
-				28967BDC12956F5E00F34412 /* gptTypes.h */,
 				28967BDD12956F5E00F34412 /* gptTypes.c */,
-				28967BE01295706500F34412 /* gepetto.h */,
-				2890C3A0129A79D90018F31E /* gptConfig.h */,
 				2890C3A1129A79D90018F31E /* gptConfig.c */,
-				28BF3C2612E5982F008B2531 /* list_utils.h */,
 				28BF3C2712E5982F008B2531 /* list_utils.c */,
-				28BF3D8A12E6E620008B2531 /* gptData.h */,
 				28BF3D8B12E6E620008B2531 /* gptData.c */,
-				2890E5F112E82CD900A6E3D8 /* gptLabel.h */,
 				2890E5F212E82CD900A6E3D8 /* gptLabel.c */,
 			);
 			path = gpt;
