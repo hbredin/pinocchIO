@@ -167,11 +167,12 @@ int gptDumpServer(GPTServer* server,
     void* localBuffer = NULL;
     
     oneEntrySize = pioGetSize(datatype);
+    totalNumberOfEntries = 0;
     
     // if buffer == NULL, return expected size of buffer
     if (!buffer)
     {
-        totalNumberOfEntries = 0;
+
         for (f=0; f<DAT_NFILES(*server); f++)
         {
             for (tr=0; tr<DAT_NTIMERANGES(*server, f); tr++)
