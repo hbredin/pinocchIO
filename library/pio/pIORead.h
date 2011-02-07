@@ -89,6 +89,35 @@ int pioReadData(PIODataset* dataset,
 int pioReadNumber(PIODataset dataset,
                   int timerangeIndex);
 
+
+/**
+ @brief Get number of entries stored in dataset
+ 
+ Get @a number of entries stored in @a dataset for all time ranges
+ 
+ @param[in] dataset pinocchIO dataset
+ @param[in, out] number Number of entries per time range
+ 
+ @returns
+ - total number of entries when successful
+ - negative value otherwise
+ 
+ @note
+ @a number has to be allocated with enough memory space to contain the
+ number of entries for all time ranges. A first call with NULL @a number
+ will return the number of time ranges.
+ 
+\par Example
+\verbatim
+ int ntimeranges = pioReadAllNumbers(dataset, NULL);
+ int* number = (int*) malloc(ntimeranges*sizeof(int));
+ int totalNumber = pioReadAllNumbers(dataset, number);
+\endverbatim
+ 
+ @ingroup dataset
+ */
+int pioReadAllNumbers(PIODataset dataset, int* number);
+
 /**
  @brief Dump whole dataset into buffer
  

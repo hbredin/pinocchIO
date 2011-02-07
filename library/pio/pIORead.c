@@ -58,6 +58,36 @@ int getLink(PIODataset pioDataset, int timerangeIndex, link_t* link)
 	return 1;
 }
 
+int getLinks(PIODataset dataset, link_t* links)
+{
+	ERROR_SWITCH_INIT
+	herr_t read_err;
+    
+	hsize_t position[1] = {-1};
+	hsize_t number[1] = {-1};
+	hid_t dataspaceForLink = -1;
+	hid_t bufferDataspaceForLink = -1;
+	hid_t link_datatype = -1;
+	
+	// read link dataset
+	position[0] = 0; // from first 'link'
+	number[0] = dataset.ntimeranges;   // to last 'link'
+	dataspaceForLink = H5Dget_space(dataset.link_identifier);
+	H5Sselect_hyperslab(dataspaceForLink, H5S_SELECT_SET, position, NULL, number, NULL);
+	bufferDataspaceForLink = H5Screate_simple(1, number, NULL);
+	link_datatype = linkDatatype();
+	ERROR_SWITCH_OFF
+	read_err = H5Dread(dataset.link_identifier, link_datatype, bufferDataspaceForLink, dataspaceForLink, H5P_DEFAULT, links);
+	ERROR_SWITCH_ON
+	H5Tclose(link_datatype);
+	H5Sclose(bufferDataspaceForLink);
+	H5Sclose(dataspaceForLink);
+	
+	if (read_err < 0) return -1;
+	return 1;
+}
+
+
 int pioReadData(PIODataset* pioDataset, int timerangeIndex, 
                 PIODatatype pioDatatype, void** buffer)
 {
@@ -115,6 +145,33 @@ int pioReadNumber(PIODataset pioDataset, int timerangeIndex)
 	link_t link = {-1, -1};	
 	if (getLink(pioDataset, timerangeIndex, &link)<0) return -1;
     return link.number;    
+}
+
+int pioReadAllNumbers(PIODataset dataset, int* number)
+{
+    link_t* links = NULL;
+    int tr;
+    int sumNumber;
+    
+    // return expected length of @a number array
+    if (!number) return dataset.ntimeranges;
+    
+    links = (link_t*) malloc(sizeof(link_t)*dataset.ntimeranges);
+    if (getLinks(dataset, links) < 0)
+    {
+        free(links);
+        return -1;
+    }
+    
+    sumNumber = 0;
+    for (tr=0; tr<dataset.ntimeranges; tr++)
+    {
+        number[tr] = links[tr].number;
+        sumNumber += number[tr];
+    }
+    
+    free(links);
+    return sumNumber;
 }
 
 int pioDumpDataset(PIODataset* pioDataset, 
