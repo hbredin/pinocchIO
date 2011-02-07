@@ -475,6 +475,7 @@ static int initDataConfiguration( GPTServer* server, int numberOfDataFiles, char
  - server.lengthOfDataTimeline
  - server.dataTimeline
  - server.datatype
+ - server.numberOfEntriesPerTimerangePerFile
  
  @param[in, out] server Gepetto server
  @returns
@@ -488,6 +489,8 @@ static int initDataStorage(GPTServer* gptServer)
     
     gptServer->dataTimeline = (PIOTimeRange**) malloc(DAT_NFILES(*gptServer)*sizeof(PIOTimeRange*));
     for (f=0; f<DAT_NFILES(*gptServer); f++) DAT_TIMELINE(*gptServer, f) = NULL;
+    
+    gptServer->numberOfEntriesPerTimerangePerFile = (int**)malloc(sizeof(int*)*DAT_NFILES(*gptServer));
     
     gptServer->lengthOfDataTimeline = (int*) malloc(DAT_NFILES(*gptServer)*sizeof(int));
     
@@ -572,6 +575,17 @@ static int initDataStorage(GPTServer* gptServer)
         DAT_TIMELINE(*gptServer, f) = (PIOTimeRange*) malloc(DAT_NTIMERANGES(*gptServer, f)*sizeof(PIOTimeRange));
         for (data_t=0; data_t<DAT_NTIMERANGES(*gptServer, f); data_t++) 
             DAT_TIMERANGE(*gptServer, f, data_t) = gptServer->current_timeline.timeranges[data_t];
+        
+        // load number of entries per timerange
+        gptServer->numberOfEntriesPerTimerangePerFile[f] = (int*)malloc(sizeof(int)*DAT_NTIMERANGES(*gptServer, f));
+        if (pioReadAllNumbers(gptServer->current_dataset, gptServer->numberOfEntriesPerTimerangePerFile[f]) < 0)
+        {
+            fprintf(stderr, "Geppeto cannot get number of entries from data dataset %s in file %s.\n",
+                    DAT_DATASET(*gptServer), DAT_PATH(*gptServer, f));
+            fflush(stderr);
+            gptCloseServer(gptServer);
+            return -1;
+        }
         
         // prepare for next file
         pioCloseTimeline(&(gptServer->current_timeline));
@@ -937,6 +951,16 @@ int gptCloseServer(GPTServer* gptServer)
         free(gptServer->dataTimeline);
     }
     gptServer->dataTimeline = NULL;
+    
+    // free numberOfEntriesPerTimerangePerFile
+    if (gptServer->numberOfEntriesPerTimerangePerFile)
+    {
+        for (f=0; f<gptServer->numberOfDataFiles; f++) 
+            if (gptServer->numberOfEntriesPerTimerangePerFile[f])
+                free(gptServer->numberOfEntriesPerTimerangePerFile[f]);
+        free(gptServer->numberOfEntriesPerTimerangePerFile);
+    }
+    gptServer->numberOfEntriesPerTimerangePerFile = NULL;
     
     // free lengthOfDataTimeline
     if (gptServer->lengthOfDataTimeline) free(gptServer->lengthOfDataTimeline);

@@ -245,6 +245,12 @@ typedef struct {
      Getter: DAT_TIMERANGE(server, f, t)
      */
     PIOTimeRange** dataTimeline;
+    
+    /**
+     @brief Number of entries per timerange, for each file
+     numberOfEntriesPerTimerangePerFile[f][t] is the number of entries stored in fth file for the tth timerange.
+     */
+    int** numberOfEntriesPerTimerangePerFile;
                 
     // ===================================
     // Data filtering based on labels
@@ -351,6 +357,7 @@ typedef struct {
 /* dataCountsForLabelPerFile */ NULL,               \
 /* lengthOfDataTimeline */      NULL,               \
 /* dataTimeline */              NULL,               \
+/* numberOfEntriesPerTimerangePerFile */  NULL,     \
 /* labelFilterType */           -1,                 \
 /* labelFilterReference */      -1,                 \
 /* maximumNumberOfSamplesPerLabel */ -1,            \
