@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "gepetto.h"
+#include "gepetto/gepetto.h"
 
 
 static int perfile_flag = 0;

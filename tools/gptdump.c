@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "gepetto.h"
+#include "gepetto/gepetto.h"
 
 extern int ez_dump(FILE* file,
                    void* buffer, PIODatatype bufferDatatype, 

@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "pinocchIO.h"
+#include "pinocchIO/pinocchIO.h"
 
 static int verbose_flag = 0;
 static int all_flag = 0;

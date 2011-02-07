@@ -21,7 +21,7 @@
 #ifndef _GEPETTO_TYPES_H
 #define _GEPETTO_TYPES_H
 
-#include "pinocchIO.h"
+#include "pinocchIO/pinocchIO.h"
 
 /**
  @brief Type of filter

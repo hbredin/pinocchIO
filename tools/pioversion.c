@@ -83,7 +83,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "pIOVersion.h"
+#include "pinocchIO/pIOVersion.h"
 
 int main (int argc, char *const  argv[])
 {	

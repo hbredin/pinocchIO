@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
-#include "pinocchIO.h"
+#include "pinocchIO/pinocchIO.h"
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b)) 
 #define MIN(a,b) ((a) < (b) ? (a) : (b)) 

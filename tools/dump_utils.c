@@ -1,7 +1,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "pinocchIO.h"
+#include "pinocchIO/pinocchIO.h"
 
 int text_dump(FILE* file, 
               void* buffer,

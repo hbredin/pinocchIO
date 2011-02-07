@@ -71,7 +71,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "pinocchIO.h"
+#include "pinocchIO/pinocchIO.h"
 
 
 #define PIOLS_PATH_MAX_LENGTH 40
