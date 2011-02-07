@@ -103,5 +103,51 @@ int gptReadNext(GPTServer* gptServer,
 #define gptReadNextData(server, datatype, buffer) gptReadNext((server), (datatype), (buffer), NULL, NULL)
 
 
+/**
+ @brief Dump whole server data into buffer
+ 
+ Dump whole @a server data into previously allocated @a buffer.
+ 
+ @param[in] server Gepetto server
+ @param[in] datatype Buffer datatype
+ @param[in, out] buffer Data buffer
+ 
+ Entries are stored in the buffer the one after the other,
+ sorted in file index/time range ascending order.
+ 
+ @note
+ Buffer @a datatype does not have to match @a server datatype exactly.\n 
+ While dimensions must be the same, @ref PIOBaseType "base types" can 
+ be different: pinocchIO automatically performs the conversion when needed. 
+ 
+ @note
+ @a buffer has to be allocated with enough memory space to contain the whole
+ @a dataset. A first call with a NULL buffer will return the required buffer
+ size in bytes.
+ 
+ @returns 
+ - required buffer size in bytes if successful if buffer!=NULL
+ - total number of entries if successful and buffer!=NULL
+ - a negative value otherwise
+ 
+ \par Example
+\verbatim
+ // Get amount of memory needed to store the whole server data
+ size_t size = gptDumpServer(server, datatype, NULL);
+ // Allocate buffer for data
+ buffer = malloc(size);
+ // Dump the whole server
+ totalNumber = gptDumpDataset(server, datatype, buffer);
+\endverbatim
+ 
+ 
+ @ingroup gptdata
+ */
+int gptDumpDataset(GPTServer* server,
+                   PIODatatype datatype,
+                   void* buffer);
+
+
+
 #endif
 
