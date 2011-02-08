@@ -94,7 +94,7 @@ int pioReadData(PIODataset* pioDataset, int timerangeIndex,
 	ERROR_SWITCH_INIT
 	herr_t read_err;
 	
-	link_t link = {-1, -1};
+	link_t link = {0, 0};
 	
 	hsize_t position[1] = {-1};
 	hsize_t number[1] = {-1};
@@ -142,9 +142,9 @@ int pioReadData(PIODataset* pioDataset, int timerangeIndex,
 
 int pioReadNumber(PIODataset pioDataset, int timerangeIndex)
 {
-	link_t link = {-1, -1};	
+	link_t link = {0, 0};	
 	if (getLink(pioDataset, timerangeIndex, &link)<0) return -1;
-    return link.number;    
+	return link.number;    
 }
 
 int pioReadAllNumbers(PIODataset dataset, int* number)
@@ -188,13 +188,15 @@ int pioDumpDataset(PIODataset* pioDataset,
     size_t size = 0;
     void* localBuffer = NULL;
     
+    
     if (buffer)
     {
         for (tr=0; tr<pioDataset->ntimeranges; tr++)
         {
             // read data for timerange tr
             localNumber = pioReadData(pioDataset, tr, pioDatatype, &localBuffer);
-            if (localNumber < 0) return -1; // stop if something bad happened
+            if (localNumber < 0) 
+		return -1; // stop if something bad happened
             
             // deduce buffer size from number of read data
             tmp_size = localNumber*pioGetSize(pioDatatype);
@@ -218,7 +220,8 @@ int pioDumpDataset(PIODataset* pioDataset,
         {
             // read number of data for timerange tr
             localNumber = pioReadNumber(*pioDataset, tr);
-            if (localNumber < 0) return -1; // stop if something bad happened
+             if (localNumber < 0) 
+		return -1; // stop if something bad happened
                         
             // update total number of data
             totalNumber = totalNumber + localNumber;
