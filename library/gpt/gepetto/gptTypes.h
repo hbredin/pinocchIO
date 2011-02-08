@@ -213,18 +213,18 @@ typedef struct {
     /**
      @brief Distribution of data with respect to labels
      
-     dataCountsForLabel[i] is the number of data entries with ith label value.\n
+     numberOfVectorsWithLabel[i] is the number of data entries with ith label value.\n
      Getter: DAT_COUNT(server, i)
      */
-    int*  dataCountsForLabel;
+    int*  numberOfVectorsWithLabel;
     
     /**
      @brief  Distribution of data with respect to labels, for each file
      
-     dataCountsForLabelPerFile[f][i] is the number of data entries with ith label value in fth label file.\n
+     numberOfVectorsWithLabelPerFile[f][i] is the number of data entries with ith label value in fth label file.\n
      Getter: DAT_COUNTF(server, f, i)
      */
-    int** dataCountsForLabelPerFile;    
+    int** numberOfVectorsWithLabelPerFile;    
     
     // -------
     // storage
@@ -353,8 +353,8 @@ typedef struct {
 /* numberOfDataFiles */         -1,                 \
 /* pathToDataFile */            NULL,               \
 /* pathToDataDataset */         NULL,               \
-/* dataCountsForLabel */        NULL,               \
-/* dataCountsForLabelPerFile */ NULL,               \
+/* numberOfVectorsWithLabel */        NULL,               \
+/* numberOfVectorsWithLabelPerFile */ NULL,               \
 /* lengthOfDataTimeline */      NULL,               \
 /* dataTimeline */              NULL,               \
 /* numberOfEntriesPerTimerangePerFile */  NULL,     \
@@ -431,8 +431,8 @@ typedef struct {
 
 #define DAT_DATASET(server)                 ((server).pathToDataDataset)
 
-#define DAT_COUNT(server, i)                ((server).dataCountsForLabel[(i)])
-#define DAT_COUNTF(server, f, i)            ((server).dataCountsForLabelPerFile[(f)][(i)])
+#define DAT_COUNT(server, i)                ((server).numberOfVectorsWithLabel[(i)])
+#define DAT_COUNTF(server, f, i)            ((server).numberOfVectorsWithLabelPerFile[(f)][(i)])
 
 #define DAT_FILTERED(server, f, t)          ((server).filtered[(f)][(t)])
 
