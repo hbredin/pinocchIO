@@ -155,18 +155,18 @@ int gptReadNext(GPTServer* server, PIODatatype datatype, void** buffer,
 }
 
 
-int gptDumpServer(GPTServer* server,
+long gptDumpServer(GPTServer* server,
                    PIODatatype datatype,
                    void* buffer)
 {
     int f; // file index
     int tr; // time range index
-    int totalNumberOfEntries; // total number of served entries
-    int numberOfEntries;  // local number of entries
-    size_t oneEntrySize; // memory size of one entry
+    long totalNumberOfEntries; // total number of served entries
+    long numberOfEntries;  // local number of entries
+    long oneEntrySize; // memory size of one entry
     void* localBuffer = NULL;
     
-    oneEntrySize = pioGetSize(datatype);
+    oneEntrySize = (long)pioGetSize(datatype);
     totalNumberOfEntries = 0;
     
     // if buffer == NULL, return expected size of buffer
