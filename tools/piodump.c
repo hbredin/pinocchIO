@@ -32,19 +32,13 @@
 #include <string.h>
 #include "pinocchIO/pinocchIO.h"
 
-//static int verbose_flag = 0;
-//static int timestamp_flag = 0;
-//static int string_flag = 0;
-//static int multiple_flag = 0;
-//static int svmlight_flag = 0;
-
 char* pinocchio_path = NULL;
 char* timeline_path = NULL;
 char* dataset_path = NULL;
 char* output_path = NULL;
 
 int ascii = 0;
-char* format = "%f";
+char* format = "%g";
 int timestamp = 0;
 int multiple = 0;
 
@@ -94,8 +88,10 @@ void usage(const char * path2tool)
             "                                                                       \n"
             " * Format presets                                                      \n"
             "                                                                       \n"
-            "       --libsvm                                                        \n"
+            "       --libsvm[=anything]                                             \n"
             "                Use libsvm format                                      \n"
+            "                When any value is provided, even empty time ranges are \n"
+            "                dumped as one vector made of zeros.                    \n"
             "       --fvec                                                          \n"
             "       --ivec                                                          \n"
             "       --bvec                                                          \n"
@@ -137,18 +133,18 @@ int main (int argc, char *const  argv[])
             {"float",     no_argument, &bin_float,  1},
             {"double",    no_argument, &bin_double, 1},
             
-            {"libsvm",    no_argument, &libsvm, 1},
-            {"fvec",      no_argument, &fvec,   1},
-            {"ivec",      no_argument, &ivec,   1},
-            {"bvec",      no_argument, &bvec,   1},
-			{"string",    no_argument, &string, 1},
+            {"libsvm", optional_argument, 0,      'L'},
+            {"fvec",   no_argument,       &fvec,   1},
+            {"ivec",   no_argument,       &ivec,   1},
+            {"bvec",   no_argument,       &bvec,   1},
+			{"string", no_argument,       &string, 1},
             
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "ht:d:o:f:",
+		c = getopt_long (argc, argv, "ht:d:o:f:L::",
 						 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -176,6 +172,11 @@ int main (int argc, char *const  argv[])
                 
             case 'f':
                 format = optarg;
+                break;
+                
+            case 'L':
+                libsvm = 1;
+                if (optarg) libsvm = 2;
                 break;
                 
 			case 'h':
@@ -400,32 +401,50 @@ int main (int argc, char *const  argv[])
         {
             size_t size;
             int nVectors;
-            int n, d;
+            int tr, n, d, N;
             double* buffer;
+            int* number;
             PIODatatype outDatatype = PIODatatypeInvalid;
             
             outDatatype = pioNewDatatype(PINOCCHIO_TYPE_DOUBLE, dimension);
             
             size = pioDumpDataset(&pioDataset, outDatatype, NULL, NULL);
             buffer = (double*)malloc(size);
-            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, NULL);
+            number = (int*)malloc(pioDataset.ntimeranges*sizeof(int));
+            nVectors = pioDumpDataset(&pioDataset, outDatatype, buffer, number);
             
-            for (n=0; n<nVectors; n++) 
+            N = 0;
+            for (tr=0; tr<pioDataset.ntimeranges; tr++) 
             {
-                // label
-                fprintf(output, "-1");
-                
-                // id:value (only when value does not equal 0)
-                for (d=0; d<dimension; d++) 
+                if (number[tr] > 0)
                 {
-                    if (buffer[n*dimension+d] != 0)
+                    for (n=0; n<number[tr]; n++)
                     {
-                        fprintf(output, " %d:", d);
-                        fprintf(output, format, buffer[n*dimension+d]);
-                    }
-                }                
-                fprintf(output, "\n");
+                        // label
+                        fprintf(output, "-1");
+                        
+                        // id:value (only when value does not equal 0)
+                        for (d=0; d<dimension; d++)
+                        {
+                            if (buffer[N*dimension+d] != 0)
+                            {
+                                fprintf(output, " %d:", d);
+                                fprintf(output, format, buffer[N*dimension+d]);
+                            }
+                        }
+                        N++;
+                        fprintf(output, "\n");
+                    } 
+                }
+                else 
+                {
+                    // add dummy vector if requested
+                    // label 0:0 1:0 2:0 3:0 ... dimension:0
+                    if (libsvm == 2) fprintf(output, "-1\n");
+                }
             }
+                        
+            free(number);
             free(buffer);
         }
         
