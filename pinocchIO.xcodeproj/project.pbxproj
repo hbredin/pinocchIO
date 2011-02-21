@@ -261,7 +261,7 @@
 
 /* Begin PBXFileReference section */
 		28074BFA1289CEEC0042E4D5 /* gptServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gptServer.h; sourceTree = "<group>"; };
-		28074BFB1289CEEC0042E4D5 /* gptServer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptServer.c; sourceTree = "<group>"; };
+		28074BFB1289CEEC0042E4D5 /* gptServer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = gptServer.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		28274068128174B400E58030 /* pioversion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pioversion.c; sourceTree = "<group>"; };
 		28274072128174BF00E58030 /* pioversion */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pioversion; sourceTree = BUILT_PRODUCTS_DIR; };
 		282740B512817B0D00E58030 /* ascii2pio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ascii2pio.c; sourceTree = "<group>"; };
@@ -306,7 +306,7 @@
 		28967ADB12951D6400F34412 /* piorm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = piorm.c; sourceTree = "<group>"; };
 		28967AE512951F0100F34412 /* piorm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = piorm; sourceTree = BUILT_PRODUCTS_DIR; };
 		28967BD412956EC600F34412 /* libgepetto.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libgepetto.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		28967BDC12956F5E00F34412 /* gptTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gptTypes.h; sourceTree = "<group>"; wrapsLines = 1; };
+		28967BDC12956F5E00F34412 /* gptTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = gptTypes.h; sourceTree = "<group>"; wrapsLines = 1; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		28967BDD12956F5E00F34412 /* gptTypes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gptTypes.c; sourceTree = "<group>"; };
 		28967BE01295706500F34412 /* gepetto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gepetto.h; sourceTree = "<group>"; };
 		28BF3C2612E5982F008B2531 /* list_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list_utils.h; sourceTree = "<group>"; };

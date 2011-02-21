@@ -26,7 +26,7 @@ import numpy as np
 import pynocchIO as pyo
 
 class GPTServer:
-    def __init__(self, files, dataset, prefix='', suffix=''):
+    def __init__(self, files, dataset, prefix='', suffix='', fileByFile=False):
 
         base = []
         # files can be
@@ -53,23 +53,29 @@ class GPTServer:
         self.path2dataset = dataset
                 
         # initialize data array
-        self.data = None
+        if fileByFile:
+            self.data = []
+        else:
+            self.data = None
         for path in self.path2file:
-            print 'Loading %s' % (path)
+            # print 'Loading %s' % (path)
             f = pyo.PYOFile(path)
             d = pyo.PYODataset(f, self.path2dataset)
             f.close()
-            if self.data != None:
-                self.data = np.append(self.data, d.data, axis=0)
+            
+            if fileByFile:
+                self.data.append(d.data)
             else:
-                # get data dimension
-                self.dimension = d.dimension
-                # get data base type
-                self.basetype = d.basetype
-                # get data description
-                self.description = d.description
-                self.data = np.array(d.data, dtype=self.basetype, copy=True, ndmin=2)
-            del d.data
+                if self.data != None:
+                    self.data = np.append(self.data, d.data, axis=0)
+                else:
+                    # get data dimension
+                    self.dimension = d.dimension
+                    # get data base type
+                    self.basetype = d.basetype
+                    # get data description
+                    self.description = d.description
+                    self.data = np.array(d.data, dtype=self.basetype, copy=True, ndmin=2)
 
 
 if __name__ == "__main__":
