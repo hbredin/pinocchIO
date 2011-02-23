@@ -24,7 +24,7 @@ import sys
 import os
 import h5py
 import numpy
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 def recursive_add_h5dataset(listOfDatasets, object):
     if type(object) == h5py.highlevel.Dataset:
@@ -98,46 +98,58 @@ class PYOTimeline(object):
         return True
 
 class PYODataset(object):
-    def __init__(self, pyoFile, path):
+    def __init__(self, pyoFile, path, loadTimeline=True, assumeSorted=False):
         super(PYODataset, self).__init__()
         
         # Path to dataset
         self.path = path
         
+        # Read HDF5 dataset used to store data layout
+        linkset = pyoFile.h5file['/dataset/' + path + '/link']
+        # number[t] is the number of vectors for tth time range
+        self.number = numpy.zeros(linkset.shape, dtype=numpy.int32)
+        # position[t] is the position of first vector for tth time range
+        self.position = numpy.zeros(linkset.shape, dtype=numpy.int32)
+        for t in range(linkset.shape[0]):
+            self.number[t] = linkset[t][1]
+            self.position[t] = linkset[t][0]
+
         # Read HDF5 dataset used to store actual data
         dataset = pyoFile.h5file['/dataset/' + path + '/data']
         # Description
         self.description = dataset.attrs['description']
         # Data base type
         self.basetype    = dataset.dtype.base
-        # Data dimension
         self.dimension   = dataset.dtype.shape[0]
         
-        # Timeline
-        self.timeline = PYOTimeline(pyoFile, dataset.attrs['timeline'])
-
-        # Read HDF5 dataset used to store data layout
-        linkset = pyoFile.h5file['/dataset/' + path + '/link']
-                        
-        # Total number of data stored in pinocchIO dataset
-        self.stored = 0
-        for t in range(self.timeline.ntimeranges):
-            self.stored += linkset[t][1]
+        if assumeSorted and self.dimension != 1:
+            print "TODO: implement assumeSorted with dimension != 1"
         
-        # Data, sorted in chronological order
-        self.data = numpy.empty((self.stored, self.dimension), self.basetype)
-        # Number of data, sorted in chronological order
-        self.number = []
-        self.position = []
+        if assumeSorted and self.dimension == 1:
+            self.data = dataset.value
+            self.stored = dataset.shape[0]
+        else:            
+            # Total number of data stored in pinocchIO dataset
+            self.stored = 0
+            for t in range(linkset.shape[0]):
+                self.stored += linkset[t][1]
+            # Data, sorted in chronological order
+            self.data = numpy.empty((self.stored, self.dimension), self.basetype)
+            counter = 0
+            for t in range(linkset.shape[0]):
+                for n in range(self.number[t]):
+                    self.data[counter, :] = dataset[self.position[t]+n]
+                    counter += 1
+            self.position = self.number.cumsum()-self.number[0]
+                                        
+        self.timelinePath = dataset.attrs['timeline']
         
-        counter = 0
-        for t in range(self.timeline.ntimeranges):
-            position = linkset[t][0]
-            self.position.append(counter)
-            self.number.append(linkset[t][1])
-            for n in range(self.number[t]):
-                self.data[counter, :] = dataset[position+n]
-                counter = counter + 1
+        # Timelined
+        if loadTimeline:
+            self.timeline = PYOTimeline(pyoFile, self.timelinePath)
+        else:
+            self.timeline = None
+        
         
 
 if __name__ == "__main__":

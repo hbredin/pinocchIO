@@ -26,28 +26,12 @@ import numpy as np
 import pynocchIO as pyo
 
 class GPTServer:
-    def __init__(self, files, dataset, prefix='', suffix='', fileByFile=False):
+    def __init__(self, files, dataset, prefix='', suffix='', fileByFile=False, assumeSorted=False):
 
-        base = []
-        # files can be
-        #   - a path to a file containing a list of paths to files
-        if type(files) == str:
-            f = open(files, 'r')
-            for line in f:
-                if line.strip() != '':
-                    base.append(line.strip())
-            f.close()
-        #   - a list of files (or base names)
-        else:
-            for elt in files:
-                base.append(elt)
-                
-        # up to here, base is a list of paths to files
-        
         # add prefix (resp. suffix) before (resp. after) path to file
         # typically suffix would be '.pio'
         self.path2file = []
-        for elt in base:
+        for elt in files:
             self.path2file.append(prefix + elt + suffix)
             
         self.path2dataset = dataset
@@ -60,7 +44,7 @@ class GPTServer:
         for path in self.path2file:
             # print 'Loading %s' % (path)
             f = pyo.PYOFile(path)
-            d = pyo.PYODataset(f, self.path2dataset)
+            d = pyo.PYODataset(f, self.path2dataset, loadTimeline=False, assumeSorted=assumeSorted)
             f.close()
             
             if fileByFile:
