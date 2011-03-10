@@ -44,7 +44,7 @@ class GPTServer:
         for path in self.path2file:
             # print 'Loading %s' % (path)
             f = pyo.PYOFile(path)
-            d = pyo.PYODataset(f, self.path2dataset, loadTimeline=False, assumeSorted=assumeSorted)
+            d = pyo.PYODataset.FromFile(f, self.path2dataset, loadTimeline=False, assumeSorted=assumeSorted)
             f.close()
             
             if fileByFile:
