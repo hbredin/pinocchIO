@@ -1,6 +1,6 @@
 import numpy as np
-import pyfusion.normalization.L1 as L1Norm
-import pyfusion.normalization.L2 as L2Norm
+import pyfusion.normalization.vectors.L1 as L1Norm
+import pyfusion.normalization.vectors.L2 as L2Norm
 import pyfusion
 
 
