@@ -1,7 +1,8 @@
 from datetime import timedelta, datetime
 
+DEFAULT_ORIGIN = datetime(year=1981, month=4, day=17)
 
-def FromTimeset(timeset, origin=datetime(year=1981, month=4, day=17)):
+def FromTimeset(timeset, origin=DEFAULT_ORIGIN):
     """
     Create PYOTimerange based on 'timeset' entry (internal 3-dimensional pinocchIO array).
         - timeset[2] is number of units per seconds
@@ -69,7 +70,7 @@ class PYOTimerange(object):
         return self.start + timedelta(seconds=.5*self.duration.total_seconds())
     
     
-    def equals(self, timerange):
+    def __eq__(self, timerange):
         """
         Returns True if identical to provided time range
             and False otherwise

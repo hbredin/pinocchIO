@@ -1,8 +1,12 @@
 from pinocchIO import PYOTimerange
 from matplotlib.collections import LineCollection
 from matplotlib import pyplot
+from datetime import timedelta
 
-def FromFile(pyoFile, path):
+def Empty():
+    return PYOTimeline( [] )
+
+def _fromFile(pyoFile, path):
     """
     Create timeline by reading from pinocchIO file
         - pyoFile as PYOFile
@@ -23,42 +27,38 @@ def FromFile(pyoFile, path):
     return PYOTimeline(timeranges)
 
 
-def Combination( timelines ):
-    """
-    Create timeline by combining multiple input timelines
-         - timelines is an array of PYOTimeline objects
-         
-    Put graphically, that's what Combination does:
-    Input 1 =      |-----|      |------|    |---------------|
-    Input 2 =  |------| |---|      |------------|
-    Ouput =    |---|--|-||--|---|--|---|----|---|-----------|
-    """
-    
-    # Concatenate start and stop timestamp of every time range of every time line
-    timestamps = []
-    for t, timeline in enumerate( timelines ):
-        for r, timerange in enumerate( timeline.timeranges ):
-            timestamps.append( timerange.getStart() )
-            timestamps.append( timerange.getStop()  )
-    
-    # Sort timestamps (in place)
-    timestamps.sort()
-    
-    # Build the resulting timeline
-    timeranges = []
-    for r in range(1, len(timestamps)):
-        if timestamps[r-1] < timestamps[r]:
-            timerange = PYOTimerange.FromStartToStop(timestamps[r-1], timestamps[r])
-            timeranges.append( timerange )
-            
-    return PYOTimeline( timeranges )
-    
-
 class PYOTimeline(object):
     
     def __init__(self, timeranges):
         super(PYOTimeline, self).__init__()
         self.timeranges = timeranges
+    
+    
+    def __getitem__(self, t):
+        return self.timeranges[t]
+    
+    
+    def __eq__(self, other):
+        """
+        Returns True if other timeline is identical
+            and False otherwise
+        """
+
+        if type(other) != PYOTimeline:
+            return False
+
+        if self.getNumberOfTimeranges() != other.getNumberOfTimeranges():
+            return False
+
+        for t, timerange in enumerate(self):
+            if not timerange == other[t]:
+                return False
+
+        return True
+    
+    
+    def isEmpty(self):
+        return len(self.timeranges) < 1
     
     
     def indexOfTimerangesInPeriod(self, period, strict=False):
@@ -67,19 +67,19 @@ class PYOTimeline(object):
         """
         
         if strict:
-            Is = [ i for i, timerange in enumerate(self.timeranges) if period.includes(timerange, strict=True)]
+            Is = [ i for i, timerange in enumerate(self) if period.includes(timerange, strict=False)]
         else:
-            Is = [ i for i, timerange in enumerate(self.timeranges) if period.intersects(timerange)]
+            Is = [ i for i, timerange in enumerate(self) if period.intersects(timerange)]
         
         return Is
     
     
-    def getSlice(self, period, strict=False):
-        """
-        Create a new PYOTimeline as a slice defined by 'period' 
-        """
-        Is = self.indexOfTimerangesInPeriod(period, strict=strict)
-        return PYOTimeline([timerange for i, timerange in enumerate(self.timeranges) if i in Is])
+    # def getSlice(self, period, strict=False):
+    #     """
+    #     Create a new PYOTimeline as a slice defined by 'period' 
+    #     """
+    #     Is = self.indexOfTimerangesInPeriod(period, strict=strict)
+    #     return PYOTimeline([timerange for i, timerange in enumerate(self.timeranges) if i in Is])
     
     
     def getNumberOfTimeranges(self):
@@ -89,19 +89,6 @@ class PYOTimeline(object):
         return len(self.timeranges)
     
     
-    def equals(self, other):
-        """
-        Returns True if other timeline is identical
-            and False otherwise
-        """
-        if self.getNumberOfTimeranges() != other.getNumberOfTimeranges():
-            return False
-        
-        for t in range(self.getNumberOfTimeranges):
-            if self.timeranges[t].equals(other.timeranges[t]) == False:
-                return False
-            
-        return True
     
     
     def indexOfTimerangesContainingTimestamp(self, timestamp, strict=False):
@@ -110,7 +97,7 @@ class PYOTimeline(object):
         """
         
         Is = []
-        for i, timerange in enumerate(self.timeranges):
+        for i, timerange in enumerate(self):
             if timerange.contains(timestamp, strict=strict):
                 # timerange contains timestamp. Yeaaaay!
                 Is.append(i)
@@ -126,8 +113,8 @@ class PYOTimeline(object):
         
         
         if self.getNumberOfTimeranges() > 0:
-            start = min( [timerange.getStart() for i, timerange in enumerate(self.timeranges)])
-            stop  = max( [timerange.getStop()  for i, timerange in enumerate(self.timeranges)])
+            start = min( [timerange.getStart() for i, timerange in enumerate(self)])
+            stop  = max( [timerange.getStop()  for i, timerange in enumerate(self)])
             duration = stop - start
         else:
             start = datetime.now()
@@ -146,7 +133,7 @@ class PYOTimeline(object):
         
         lines = []
         nLevels = len(levels)
-        for tr, timerange in enumerate(self.timeranges):
+        for tr, timerange in enumerate(self):
             y  = levels[tr % nLevels]
             xL = (timerange.getStart() - origin).total_seconds()
             xR = (timerange.getStop()  - origin).total_seconds()

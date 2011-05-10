@@ -1,9 +1,16 @@
 from pinocchIO import PYOTimeline
+import pinocchIO.utils.timeline
+
 from matplotlib.collections import LineCollection
 from matplotlib import pyplot
 import numpy as np
 
-def FromFile(pyoFile, path, loadTimeline=True, assumeSorted=False):
+
+def Empty():
+    return PYODataset(np.array(()), np.array((), dtype=np.int32), PYOTimeline.Empty())
+
+
+def _fromFile(pyoFile, path, loadTimeline=True, assumeSorted=False):
     """
     Create dataset by reading from pinocchIO file
         - pyoFile as PYOFile
@@ -52,143 +59,153 @@ def FromFile(pyoFile, path, loadTimeline=True, assumeSorted=False):
     
     # Timelined
     if loadTimeline:
-        timeline = PYOTimeline.FromFile(pyoFile, timelinePath)
+        timeline = pyoFile.getTimeline(timelinePath)
     else:
-        timeline = None
+        timeline = pinocchIO.utils.timeline.dummy( number.shape[0] )
     
-    return PYODataset(data, number=number, timeline=timeline)
-
-def Paste(datasets):
-    
-    # TODO => check all timelines are the same
-    # TODO => check all datasets are the same length
-    
-    try:
-        data = np.concatenate([dataset.data for d, dataset in enumerate(datasets)], axis=1)            
-    except Exception, e:
-        sys.stderr.write("Pasted datasets must have identical number of entries.")
-        data = None
-            
-    return PYODataset(data, number=datasets[0].number, timeline=datasets[0].timeline)
+    return PYODataset(data, number, timeline)
 
 
 class PYODataset(object):
-    def __init__(self, data, number=None, timeline=None):
+    
+    def __init__(self, data, number, timeline):
         super(PYODataset, self).__init__()
-        self.data = data
-        if data == None:
-            self.number = None
-            self.position = None
-            stored = 0
-        else:
-            stored, dimension = self.data.shape
-            if number == None:
-                self.number = np.ones((stored,), dtype=np.int32)
-            else:
-                self.number = np.array(np.copy(number), dtype=np.int32)
-            self.position = np.copy(self.number)
-            self.position[1:] = self.number[:-1].cumsum()
-            self.position[0]  = 0
+        
+        if data == None or data.shape == (0,) or number == None or timeline == None or number.shape[0] != timeline.getNumberOfTimeranges():
+            self._data = np.array(())
+            self._number = np.array((), dtype=np.int32)
+            self._position = np.array((), dtype=np.int32)
+            self._timeline = PYOTimeline.Empty()
+            return
             
-        if timeline:
-            self.timeline = timeline
-            if self.timeline.getNumberOfTimeranges() != self.number.shape[0]:
-                sys.stderr.write("Number of time ranges (%d) in time line and dimension (%d) of data array do not match.\n" % (self.timeline.getNumberOfTimeranges(), self.number.shape[0]))
-                return None
+        self._data = data
+        self._timeline = timeline
+        
+        stored, dimension = self._data.shape
+        self._number = np.array(np.copy(number), dtype=np.int32)
+        self._position = np.copy(self._number)
+        self._position[1:] = self._number[:-1].cumsum()
+        self._position[0]  = 0
     
     
-    def UpdateTimeline(self, timeline):
-        """
-        Create a new PYODataset by aligning it on a new timeline
-        
-        Given a time range in new timeline,
-            If no original timeline timerange intersects it, new dataset will contain nothing for the time range
-            If at least one timerange intersects it, new dataset will contain the concatenated data of all intersecting timeranges 
-        """
-        
-        number = np.ones((timeline.getNumberOfTimeranges(),), dtype=np.int32)
-        indexOfData = []
-        for t, timerange in enumerate(timeline.timeranges):
-            # find original time ranges that intersect this time range
-            ids = self.timeline.indexOfTimerangesInPeriod(timerange, strict=False)
-            # count corresponding data
-            number[t] = self.number[ids].sum()
-            # keep track of ordered ids
-            for i in ids:
-                indexOfData = indexOfData + self.indexOfDataByTimerangeIndex(i)
-        
-        data = np.copy( self.data[indexOfData, :] )
-        return PYODataset(data, number=number, timeline=timeline)
+    def isEmpty(self):
+        # A dataset is considered empty if its timeline is empty
+        # or if it contains no data
+        return self._timeline.isEmpty() or np.sum(self._number) == 0
     
-    def indexOfDataByTimerangeIndex(self, index):
-        number = self.number[index]
-        position = self.position[index]
+    
+    def _indexOfDataByTimerangeIndex(self, index):
+        number = self._number[index]
+        position = self._position[index]
         return range(position, position+number)
     
     
-    def getSlice(self, period, strict=False):
-        
-        if self.timeline == None:
-            sys.stderr.write("Dataset has no timeline.")
-            return None
-        
-        Is = self.timeline.indexOfTimerangesInPeriod(period, strict=strict)
-        if len(Is) == 0:
-            return None
-        else:
-            data = np.concatenate([ self.data[self.indexOfDataByTimerangeIndex(i), :]  for i in Is])
-        timeline = self.timeline.getSlice(period, strict=strict)
-        
-        return PYODataset(data, timeline=timeline) 
+    def __getitem__(self, t):
+        return self._data[self._indexOfDataByTimerangeIndex(t), :]
     
     
     def getData(self):
-        return self.data
+        return self._data
     
     
     def getDimension(self):
         
-        if self.data == None:
-            dimension = -1
-        else:
-            stored, dimension = self.data.shape
+        if self.isEmpty():
+            return -1
+        
+        stored, dimension = self._data.shape
         return dimension
     
     
+    def getTimeline(self):
+        return self._timeline
+    
+    
+    def getNumber(self):
+        return self._number
+        
+    
+    def getPosition(self):
+        return self._position
+    
+    
+    # def __getattr__(self, name):
+    #     if name == 'data':
+    #         return self.getData()
+    #     elif name == 'dimension':
+    #         return self.getDimension()
+    #     elif name == 'number':
+    #         return self.getNumber()
+    #     elif name == 'timeline':
+    #         return self.getTimeline()
+    #     else:
+    #         raise AttributeError()
+        
+    
     def getDataForTimestamp(self, timestamp, strict=False):
-        if self.timeline == None:
-            sys.stderr.write("Dataset has no timeline.")
-            return None
-            
-        Is = self.timeline.indexOfTimerangesContainingTimestamp(timestamp, strict=strict)
-        data = np.concatenate([ self.data[self.indexOfDataByTimerangeIndex(i), :]  for i in Is])
+        
+        Is = self._timeline.indexOfTimerangesContainingTimestamp(timestamp, strict=strict)
+        data = np.concatenate([self[i] for i in Is])
         
         return data
     
     
     def getExtent(self):
-        if self.timeline == None:
+        if self._timeline == None:
             sys.stderr.write("Dataset has no timeline.")
             return None
         else:
-            return self.timeline.getExtent()
+            return self._timeline.getExtent()
+    
+    
+    # def __mul__(self, other):
+    #     
+    #     if type(other) == PYOTimeline:
+    #         raise ValueError("Cannot multiply two datasets.")
+    #     else:
+    #         return PYODataset(self.data * other, number=self._number, timeline=self.timeline)
+    # 
+    # def __add__(self, other):
+    #     
+    #     if type(other) == PYOTimeline:
+    #         
+    #         # Combine timelines
+    #         timeline = PYOTimeline.Combination([self.timeline, other.timeline])
+    #         
+    #         # Update self and other timelines
+    #         ds1 = self.UpdateTimeline( timeline )
+    #         ds2 = other.UpdateTimeline( timeline )
+    #         
+    #         # Check self and other 'number' compatibility
+    #         if False in (ds1.number == ds2.number):
+    #             raise ValueError("Number of entries do not match for each time range")
+    #         else:
+    #             number = ds1.number
+    #         
+    #         # Add data
+    #         data = ds1.data + ds2.data
+    #         
+    #         return PYODataset(data, number=number, timeline=timeline)
+    #         
+    #     else:
+    #         return PYODataset(self.data + other, number=self._number, timeline=self.timeline)
     
     
     def plot( self, ax=None, dimension=0, origin=None ):
         
-        if self.timeline == None:
-            raise NameError('NoTimeline')
+        if self._timeline == None:
+            raise ValueError('Cannot plot a dataset without a timeline')
         
         if ax == None:
             ax = pyplot.gca()
         
         if origin == None:
-            origin = self.timeline.timeranges[0].getStart()
+            origin = self._timeline[0].getStart()
         
         lines = []
-        for tr, timerange in enumerate(self.timeline.timeranges):
-            for i in range(self.number[tr]):
-                y  = self.data[self.position[tr]+i, dimension]
+        for tr, timerange in enumerate(self._timeline):
+            for i in range(self._number[tr]):
+                y  = self._data[self._position[tr]+i, dimension]
                 xL = (timerange.getStart() - origin).total_seconds()
                 xR = (timerange.getStop()  - origin).total_seconds()
                 lines.append( [ (xL, y), (xR, y)] )
