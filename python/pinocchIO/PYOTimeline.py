@@ -1,6 +1,6 @@
 from pinocchIO import PYOTimerange
-from matplotlib.collections import LineCollection
-from matplotlib import pyplot
+# from matplotlib.collections import LineCollection
+# from matplotlib import pyplot
 from datetime import timedelta
 
 def Empty():
@@ -123,34 +123,34 @@ class PYOTimeline(object):
         return PYOTimerange.PYOTimerange(start, duration)
     
     
-    def plot( self, ax=None, origin=None, levels=[0.0], width=0.1, colors=['blue', 'red'] ):
-        
-        if origin == None:
-            origin = self.timeranges[0].getStart()
-        
-        if ax == None:
-            ax = pyplot.gca()
-        
-        lines = []
-        nLevels = len(levels)
-        for tr, timerange in enumerate(self):
-            y  = levels[tr % nLevels]
-            xL = (timerange.getStart() - origin).total_seconds()
-            xR = (timerange.getStop()  - origin).total_seconds()
-            lines.append( [ (xL, y-width), (xL, y+width)])
-            lines.append( [ (xL, y),       (xR, y)      ])
-            lines.append( [ (xR, y-width), (xR, y+width)])
-        
-        xLower  = lines[0][0][0]
-        xHigher = lines[0][0][0]
-        
-        for l, line in enumerate(lines):
-            xLower  =  min(xLower,  line[0][0])
-            xHigher =  max(xHigher, line[1][0])
-        
-        ax.add_collection(LineCollection(lines, colors=sorted(colors*3)))
-        ax.set_xlim(xLower,              xHigher)
-        ax.set_ylim(min(levels)-10*width, max(levels)+10*width)
-        
-        return ax
+    # def plot( self, ax=None, origin=None, levels=[0.0], width=0.1, colors=['blue', 'red'] ):
+    #     
+    #     if origin == None:
+    #         origin = self.timeranges[0].getStart()
+    #     
+    #     if ax == None:
+    #         ax = pyplot.gca()
+    #     
+    #     lines = []
+    #     nLevels = len(levels)
+    #     for tr, timerange in enumerate(self):
+    #         y  = levels[tr % nLevels]
+    #         xL = (timerange.getStart() - origin).total_seconds()
+    #         xR = (timerange.getStop()  - origin).total_seconds()
+    #         lines.append( [ (xL, y-width), (xL, y+width)])
+    #         lines.append( [ (xL, y),       (xR, y)      ])
+    #         lines.append( [ (xR, y-width), (xR, y+width)])
+    #     
+    #     xLower  = lines[0][0][0]
+    #     xHigher = lines[0][0][0]
+    #     
+    #     for l, line in enumerate(lines):
+    #         xLower  =  min(xLower,  line[0][0])
+    #         xHigher =  max(xHigher, line[1][0])
+    #     
+    #     ax.add_collection(LineCollection(lines, colors=sorted(colors*3)))
+    #     ax.set_xlim(xLower,              xHigher)
+    #     ax.set_ylim(min(levels)-10*width, max(levels)+10*width)
+    #     
+    #     return ax
     

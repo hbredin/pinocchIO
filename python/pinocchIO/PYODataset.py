@@ -1,8 +1,8 @@
 from pinocchIO import PYOTimeline
 import pinocchIO.utils.timeline
 
-from matplotlib.collections import LineCollection
-from matplotlib import pyplot
+# from matplotlib.collections import LineCollection
+# from matplotlib import pyplot
 import numpy as np
 
 
@@ -191,41 +191,41 @@ class PYODataset(object):
     #         return PYODataset(self.data + other, number=self._number, timeline=self.timeline)
     
     
-    def plot( self, ax=None, dimension=0, origin=None ):
-        
-        if self._timeline == None:
-            raise ValueError('Cannot plot a dataset without a timeline')
-        
-        if ax == None:
-            ax = pyplot.gca()
-        
-        if origin == None:
-            origin = self._timeline[0].getStart()
-        
-        lines = []
-        for tr, timerange in enumerate(self._timeline):
-            for i in range(self._number[tr]):
-                y  = self._data[self._position[tr]+i, dimension]
-                xL = (timerange.getStart() - origin).total_seconds()
-                xR = (timerange.getStop()  - origin).total_seconds()
-                lines.append( [ (xL, y), (xR, y)] )
-                
-        xLower  = lines[0][0][0]
-        xHigher = lines[0][0][0]
-        yLower  = lines[0][0][1]
-        yHigher = lines[0][0][1]
-        
-        for l, line in enumerate(lines):
-            xLower  =  min(xLower,  line[0][0])
-            xHigher =  max(xHigher, line[1][0])
-            yLower  =  min(yLower,  line[0][1])
-            yHigher =  max(yHigher, line[0][1])
-        
-        ax.add_collection(LineCollection(lines))
-        ax.set_xlim(xLower,                          xHigher)
-        ax.set_ylim(yLower - 0.1 * (yHigher-yLower), yHigher + 0.1 * (yHigher-yLower))
-        
-        return ax
+    # def plot( self, ax=None, dimension=0, origin=None ):
+    #     
+    #     if self._timeline == None:
+    #         raise ValueError('Cannot plot a dataset without a timeline')
+    #     
+    #     if ax == None:
+    #         ax = pyplot.gca()
+    #     
+    #     if origin == None:
+    #         origin = self._timeline[0].getStart()
+    #     
+    #     lines = []
+    #     for tr, timerange in enumerate(self._timeline):
+    #         for i in range(self._number[tr]):
+    #             y  = self._data[self._position[tr]+i, dimension]
+    #             xL = (timerange.getStart() - origin).total_seconds()
+    #             xR = (timerange.getStop()  - origin).total_seconds()
+    #             lines.append( [ (xL, y), (xR, y)] )
+    #             
+    #     xLower  = lines[0][0][0]
+    #     xHigher = lines[0][0][0]
+    #     yLower  = lines[0][0][1]
+    #     yHigher = lines[0][0][1]
+    #     
+    #     for l, line in enumerate(lines):
+    #         xLower  =  min(xLower,  line[0][0])
+    #         xHigher =  max(xHigher, line[1][0])
+    #         yLower  =  min(yLower,  line[0][1])
+    #         yHigher =  max(yHigher, line[0][1])
+    #     
+    #     ax.add_collection(LineCollection(lines))
+    #     ax.set_xlim(xLower,                          xHigher)
+    #     ax.set_ylim(yLower - 0.1 * (yHigher-yLower), yHigher + 0.1 * (yHigher-yLower))
+    #     
+    #     return ax
         
         
         
