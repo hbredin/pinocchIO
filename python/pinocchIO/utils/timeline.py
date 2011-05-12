@@ -65,42 +65,111 @@ def dummy( numberOfTimeranges ):
     return PYOTimeline.PYOTimeline( [PYOTimerange.FromTimeset([n, 1, 1]) for n in range(numberOfTimeranges)] )
 
 
-def sliding_window( duration, step, extent ):
+def sliding_window( duration, step, extent, position='center' ):
     """
     duration in seconds
     step     in seconds
     extent   as PYOTimerange
-    """
-    start = extent.getStart()
-    stop  = extent.getStop()
     
-    tdDuration = timedelta(seconds=duration)
+    sliding    [========================]
+    window               [=========================]
+               <--------duration-------->
+               |--step-->
+    
+    position='center' 
+              |-------------------------- extent --------------------------|
+          [===|===] .................................................. [===|===]
+    
+    position='in'
+              |-------------------------- extent --------------------------|
+              [===|===] .......................................... [===|===]
+    
+    position='out'
+              |-------------------------- extent --------------------------|
+      [===|===] .......................................................... [===|===]
+      
+    """
+    
+    tdDuration     = timedelta(seconds=duration)
     tdHalfDuration = timedelta(seconds=.5*duration)
-    tdStep     = timedelta(seconds=step)
+    tdStep         = timedelta(seconds=step)
+    
+    if position == 'in':
+        start = extent.getStart()
+        stop  = extent.getStop() - tdDuration
+    elif position == 'out':
+        start = extent.getStart() - tdDuration
+        stop  = extent.getStop()
+    else: 
+        # 'center' or anything different from 'in' and 'out'
+        start = extent.getStart() - tdHalfDuration
+        stop  = extent.getStop()  - tdHalfDuration
+    
     
     timeranges = []
-    cur_start = start - tdHalfDuration
+    cur_start = start
     
-    while( cur_start + tdHalfDuration <= stop ):
+    while( cur_start + tdDuration <= stop ):
         timeranges.append(PYOTimerange.PYOTimerange(cur_start, tdDuration))
         cur_start += tdStep
     
     return PYOTimeline.PYOTimeline( timeranges )
 
 
-def constrained_sliding_window( length, step, original_timeline):
+def constrained_sliding_window( length, original_timeline, position='left'):
+    """
+    duration in seconds
+    step     in seconds
+    extent   as PYOTimerange
     
-    # number of time ranges in original timeline
-    numberOfTimeranges = original_timeline.getNumberOfTimeranges()
+    sliding    [========================]
+    window               [=========================]
+               <--------duration-------->
+               |--step-->
+    
+    position='left' with length=3
+              |--|--|--|--|--|--|--|--|-- extent --|--|--|--|--|--|--|--|--|
+              [    0   ] ........................................ [   N-3  ]
+                 [    1   ]                                          [ N-2 ]xx
+                    [    2   ]                                          [-1]xx|xx
+    
+    position='right' with length=3
+              |--|--|--|--|--|--|--|--|-- extent --|--|--|--|--|--|--|--|--|
+         xx|xx[ 0] .............................................. [   N-1  ]
+            xx[  1  ]                                          [   N-2  ]   
+              [    2   ]                                    [   N-3  ]                                                                                         [     ]
+                                                                                                                                            [  ]
+    
+    position='center' with length=3
+              |--|--|--|--|--|--|--|--|-- extent --|--|--|--|--|--|--|--|--|
+            xx[ 0   ] .............................................. [ N-1 ]xx
+              [    1   ]                                          [   N-2  ]   
+                 [   2    ]                                    [   N-3  ]                                                                                         [     ]
+      
+    """
+    
+    N = original_timeline.getNumberOfTimeranges()
+    L = int(length)
     
     timeranges = []
-    for t in range(0, numberOfTimeranges-length+1, step):
-        left  = original_timeline[t]
-        right = original_timeline[t+length-1]
-        timerange = PYOTimerange.FromStartToStop(left.getStart(), right.getStop())
-        timeranges.append(timerange)
+    for t in range(N):
+        if position == 'left':
+            a = t
+            b = t+L-1
+        elif position == 'right':
+            a = t-L+1
+            b = t
+        else:
+            # position == 'center' or any value different from 'left' and 'right'
+            a = t-(L-1)/2
+            b = t+( L )/2
         
+        a = max(0, a  )
+        b = min(b, N-1)
+        
+        timerange = PYOTimerange.FromStartToStop(original_timeline[a].getStart(), original_timeline[b].getStop())
+        timeranges.append( timerange )
+    
     return PYOTimeline.PYOTimeline( timeranges )
-    
-    
-    
+
+
