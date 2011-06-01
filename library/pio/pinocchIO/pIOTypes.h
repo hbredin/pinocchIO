@@ -53,8 +53,8 @@ typedef struct {
  @param[in] any pinocchIO file, timeline or dataset
  @returns pinocchIO generic object
  */
-#define PIOMakeObject( any )  ((PIOObject){ any.identifier })
- 
+#define PIOMakeObject( any )  ((PIOObject){ (any).identifier })
+
 /**
  @brief Check object validity
  
