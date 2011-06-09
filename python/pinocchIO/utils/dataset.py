@@ -103,18 +103,28 @@ def _idf( tcDataset ):
     return idf
 
 
-def id2tfidf(idDataset, docTimeline, dimension=None, weighted=False):
-
+def id2tfidf(idDataset, docTimeline, dimension=None, weighted=False, keepOrphans=True):
+    
     if dimension == None:
         # assume 'words' are numbered from 0 to dimension-1
         data = idDataset.getData()
         dimension = np.max(data) + 1
-
+    else:
+        keepOrphans = True
+        
     # Compute inverse document frequency
     tcDataset = aggregate(idDataset, docTimeline, aggregator=pinocchIO.utils.aggregator.frequency.termCount, **{'dimension':dimension})
     idf = _idf(tcDataset)
-
+    
+    # Find orphans (ids appearing only once)
+    if keepOrphans == False:
+         orphans = (np.sum(tcDataset.getData(), axis=0) < 2)
+    
     # Compute term frequency * inverse document frequency
     tfidfDataset = aggregate(idDataset, docTimeline, aggregator=pinocchIO.utils.aggregator.frequency.tfidf, **{'dimension': dimension, 'idf': idf, 'weighted': weighted})
-
+    
+    # Remove orphans
+    if keepOrphans == False:
+        tfidfDataset = PYODataset.PYODataset(tfidfDataset.getData()[:, ~orphans], tfidfDataset.getNumber(), tfidfDataset.getTimeline())
+    
     return tfidfDataset    
