@@ -1,0 +1,49 @@
+# Introduction
+
+pinocchIO is a file format, a C library and a set of tools for storing audiovisual document descriptors.
+pinocchIO is meant to be an easy way for researchers working in the wide area of content-based multimedia analysis to store and share any kind of time-indexed description of the content.
+
+The notion of time-indexed description includes (but is not restricted to) labelled and unlabelled segmentations of a multimedia document, low-level descriptors directly extracted from an audio signal or the frames of a video, as well as manual or automatic semantic annotations of the document.
+
+pinocchIO does NOT provide the necessary tools to automatically extract these from an audiovisual document. It is a way for the members of the community to store and share the output of their own tools.
+
+
+# Documentation
+
+> cd pinocchIO
+> doxygen Doxyfile
+> firefox doc/0.3.0/html/index.html &
+
+# History
+
+* pinocchIO 0.3.0 (2010-01-26)
+	* New Gepetto API
+		* New: gptNewServer() and gptCloseServer() functions (Server API)
+		* New: gptNewServerFromConfigurationFile() function (Configuration API)
+		* New: gptGetServerDimension() and gptReadNext() functions (Data API)
+		* New: gptGetListOfDistinctLabels() and gptGetTimerangesForLabel() functions (Label API) 
+	* New Gepetto CLI
+		* New: gptdump (equivalent of piodump, for Gepetto servers)
+		* New: gptstat
+	* New Gepetto documentation (work in progress)
+	* Updated pinocchIO API
+		* New: pioRemoveTimeline() function (File API)
+		* Bug fix: pioWrite() would fail when asked to write 0 (zero) data entry (Dataset API)
+		* Bug fix: pioTimeRangeIntersectsTimeRange() would return TRUE in case first time range ends and second time range starts simultaneously (Time API)
+		* New: pioGetTimeMax() and pioGetTimeMin() functions (Time API)
+		* New: pioGetTimerangeBetweenTimes() function (Time API)
+		* New: pioGetTimerangeIntersection() function (Time API)
+	* Updated pinocchIO CLI
+		* Enhancement: ascii2pio - added support for variable number of entries per timerange
+		* Enhancement: ascii2pio - added option (--unit) for timestamps that are not printed in seconds
+		* Enhancement: piodump - added option (--multiple) to dump, on the same line, multiple entries per timerange
+		* Enhancement: piorm - added support for timeline deletion
+	* Updated pinocchIO documentation
+
+* pinocchIO 0.2.5 (2010-01-12)
+	 * New pioCopyTimeline() and pioCopyDataset() functions
+	 * Updated piocp tool with new option to copy all timelines and datasets
+
+* pinocchIO 0.2.4 (2010-01-10)
+	 * Bug fix in pioClose...() functions
+	 * Documentation
